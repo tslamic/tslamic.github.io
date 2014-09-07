@@ -1,0 +1,9 @@
+---
+layout: page
+title: Archive
+---
+<br />
+
+{% for post in site.posts %}
+[ {{ post.title }} ]({{ post.url }})
+{% endfor %}

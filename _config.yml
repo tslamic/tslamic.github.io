@@ -1,0 +1,21 @@
+# Dependencies
+markdown:         redcarpet
+highlighter:      pygments
+
+# Permalinks
+permalink:        pretty
+
+# Setup
+title:            Tadej's Blog
+tagline:          Code, Life and Coffee.
+url:              http://tslamic.github.io
+paginate:         8
+
+author:
+  name:           'Tadej Slamic'
+  url:            http://tslamic.github.io
+
+# Custom vars
+
+github:           https://github.com/tslamic/
+linkedin:         http://ie.linkedin.com/in/tadejslamic/

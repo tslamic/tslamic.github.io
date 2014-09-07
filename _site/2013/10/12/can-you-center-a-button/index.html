@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
+
+  <head>
+  <link href="http://gmpg.org/xfn/11" rel="profile">
+  <link rel="alternate" type="application/rss+xml" title="Tadej's Blog" href="atom.xml">
+  
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+  <!-- Enable responsiveness on mobile devices-->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+  <title>
+    
+      To Center A Button &middot; Tadej's Blog
+    
+  </title>
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="/public/css/poole.css">
+  <link rel="stylesheet" href="/public/css/syntax.css">
+  <link rel="stylesheet" href="/public/css/lanyon.css">
+  <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=PT+Serif:400,400italic,700|PT+Sans:400">
+
+  <!-- Icons -->
+  <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/public/apple-touch-icon-144-precomposed.png">
+  <link rel="shortcut icon" href="/public/favicon.ico">
+
+  <!-- RSS -->
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
+  
+   <!-- Analytics -->
+  <script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-44812127-1', 'tslamic.github.io');
+  ga('send', 'pageview');
+  </script>
+</head>
+
+  <body>
+
+    <input type="checkbox" class="sidebar-checkbox" id="sidebar-checkbox">
+
+<!-- Toggleable sidebar -->
+<div class="sidebar" id="sidebar">
+  <nav class="sidebar-nav">
+    <a class="sidebar-nav-item" href="/">Home</a>
+    
+    
+      
+        
+      
+    
+      
+        
+          <a class="sidebar-nav-item" href="/about/">About</a>
+        
+      
+    
+      
+        
+          <a class="sidebar-nav-item" href="/archive/">Archive</a>
+        
+      
+    
+      
+    
+      
+        
+      
+    
+
+    <a class="sidebar-nav-item" href="https://github.com/tslamic/">GitHub</a>
+    <a class="sidebar-nav-item" href="http://ie.linkedin.com/in/tadejslamic/">LinkedIn</a>
+  </nav>
+	    
+  <div class="sidebar-item">
+    <p>
+      &copy; 2014 Tadej Slamic. All rights reserved.
+    </p>
+  </div>
+
+</div>
+
+    <!-- Wrap is the content to shift when toggling the sidebar. We wrap the
+         content to avoid any CSS collisions with our real content. -->
+    <div class="wrap">
+      <div class="masthead">
+        <div class="container">
+          <h3 class="masthead-title">
+            <a href="/" title="Home">Tadej's Blog</a>
+            <small>Code, Life and Coffee.</small>
+          </h3>
+        </div>
+      </div>
+
+      <div class="container content">
+        
+
+<!-- Social Stuff -->
+<script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-4d80e9b26f25217a"></script>
+<script type="text/javascript">
+  addthis.layers({
+    'theme' : 'transparent',
+    'share' : {
+      'position' : 'right',
+      'numPreferredServices' : 4
+    }   
+  });
+</script>
+
+<div class="post">
+  <h1 class="post-title">To Center A Button</h1>
+  <span class="post-date">12 Oct 2013</span>
+  <p>In his first problem, Carloss Sessa of <a href="http://www.amazon.com/50-Android-Hacks-Carlos-Sessa/dp/1617290564">50 Android Hacks</a> introduces an interesting problem: <em>how to center a button that is 50% of its parent width</em>?</p>
+
+<p><center>
+  <figure>
+    <img src="http://i.imgur.com/DW6JWEo.png"/>
+    <figcaption>Pretty cool Android phone, huh?</figcaption>
+  </figure>
+</center></p>
+
+<p>It&#39;s easy to center a generic button. Using <code>FrameLayout</code>, one could simply set the appropriate <code>android:layout_gravity</code>: </p>
+<div class="highlight"><pre><code class="xml language-xml" data-lang="xml"><span class="cp">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span>
+<span class="nt">&lt;FrameLayout</span> <span class="na">xmlns:android=</span><span class="s">&quot;default_schema&quot;</span>
+             <span class="na">android:layout_width=</span><span class="s">&quot;match_parent&quot;</span>
+             <span class="na">android:layout_height=</span><span class="s">&quot;match_parent&quot;</span><span class="nt">&gt;</span>
+
+    <span class="nt">&lt;Button</span> <span class="na">android:layout_width=</span><span class="s">&quot;wrap_content&quot;</span>
+            <span class="na">android:layout_height=</span><span class="s">&quot;wrap_content&quot;</span>
+            <span class="na">android:layout_gravity=</span><span class="s">&quot;center&quot;</span>
+            <span class="na">android:text=</span><span class="s">&quot;Button&quot;</span><span class="nt">/&gt;</span>
+
+<span class="nt">&lt;/FrameLayout&gt;</span>
+</code></pre></div>
+<p>But how to set the button width to 50% of its parent? I decided to create a custom <code>Button</code>. </p>
+
+<p>When creating custom views, you usually want to override some <a href="http://developer.android.com/reference/android/view/View.html">standard methods</a> the framework uses. There are two I could consider in this case: </p>
+
+<ul>
+<li><code>onMeasure</code>: called to determine the size requirements for this view and all of its children</li>
+<li><code>onLayout</code>: called when this view should assign a size and position to all of its children.</li>
+</ul>
+
+<p>Because the parent layout already provides the position I&#39;m after, <code>onMeasure</code> will suffice.</p>
+<div class="highlight"><pre><code class="java language-java" data-lang="java"><span class="kd">public</span> <span class="kd">class</span> <span class="nc">CenteredButton</span> <span class="kd">extends</span> <span class="n">Button</span> <span class="o">{</span>
+
+    <span class="c1">// Constructors ommited for clarity.</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">protected</span> <span class="kt">void</span> <span class="nf">onMeasure</span><span class="o">(</span><span class="kt">int</span> <span class="n">wMeasureSpec</span><span class="o">,</span> <span class="kt">int</span> <span class="n">hMeasureSpec</span><span class="o">)</span> <span class="o">{</span>
+        <span class="kd">super</span><span class="o">.</span><span class="na">onMeasure</span><span class="o">(</span><span class="n">wMeasureSpec</span><span class="o">,</span> <span class="n">hMeasureSpec</span><span class="o">);</span>
+
+        <span class="kd">final</span> <span class="n">View</span> <span class="n">parent</span> <span class="o">=</span> <span class="o">(</span><span class="n">View</span><span class="o">)</span> <span class="n">getParent</span><span class="o">();</span>
+        <span class="kd">final</span> <span class="kt">int</span> <span class="n">halfParentWidth</span> <span class="o">=</span> <span class="n">parent</span><span class="o">.</span><span class="na">getWidth</span><span class="o">()</span> <span class="o">/</span> <span class="mi">2</span><span class="o">;</span>
+
+        <span class="n">setMeasuredDimension</span><span class="o">(</span><span class="n">halfParentWidth</span><span class="o">,</span> <span class="n">getMeasuredHeight</span><span class="o">());</span>
+    <span class="o">}</span>
+
+<span class="o">}</span>
+</code></pre></div>
+<p>The custom <code>onMeasure</code> is straightforward: after invoking <code>super</code>, which provides initial measurements, we get the parent width, halve it and apply the result. Then, we tell the XML layout to use it:</p>
+<div class="highlight"><pre><code class="xml language-xml" data-lang="xml"><span class="cp">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span>
+<span class="nt">&lt;FrameLayout</span> <span class="na">xmlns:android=</span><span class="s">&quot;default_schema&quot;</span>
+             <span class="na">android:layout_width=</span><span class="s">&quot;match_parent&quot;</span>
+             <span class="na">android:layout_height=</span><span class="s">&quot;match_parent&quot;</span><span class="nt">&gt;</span>
+
+    <span class="nt">&lt;path.to.CenteredButton</span> <span class="na">android:layout_width=</span><span class="s">&quot;wrap_content&quot;</span>
+                            <span class="na">android:layout_height=</span><span class="s">&quot;wrap_content&quot;</span>
+                            <span class="na">android:layout_gravity=</span><span class="s">&quot;center&quot;</span>
+                            <span class="na">android:text=</span><span class="s">&quot;Button&quot;</span><span class="nt">/&gt;</span>
+
+<span class="nt">&lt;/FrameLayout&gt;</span>
+</code></pre></div>
+<p>It works! However, there&#39;s a slight hiccup. Say I want to center the text of my custom Button. Applying <code>android:gravity=&quot;center&quot;</code> doesn&#39;t work:</p>
+
+<p><center>
+  <figure>
+    <img src="http://i.imgur.com/4huD0rH.png"/>
+    <figcaption>&quot;Button&quot; text is not centered.</figcaption>
+  </figure>
+</center> </p>
+
+<p>That darn <code>super.onMeasure</code>! A closer look at the <a href="http://grepcode.com/file/repository.grepcode.com/java/ext/com.google.android/android/4.4.2_r1/android/widget/Button.java/">source code</a> reveals a simple text like &quot;Button&quot; is drawn with the help of a <code>BoringLayout</code>. The layout is also responsible for positioning the text based on the available height, width and gravity. </p>
+
+<p>Since I only change the width after <code>super.onMeasure</code>, it has no effect to the initially calculated dimensions and position.</p>
+
+<p>Is there a way to halve the width before <code>super.onMeasure</code>? Enter <a href="http://developer.android.com/reference/android/view/View.MeasureSpec.html">MeasureSpec</a>. Scary documentation hides its simple nature: the three modes, <code>AT_MOST</code>, <code>UNSPECIFIED</code> and <code>EXACTLY</code>, are a rough translation of the familiar <code>wrap_content</code>, <code>match_parent</code> and a specific size, e.g. <code>200dp</code>. </p>
+
+<p>The two encoded <code>int</code> values of the <code>onMeasure</code> method, <code>widthMeasureSpec</code> and <code>heightMeasureSpec</code> present the <code>MeasureSpec</code> values from its parent View. This is quite relevant, since we can easily extract the parent width from it: </p>
+<div class="highlight"><pre><code class="java language-java" data-lang="java"><span class="kd">final</span> <span class="kt">int</span> <span class="n">parentWidth</span> <span class="o">=</span> <span class="n">MeasureSpec</span><span class="o">.</span><span class="na">getSize</span><span class="o">(</span><span class="n">widthMeasureSpec</span><span class="o">);</span>
+</code></pre></div>
+<p>If we could modify the <code>widthMeasureSpec</code> to be half its parent width, and pass it to the <code>super.onMeasure</code>, our work would be done. Fortunately, that&#39;s easy:</p>
+<div class="highlight"><pre><code class="java language-java" data-lang="java"><span class="nd">@Override</span>
+<span class="kd">protected</span> <span class="kt">void</span> <span class="nf">onMeasure</span><span class="o">(</span><span class="kt">int</span> <span class="n">wMeasureSpec</span><span class="o">,</span> <span class="kt">int</span> <span class="n">hMeasureSpec</span><span class="o">)</span> <span class="o">{</span>
+  <span class="kd">final</span> <span class="kt">int</span> <span class="n">widthSize</span> <span class="o">=</span> <span class="n">MeasureSpec</span><span class="o">.</span><span class="na">getSize</span><span class="o">(</span><span class="n">wMeasureSpec</span><span class="o">);</span>
+  <span class="kd">final</span> <span class="kt">int</span> <span class="n">halfWidth</span> <span class="o">=</span> <span class="n">widthSize</span> <span class="o">/</span> <span class="mi">2</span><span class="o">;</span>
+  <span class="kd">final</span> <span class="kt">int</span> <span class="n">newMeasureSpec</span> <span class="o">=</span> 
+    <span class="n">MeasureSpec</span><span class="o">.</span><span class="na">makeMeasureSpec</span><span class="o">(</span><span class="n">halfWidth</span><span class="o">,</span> <span class="n">MeasureSpec</span><span class="o">.</span><span class="na">EXACTLY</span><span class="o">);</span>
+
+  <span class="kd">super</span><span class="o">.</span><span class="na">onMeasure</span><span class="o">(</span><span class="n">newMeasureSpec</span><span class="o">,</span> <span class="n">hMeasureSpec</span><span class="o">);</span>
+<span class="o">}</span>
+</code></pre></div>
+<p>Mission accomplished! </p>
+
+<p>Of course, Carlos did things a bit differently. To see his solution, go and buy his book.</p>
+
+</div>
+
+<p class="message">
+Your feedback is very important to me. If you enjoyed (or hated) this post, please let me know! 
+Leave a comment below, share it with your friends or subscribe to the <a href="/atom.xml">RSS feed</a>. 
+<br /><br />
+Thanks for reading!
+</p>
+
+<div class="related">
+  <h2>Related Posts</h2>
+  <ul class="related-posts">
+    
+      <li>
+          <a href="/2013/11/17/leaving-london/">
+            Leaving London
+            <small>17 Nov 2013</small>
+          </a>
+      </li>
+    
+      <li>
+          <a href="/2013/10/06/view-animations-on-android/">
+            View Animations On Android
+            <small>06 Oct 2013</small>
+          </a>
+      </li>
+    
+      <li>
+          <a href="/2013/07/21/twos-complement-and-absolute-values/">
+            Two's Complement And Absolute Values
+            <small>21 Jul 2013</small>
+          </a>
+      </li>
+    
+  </ul>
+</div>
+
+
+  <div class="comments">
+ <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = 'tslamic'; // required: replace example with your forum shortname
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+      </div>
+    </div>
+
+    <label for="sidebar-checkbox" class="sidebar-toggle"></label>
+  </body>
+</html>
