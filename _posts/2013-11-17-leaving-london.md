@@ -1,21 +1,17 @@
 ---
-layout:   post
-title:    Leaving London
-comments: true
+layout: post
+title: Leaving London
+description: "Goodbye London, hello Dublin."
+tags: [London, Dublin, travel]
+image:
+  feature: wajdusna.jpg
+  credit: Hostel Ajdovscina
+  creditlink: http://www.hostel-ajdovscina.si/
 ---
 
 About a year ago, I bought a one way ticket to London.
 
 I had a job waiting for me and all I had to do was to show up. Until then, I was sure the place I was living in is a slow-paced, boring and futureless town that will never become a city. I wanted to get out.
-
-<center>
-  <figure>
-    <img src="http://www.hostel-ajdovscina.si/mma/panorama/2011052009114270/lead/crop/"/>
-    <figcaption>
-      My home town, Ajdovscina
-    </figcaption>
-  </figure>
-</center>
 
 After buying the ticket, reality kicked in. I became sentimental and hesitant. I'm leaving my family. I'm leaving my friends. The place I grow up in, the forests, mountains and fresh air.  Mom's dishes and nagging. Soccer after work and drinks in my favourite bar. The smell of freshly cut grass. The sun. Half an hour drive either to the snowy slopes or good enough beach. 
 

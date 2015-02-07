@@ -1,10 +1,15 @@
 ---
-layout:   post
-title:    To Center A Button
-comments: true
+layout: post
+title: To Center A Button
+description: "How to center a button that is 50% of its parent?"
+tags: [android, button, custom view]
+image:
+  feature: abstract-5.jpg
+  credit: dargadgetz
+  creditlink: http://www.dargadgetz.com/ios-7-abstract-wallpaper-pack-for-iphone-5-and-ipod-touch-retina/
 ---
 
-In his first problem, Carloss Sessa of [50 Android Hacks](http://www.amazon.com/50-Android-Hacks-Carlos-Sessa/dp/1617290564) introduces an interesting problem: _how to center a button that is 50% of its parent width_?
+Carloss Sessa of [50 Android Hacks](http://www.amazon.com/50-Android-Hacks-Carlos-Sessa/dp/1617290564) starts off with an interesting problem: how to center a button that is 50% of its parent width?
 
 <center>
   <figure>
@@ -13,9 +18,9 @@ In his first problem, Carloss Sessa of [50 Android Hacks](http://www.amazon.com/
   </figure>
 </center>
 
-It's easy to center a generic button. Using <code>FrameLayout</code>, one could simply set the appropriate `android:layout_gravity`: 
+It's easy to center a generic button. Using <code>FrameLayout</code>, one could simply set the appropriate layout gravity:
 
-```xml
+{% highlight xml %}
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="default_schema"
              android:layout_width="match_parent"
@@ -27,18 +32,18 @@ It's easy to center a generic button. Using <code>FrameLayout</code>, one could 
             android:text="Button"/>
 
 </FrameLayout>
-```
+{% endhighlight %}
 
 But how to set the button width to 50% of its parent? I decided to create a custom `Button`. 
 
 When creating custom views, you usually want to override some [standard methods](http://developer.android.com/reference/android/view/View.html) the framework uses. There are two I could consider in this case: 
 
-* `onMeasure`: called to determine the size requirements for this view and all of its children
-* `onLayout`: called when this view should assign a size and position to all of its children.
+* `onMeasure` determines the size requirements for this view and all of its children
+* `onLayout` assigns a size and position to all of its children.
 
 Because the parent layout already provides the position I'm after, `onMeasure` will suffice.
 
-```java
+{% highlight java %}
 public class CenteredButton extends Button {
 
     // Constructors ommited for clarity.
@@ -54,11 +59,11 @@ public class CenteredButton extends Button {
     }
     
 }
-```
+{% endhighlight %}
 
 The custom `onMeasure` is straightforward: after invoking `super`, which provides initial measurements, we get the parent width, halve it and apply the result. Then, we tell the XML layout to use it:
 
-```xml
+{% highlight xml %}
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="default_schema"
              android:layout_width="match_parent"
@@ -68,11 +73,11 @@ The custom `onMeasure` is straightforward: after invoking `super`, which provide
                             android:layout_height="wrap_content"
                             android:layout_gravity="center"
                             android:text="Button"/>
-                            
-</FrameLayout>
-```
 
-It works! However, there's a slight hiccup. Say I want to center the text of my custom Button. Applying `android:gravity="center"` doesn't work:
+</FrameLayout>
+{% endhighlight %}
+
+It works! However, there's a slight hiccup - the text is not centered. Applying `android:gravity="center"` doesn't work:
 
 <center>
   <figure>
@@ -81,21 +86,21 @@ It works! However, there's a slight hiccup. Say I want to center the text of my 
   </figure>
 </center> 
 
-That darn `super.onMeasure`! A closer look at the [source code](http://grepcode.com/file/repository.grepcode.com/java/ext/com.google.android/android/4.4.2_r1/android/widget/Button.java/) reveals a simple text like "Button" is drawn with the help of a `BoringLayout`. The layout is also responsible for positioning the text based on the available height, width and gravity. 
+Darn `super.onMeasure`! A closer look at the [source code](http://grepcode.com/file/repository.grepcode.com/java/ext/com.google.android/android/4.4.2_r1/android/widget/Button.java/) reveals a simple text like "Button" is drawn with the help of a `BoringLayout`. The layout is also responsible for positioning the text based on the available height, width and gravity. 
 
 Since I only change the width after `super.onMeasure`, it has no effect to the initially calculated dimensions and position.
 
 Is there a way to halve the width before `super.onMeasure`? Enter [MeasureSpec](http://developer.android.com/reference/android/view/View.MeasureSpec.html). Scary documentation hides its simple nature: the three modes, `AT_MOST`, `UNSPECIFIED` and `EXACTLY`, are a rough translation of the familiar `wrap_content`, `match_parent` and a specific size, e.g. `200dp`. 
 
-The two encoded `int` values of the `onMeasure` method, `widthMeasureSpec` and `heightMeasureSpec` present the `MeasureSpec` values from its parent View. This is quite relevant, since we can easily extract the parent width from it: 
+Two encoded values of the `onMeasure` method, `widthMeasureSpec` and `heightMeasureSpec` present the `MeasureSpec` values from its parent View. This is handy, we can easily extract the parent width from it: 
 
-```java
+{% highlight java %}
 final int parentWidth = MeasureSpec.getSize(widthMeasureSpec);
-```
+{% endhighlight %}
 
 If we could modify the `widthMeasureSpec` to be half its parent width, and pass it to the `super.onMeasure`, our work would be done. Fortunately, that's easy:
 
-```java
+{% highlight java %}
 @Override
 protected void onMeasure(int wMeasureSpec, int hMeasureSpec) {
   final int widthSize = MeasureSpec.getSize(wMeasureSpec);
@@ -105,7 +110,7 @@ protected void onMeasure(int wMeasureSpec, int hMeasureSpec) {
     
   super.onMeasure(newMeasureSpec, hMeasureSpec);
 }
-```
+{% endhighlight %}
 
 Mission accomplished! 
 

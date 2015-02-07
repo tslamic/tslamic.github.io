@@ -1,9 +1,17 @@
 ---
 layout:   post
 title:    Two's Complement And Absolute Values
-comments: true
-math:     true
+description: "Examples and code for displaying images in posts."
+tags: [java, two's complement, bitshift]
+image:
+  feature: abstract-5.jpg
+  credit: dargadgetz
+  creditlink: http://www.dargadgetz.com/ios-7-abstract-wallpaper-pack-for-iphone-5-and-ipod-touch-retina/
 ---
+
+<script type="text/javascript"
+ src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
 
 If I ask you what the result of `Math.abs(-10)` is, would you guess it's `10`? How about `Math.abs(-2147483648)`? If you think the answer is `2147483648`, you're wrong.
 
@@ -40,9 +48,9 @@ Knowing computers operate with binary numbers, a good guess would be this are ju
 256: [1] [1] [1] [1] [1] [1] [1] [1] = 255
 </pre>
 
-Notice what _unsigned_ means - the values we've calculated are all non-negative. Also, we're able to represent all integers from 0 to 255.
+Notice what _unsigned_ means - the values we've calculated are all non-negative. Also, we're only able to represent integers from 0 to 255.
 
-Now let's think of a way to make our system _signed_ - let's incorporate negative numbers.
+Let's think of a way to make our system _signed_ - let's incorporate negative numbers.
 
 We want more or less even number of both, positive and negative numbers, so let's make a wild guess and choose the first bit to represent the sign: `0` means the number will be positive, `1` negative:
 <pre>
@@ -60,7 +68,7 @@ We want more or less even number of both, positive and negative numbers, so let'
 [1] [1] [1] [1] [1] [1] [1] [1] = -127
 </pre>
 
-Voila! Our very first 8-bit signed integer system. Being very intuitive, this is actually a well known system called _signed magnitude_. It was used by some ancient computers.
+Voila! Our very first 8-bit signed integer system. Being very intuitive, this is a well known system called _signed magnitude_. It was used by some ancient computers.
 
 <center>
   <figure>
@@ -190,7 +198,7 @@ Let's first look at 3-bit two's complement binary numbers and its decimal values
 </table>
 </center>
 
-Since one bit represents the sign, there are only two bits available for binary numbers. The upper bound seems to be 3 or $2^{2} - 1$. The lower bound is -4 or $-2^{2}$
+Since one bit represents the sign, there are only two bits available for binary numbers. The upper bound seems to be 3 or \\(2^{2} - 1\\). The lower bound is -4 or \\(-2^{2}\\)
 
 Let's do the same thing for 4-bit numbers:
 
@@ -284,7 +292,7 @@ Let's do the same thing for 4-bit numbers:
 </table>
 </center>
 
-Again, one bit represents the sign, so there are three bits available for binary numbers. The upper bound seems to be 7 or $2 ^ {3} - 1$. The lower bound is -8 or $-2^{3}$
+Again, one bit represents the sign, so there are three bits available for binary numbers. The upper bound seems to be 7 or \\(2 ^ {3} - 1\\). The lower bound is -8 or \\(-2^{3}\\)
 
 Notice the bounds pattern for number of bits:
 
@@ -298,20 +306,20 @@ Notice the bounds pattern for number of bits:
   
   <tr>
     <td>3</td>
-    <td>-4 or $-2^{2}$</td>
-    <td>3 or $2^{2} - 1$</td>
+    <td>-4</td>
+    <td>3</td>
   </tr>
   
   <tr>
     <td>4</td>
-    <td>-8 or $-2^{3}$</td>
-    <td>7 or $2^{3} - 1$</td>
+    <td>-8</td>
+    <td>7</td>
   </tr>
   
   <tr>
     <td>5</td>
-    <td>-16 or $-2^{4}$</td>
-    <td>15 or $2^{4} - 1$</td>
+    <td>-16</td>
+    <td>15</td>
   </tr>
 
   <tr>
@@ -322,8 +330,8 @@ Notice the bounds pattern for number of bits:
 
  <tr>
     <td>n</td>
-   <td>$-2^{n - 1}$</td>
-    <td>$2^{n - 1} - 1$</td>
+    <td>\(-2^{n - 1}\)</td>
+    <td>\(2^{n - 1} - 1\)</td>
   </tr>
   
 </table>
@@ -395,7 +403,7 @@ Yes, it does. But what are this values?
   <tr>
    <td>n</td>
    <td></td>
-   <td>$-2^{n - 1}$</td> 
+   <td>\(-2^{n - 1}\)</td> 
   </tr>
   
 </table>
@@ -404,4 +412,4 @@ Yes, it does. But what are this values?
 
 The values are lower bounds. We've shown that in Two's Complement, the opposite value of a lower bound is still the lower bound. 
 
-This is relevant because `-2147483648 == Integer.MIN_VALUE`. We've seen that the opposite value of a lower bound is still the lower bound, which explains why `Math.abs(-2147483648) != 2147483648`, as casually mentioned at the beginning of this post.
+This is relevant because `-2147483648 == Integer.MIN_VALUE`, a lower bound for `int` type in Java. We know now the opposite value of a lower bound is still the lower bound, which explains why `Math.abs(-2147483648) != 2147483648`.

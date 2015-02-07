@@ -1,23 +1,21 @@
 ---
-layout:   post
-title:    Java Operators I Thought I Knew
-comments: true
+layout: post
+title: Java Operators I Thought I Knew
+description: "I thought I know them all..."
+tags: [java, modulo, bitshift]
+image:
+  feature: abstract-5.jpg
+  credit: dargadgetz
+  creditlink: http://www.dargadgetz.com/ios-7-abstract-wallpaper-pack-for-iphone-5-and-ipod-touch-retina/
 ---
 
-Today, I stumbled upon [Java Tutorial Operators](http://docs.oracle.com/javase/tutorial/java/nutsandbolts/operators.html) page. I glanced the list, wondering if I know what each operator does:
+Today, I stumbled upon [Java Tutorial Operators](http://docs.oracle.com/javase/tutorial/java/nutsandbolts/operators.html) page. 
 
-<center>
-  <figure>
-    <img src="http://i.imgur.com/BuNAYbG.png" />
-    <figcaption>Do you know them all?</figcaption>
-  </figure>
-</center>
-
-As you might have guessed from the title, I failed. Luckily, I failed at only two operators. 
+I glanced the list, wondering if I know what each operator does. As you might have guessed from the title, I failed. Luckily, I failed at only two operators. 
 
 ### The modulo operator %
 
-While mostly defined in the same fashion, implementations of _modulo_ or _reminder_ operator differ when it comes to the sign of a result. For example, a modulo operator in Python might yield a different result than a modulo operator in Java, using the exact same data. Try it out for yourself - evaluate the expression `-1 % 2`, for instance.
+While mostly defined in the same fashion, implementations of _modulo_ or _reminder_ operator differ when it comes to the sign of a result. For example, a modulo operator in Python might yield a different result than a modulo operator in Java, using the exact same data. Try it out for yourself, evaluate the expression `-1 % 2` for instance.
 
 Why?
 
@@ -26,39 +24,41 @@ It boils down to the decision language designers made when defining the operator
 
 Missing this fact could lead to some "fun" late night debugging sessions. Consider the following example:
 
-```java
+{% highlight java %}
 /*
  * Returns true if value is odd, false otherwise.
  */
 static boolean isOdd(final int value) {
   return (value % 2) == 1;
 }
-```
+{% endhighlight %}
 
 It works wonderful with a positive argument. But since the definition of an odd number is quite natural for any negative integer too, does `isOdd(-1)` produce a correct result? 
 
-Java uses the dividend when determining the sign of a modulo operation, so the argument we pass to `isOdd`. Therefore `-1 % 2 == -1`, and `isOdd(-1) == false`. The result is not what one would expect.
+Java uses the dividend when determining the sign of a modulo operation. Therefore, if the argument we pass to `isOdd` is negative, the modulo operation yields a negative result. In our case `-1 % 2 == -1`, and `isOdd(-1) == false`. The result is not what one would expect.
 
-A quick fix could apply absolute value to a dividend. An even better solution, albeit a bit cryptic to an untrained eye, would be to just check the last bit of a number and avoiding the modulo operator altogether:
+A quick fix could apply absolute value to a dividend. A better solution, albeit a bit cryptic, would be to just check the last bit of a number and avoid the modulo operator altogether:
 
-```java
+{% highlight java %}
 /*
  * Returns true if value is odd, false otherwise.
  */
 static boolean isOdd(final int value) {
   return (value & 1) == 1;
 }
-```
+{% endhighlight %}
 
-### The unsigned right shift >>>
+### The unsigned right shift `>>>`
 
-The second operator I was having trouble with was `>>>`. Honestly, I couldn't tell the difference with `>>` operator, so I had to check the definition: `>>>`is an _unsigned_ right shift whereas `>>` is _signed_. If you're confused, read on. 
+The second operator I was having trouble with was `>>>`. I couldn't tell the difference with `>>` operator, so I had to check the definition: `>>>`is an _unsigned_ right shift whereas `>>` is _signed_. 
+
+Confused? Read on.
 
 <center>
-  <figure>
-    <img src="http://upload.wikimedia.org/wikipedia/commons/thumb/7/76/Most_significant_bit.svg/300px-Most_significant_bit.svg.png" />
-    <figcaption>The most significant bit is highlighted.</figcaption>
-  </figure>
+<figure>
+  <img src="http://upload.wikimedia.org/wikipedia/commons/thumb/7/76/Most_significant_bit.svg/300px-Most_significant_bit.svg.png" alt="Most Significant Bit">
+  <figcaption>The most significant bit is highlighted.</figcaption>
+</figure>
 </center>
 
 `>>` operator uses the most-significant bit value when shifting a bit pattern, whereas `>>>` _always_ uses `0`.
@@ -72,13 +72,11 @@ Now consider the binary number `1001`. The most significant bit in this case is 
 1001 >> 1 == 1100
 </pre>
 
-Regardless of the most significant bit value, an unsigned right shift operator `>>>` always uses `0` as the shifting value. So `0001` will be shifted with `0`, as will `1001`:
+Regardless of the most significant bit value, an unsigned right shift operator `>>>` always uses `0` as the shifting value. `0001` will be shifted with `0` as before, but so will `1001`:
 
 <pre>
 0001 >>> 1 = 0000
 1001 >>> 1 = 0100
 </pre>
 
-You may notice there is no unsigned left shift operator. This is because the `<<`operator is already _unsigned_: `1000 << 1 == 0000`. In two's complement system, the most significant bit represents the sign. This simple example clearly shows that the sign is lost when performing the left shift. 
-
-So why is there no _signed left shift_ operator? One could reason it's unnecessary: suppose `<<<` denotes it. Then, for example, `1001 <<< 1 == 1010`. The same result may be achieved using `>>`: `1001 >> 2 == 1010`.
+You may notice there is no unsigned left shift operator. Any nontrivial `<<` shift will actually move the significant bit out of the picture: `1001 << 1 == 0010`. Shifting by 1 to the left will transform -7 to 2, changing signs along the way. Therefore, the `<<` operator itself is already _unsigned_.
