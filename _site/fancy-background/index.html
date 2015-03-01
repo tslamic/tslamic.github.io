@@ -5,25 +5,25 @@
 <!--[if gt IE 8]><!--> <html class="no-js" lang="en"><!--<![endif]-->
 <head>
 <meta charset="utf-8">
-<title>Android, monkeys and stress testing &#8211; Tadej's Blog</title>
-<meta name="description" content="Automating the monkey and heap dumps.">
-<meta name="keywords" content="android, monkey, memory, automation, dumpey">
+<title>Fancy Background &#8211; Tadej's Blog</title>
+<meta name="description" content="Efficiently animate resource Drawables">
+<meta name="keywords" content="android, bitmap, memory, cache, subsampling">
 
 
 
 <!-- Open Graph -->
 <meta property="og:locale" content="en_US">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Android, monkeys and stress testing">
-<meta property="og:description" content="Automating the monkey and heap dumps.">
-<meta property="og:url" content="/android-monkeys-stress-testing/">
+<meta property="og:title" content="Fancy Background">
+<meta property="og:description" content="Efficiently animate resource Drawables">
+<meta property="og:url" content="/fancy-background/">
 <meta property="og:site_name" content="Tadej's Blog">
 
 
 
 
 
-<link rel="canonical" href="/android-monkeys-stress-testing/">
+<link rel="canonical" href="/fancy-background/">
 <link href="/feed.xml" type="application/atom+xml" rel="alternate" title="Tadej's Blog Feed">
 
 <!-- http://t.co/dKP3o1e -->
@@ -144,9 +144,9 @@
     <header class="header-title">
       <div class="header-title-wrap">
         
-          <h1 class="entry-title"><a href="/android-monkeys-stress-testing/" rel="bookmark" title="Android, monkeys and stress testing">Android, monkeys and stress testing</a></h1>
+          <h1 class="entry-title"><a href="/fancy-background/" rel="bookmark" title="Fancy Background">Fancy Background</a></h1>
         
-        <h2><span class="entry-date date published"><time datetime="2015-02-08T00:00:00-05:00">February 08, 2015</time></span></h2>
+        <h2><span class="entry-date date published"><time datetime="2015-02-23T00:00:00-05:00">February 23, 2015</time></span></h2>
         
         <p class="entry-reading-time">
           <i class="fa fa-clock-o"></i>
@@ -157,97 +157,112 @@
       </div><!-- /.header-title-wrap -->
     </header>
     <div class="entry-content">
-      <p>As end users, we’re terrible. </p>
+      <p>FancyBackground is a tiny Android library designed to animate images on a View instance.</p>
 
-<p>We’ll microwave a fork, pull doors with a big red sign saying push and sue a company for serving us a hot cup of coffee. We’ll grab a supposedly waterproof phone and toss it in a full tub. Then we’ll go online and laugh at the schmuck trying to drill through a wall he’s standing on. </p>
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: center">Before</th>
+      <th style="text-align: center">After</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: center"><img src="http://i.imgur.com/7kH0FIN.png?1" alt="plain" /></td>
+      <td style="text-align: center"><img src="http://i.imgur.com/Sh4XegD.gif" alt="fancybg" /></td>
+    </tr>
+  </tbody>
+</table>
 
-<center>
-  <figure>
-    <img src="http://i.imgur.com/X17puIB.gif" />
-    <figcaption>Can you imagine designing a product that can handle such superusers? </figcaption>
-  </figure>
-</center>
+<p>Android runs on a variety of devices, with different screen sizes and densities. Providing alternative resources is a standard practice. Let’s assume that in our case, the design team only gave us resources of <code>xxhdpi</code> size. To make matters worse, an <code>OutOfMemoryError</code> is thrown when we try to load any image into memory on our S3 mini. </p>
 
-<p>Creating software with good user experience is hard. Relying on intuition is naive, but expecting a product to be used in a predictable (or, y’know, logical) manner is just wrong. </p>
+<blockquote>
+  <p>Given that you are working with limited memory, ideally you only want to load a lower resolution version in memory. The lower resolution version should match the size of the UI component that displays it. An image with a higher resolution does not provide any visible benefit, but still takes up precious memory and incurs additional performance overhead due to additional on the fly scaling.</p>
+</blockquote>
 
-<p><em>Stress testing</em> puts great emphasis on availability and error handling, under a load few consider normal. It indicates just how robust our product really is.</p>
+<p>is what the <a href="http://developer.android.com/training/displaying-bitmaps/load-bitmap.html">docs</a> say about efficient bitmap loading. Therefore, in order to load the background images into memory successfully, we have to subsample and, most likely, scale them. </p>
 
-<p>Android - or, more precisely, its debug bridge -  has a very handy tool called <em>the monkey</em>. It’s purpose is to stress-test your app by generating pseudo-random user events in a repeatable manner. It’s as if a monkey was ordered to test your app. It’ll tap, swipe, click and drag no matter what’s on the screen. </p>
+<p>This real-world scenario is the motivation behind FancyBackground. FancyBackground animates through a set of resource Drawables. It ensures they are subsampled and cached, if need be, with all the heavy lifting done in the background. The usage is simple. To animate between <code>R.drawable.fst</code>, <code>R.drawable.snd</code> and <code>R.drawable.trd</code>, showing each for 2.5 seconds, simply do:</p>
 
-<p>A typical command to start the monkey is:</p>
+<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="n">FancyBackground</span><span class="o">.</span><span class="na">on</span><span class="o">(</span><span class="n">view</span><span class="o">)</span>
+               <span class="o">.</span><span class="na">set</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">drawable</span><span class="o">.</span><span class="na">fst</span><span class="o">,</span> <span class="n">R</span><span class="o">.</span><span class="na">drawable</span><span class="o">.</span><span class="na">snd</span><span class="o">,</span> <span class="n">R</span><span class="o">.</span><span class="na">drawable</span><span class="o">.</span><span class="na">trd</span><span class="o">)</span>
+               <span class="o">.</span><span class="na">inAnimation</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">anim</span><span class="o">.</span><span class="na">fade_in</span><span class="o">)</span>
+               <span class="o">.</span><span class="na">outAnimation</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">anim</span><span class="o">.</span><span class="na">fade_out</span><span class="o">)</span>
+               <span class="o">.</span><span class="na">interval</span><span class="o">(</span><span class="mi">2500</span><span class="o">)</span>
+               <span class="o">.</span><span class="na">start</span><span class="o">();</span></code></pre></div>
 
-<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">$ </span>adb shell monkey -p your.package.name 5000</code></pre></div>
+<p>The code above gives us subsampling, caching and automatic transitions for free. </p>
 
-<p>where <code>-p</code> denotes your package name. <code>5000</code> is the amount of events generated. </p>
+<p>There are other options available, so let’s do a quick abstract:</p>
 
-<p>Another useful option is the seed parameter. If you re-run the monkey with the same seed value, it will generate the exact same sequence of events. Just add the <code>-s &lt;number&gt;</code> option to your command: </p>
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: left">Method name</th>
+      <th style="text-align: left">Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: left"><code>set</code></td>
+      <td style="text-align: left">sets the Drawable resources we wish to show/animate</td>
+    </tr>
+    <tr>
+      <td style="text-align: left"><code>inAnimation</code></td>
+      <td style="text-align: left">specifies the animation used to animate a <code>View</code> entering the screen.</td>
+    </tr>
+    <tr>
+      <td style="text-align: left"><code>outAnimation</code></td>
+      <td style="text-align: left">specifies the animation used to animate a <code>View</code> exiting the screen.</td>
+    </tr>
+    <tr>
+      <td style="text-align: left"><code>loop</code></td>
+      <td style="text-align: left">continuously loop through the Drawables or stop after the first cycle is complete.</td>
+    </tr>
+    <tr>
+      <td style="text-align: left"><code>interval</code></td>
+      <td style="text-align: left">the millisecond interval a Drawable instance will be displayed for.</td>
+    </tr>
+    <tr>
+      <td style="text-align: left"><code>scale</code></td>
+      <td style="text-align: left">determines how the Drawables should be resized or moved to match the size of the view we’re animating on.</td>
+    </tr>
+    <tr>
+      <td style="text-align: left"><code>listener</code></td>
+      <td style="text-align: left">receives the <code>FancyBackground</code> events (described below)</td>
+    </tr>
+    <tr>
+      <td style="text-align: left"><code>cache</code></td>
+      <td style="text-align: left">caches loaded bitmaps so we don’t have to do it again</td>
+    </tr>
+  </tbody>
+</table>
 
-<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">$ </span>adb shell monkey -p your.package.name -s <span class="m">12345</span> 5000</code></pre></div>
-
-<p>This is handy when you encounter crashes while using the monkey. Apply the fix, re-run the monkey with the same seed value and validate.</p>
-
-<p>Sometimes, you’ll have multiple devices to run the monkey on. Suppose <code>adb devices</code> yields</p>
-
-<pre>
-List of devices attached 
-192.168.56.102:5555		device
-0749e0c421157449		device
-017961c7d19f9615		device
-</pre>
-
-<p>Executing any adb shell command results in <code>error: more than one device and emulator</code>. You need to explicitly tell the adb which device or emulator one to use, by using <code>-s &lt;serialNumber&gt;</code> option:</p>
-
-<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">$ </span>adb -s 192.168.56.102:5555 shell monkey -p your.package.name -s <span class="m">12345</span> 5000</code></pre></div>
-
-<p>This will run the monkey on a device or emulator with a serial number <code>192.168.56.102:5555</code>. To run the monkey on all attached emulators and devices, you have to execute a separate command for each one. </p>
-
-<p>Numerous other options are <a href="http://developer.android.com/tools/help/monkey.html">available</a> to fine-tune the monkey. Perhaps <code>--hprof</code> is an option worth mentioning. If set, it dumps the heap immediately before and after running. This can be quite useful for memory profiling. </p>
-
-<p>However, according to this <a href="http://stackoverflow.com/a/8433740/905349">old post</a>, the <code>--hprof</code> option seems to be ignored. Moreover, the dumps are put in <code>data/misc</code> folder. It may be impossible to extract them.</p>
-
-<p>To tackle the two problems, running the monkey on multiple devices and making heap dumps, I’ve created Dumpey, a collection of (currently) three UNIX scripts:</p>
+<p><code>FancyListener</code> can receive four events: </p>
 
 <ul>
-  <li><code>monkey</code> capable of running the monkey on all attached devices/emulators</li>
-  <li><code>memdmp</code> capable of extracting and converting heap dumps from a device/emulator to a local drive</li>
-  <li><code>dumpey</code> capable of extracting and converting heap dumps before and after running the monkey, on all attached devices/emulators</li>
+  <li><code>onStarted</code> when the FancyBackground is started </li>
+  <li><code>onNew</code> when a new image is set</li>
+  <li><code>onLoopDone</code> if looping is set to false and the first cycle is complete</li>
+  <li><code>onStopped</code> when the FancyBackground stops.</li>
 </ul>
 
-<p>Using Dumpey is easy. For example</p>
+<p><code>FancyCache</code> enables you to create your own bitmap cache. <code>FancyLruCache</code> is the default, targeting ~25% of the available heap and evicting the least recently used bitmap if over capacity. Use <code>null</code> to avoid caching.</p>
 
-<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">$ </span>./monkey -p your.package.name -s <span class="m">12345</span> -e 5000</code></pre></div>
+<p>To try it out, make sure to add the following to your dependency list: </p>
 
-<p>runs the monkey on all attached devices with a seed number <code>12345</code>, generating <code>5000</code> random events. </p>
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">compile <span class="s1">&#39;com.github.tslamic.fancybackground:library:1.0&#39;</span></code></pre></div>
 
-<p>To avoid using DDMS to do a heap dump, use <code>memdmp</code>:</p>
-
-<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">$ </span>./memdmp -s SH48HWM03500 -p your.package.name -f heapdumps/my_heap_dump.hprof</code></pre></div>
-
-<p>This will extract a converted memory heap dump to <code>heapdumps/my_heap_dump.hprof</code> file. All you have to do is open it with MAT.</p>
-
-<p>Combine memory dumps and monkey with <code>dumpey</code>:</p>
-
-<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">$ </span>./dumpey -p your.package.name -bad heapdumps/</code></pre></div>
-
-<p>This extracts converted memory heap dumps, runs the monkey, and extracts converted memory heap dumps again. It does this on all attached devices or emulators. If, for example, you only have one device attached, <code>SH48HWM03500</code>, then running <code>dumpey</code> with the above command will generate two files in <code>heapdumps</code> folder: </p>
-
-<ul>
-  <li><code>SH48HWM03500-before.hprof</code></li>
-  <li><code>SH48HWM03500-after.hprof</code></li>
-</ul>
-
-<p>As the names suggest, they are converted memory heap dumps from a specific device done before and after running the monkey. Again, all you have to do is open them in MAT. </p>
-
-<p>To read more about Dumpey, visit the <a href="https://github.com/tslamic/Dumpey">Github repo</a>. Happy stress testing!</p>
+<p>For an example, visit my <a href="https://github.com/tslamic/FancyBackground">Github profile</a>. </p>
 
       <footer class="entry-meta">
-        <span class="entry-tags"><a href="/tags/#android" title="Pages tagged android" class="tag"><span class="term">android</span></a><a href="/tags/#monkey" title="Pages tagged monkey" class="tag"><span class="term">monkey</span></a><a href="/tags/#memory" title="Pages tagged memory" class="tag"><span class="term">memory</span></a><a href="/tags/#automation" title="Pages tagged automation" class="tag"><span class="term">automation</span></a><a href="/tags/#dumpey" title="Pages tagged dumpey" class="tag"><span class="term">dumpey</span></a></span>
+        <span class="entry-tags"><a href="/tags/#android" title="Pages tagged android" class="tag"><span class="term">android</span></a><a href="/tags/#bitmap" title="Pages tagged bitmap" class="tag"><span class="term">bitmap</span></a><a href="/tags/#memory" title="Pages tagged memory" class="tag"><span class="term">memory</span></a><a href="/tags/#cache" title="Pages tagged cache" class="tag"><span class="term">cache</span></a><a href="/tags/#subsampling" title="Pages tagged subsampling" class="tag"><span class="term">subsampling</span></a></span>
         
         <div class="social-share">
   <ul class="socialcount socialcount-small inline-list">
-    <li class="facebook"><a href="https://www.facebook.com/sharer/sharer.php?u=/android-monkeys-stress-testing/" title="Share on Facebook"><span class="count"><i class="fa fa-facebook-square"></i> Like</span></a></li>
-    <li class="twitter"><a href="https://twitter.com/intent/tweet?text=/android-monkeys-stress-testing/" title="Share on Twitter"><span class="count"><i class="fa fa-twitter-square"></i> Tweet</span></a></li>
-    <li class="googleplus"><a href="https://plus.google.com/share?url=/android-monkeys-stress-testing/" title="Share on Google Plus"><span class="count"><i class="fa fa-google-plus-square"></i> +1</span></a></li>
+    <li class="facebook"><a href="https://www.facebook.com/sharer/sharer.php?u=/fancy-background/" title="Share on Facebook"><span class="count"><i class="fa fa-facebook-square"></i> Like</span></a></li>
+    <li class="twitter"><a href="https://twitter.com/intent/tweet?text=/fancy-background/" title="Share on Twitter"><span class="count"><i class="fa fa-twitter-square"></i> Tweet</span></a></li>
+    <li class="googleplus"><a href="https://plus.google.com/share?url=/fancy-background/" title="Share on Google Plus"><span class="count"><i class="fa fa-google-plus-square"></i> +1</span></a></li>
   </ul>
 </div><!-- /.social-share -->
       </footer>
@@ -256,7 +271,7 @@ List of devices attached
     <div class="read-more">
   
     <div class="read-more-header">
-      <a href="/leaving-london/" class="read-more-btn">Read More</a>
+      <a href="/android-monkeys-stress-testing/" class="read-more-btn">Read More</a>
     </div><!-- /.read-more-header -->
     <div class="read-more-content">
       <h3><a href="/on-advanced-task-killer/" title="On Advanced Task Killer">On Advanced Task Killer</a></h3>
@@ -266,8 +281,8 @@ List of devices attached
   <div class="read-more-list">
     
       <div class="list-item">
-        <h4><a href="/fancy-background/" title="Fancy Background">Fancy Background</a></h4>
-        <span>Published on February 23, 2015</span>
+        <h4><a href="/android-monkeys-stress-testing/" title="Android, monkeys and stress testing">Android, monkeys and stress testing</a></h4>
+        <span>Published on February 08, 2015</span>
       </div><!-- /.list-item -->
     
       <div class="list-item">

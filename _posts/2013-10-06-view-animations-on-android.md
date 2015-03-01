@@ -3,10 +3,6 @@ layout: post
 title: View Animations On Android
 description: "How to do view animations on Android"
 tags: [android, animation, interpolator]
-image:
-  feature: abstract-5.jpg
-  credit: dargadgetz
-  creditlink: http://www.dargadgetz.com/ios-7-abstract-wallpaper-pack-for-iphone-5-and-ipod-touch-retina/
 ---
 
 The Android framework provides two animation systems:

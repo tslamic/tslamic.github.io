@@ -5,25 +5,25 @@
 <!--[if gt IE 8]><!--> <html class="no-js" lang="en"><!--<![endif]-->
 <head>
 <meta charset="utf-8">
-<title>Two's Complement And Absolute Values &#8211; Tadej's Blog</title>
-<meta name="description" content="Examples and code for displaying images in posts.">
-<meta name="keywords" content="java, two's complement, bitshift">
+<title>Code, Coffee, Life &#8211; Tadej's Blog</title>
+<meta name="description" content="Tadej's Blog">
+
 
 
 
 <!-- Open Graph -->
 <meta property="og:locale" content="en_US">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Two's Complement And Absolute Values">
-<meta property="og:description" content="Examples and code for displaying images in posts.">
-<meta property="og:url" content="/twos-complement-and-absolute-values/">
+<meta property="og:title" content="Code, Coffee, Life">
+<meta property="og:description" content="Tadej's Blog">
+<meta property="og:url" content="/page3/index.html">
 <meta property="og:site_name" content="Tadej's Blog">
 
 
 
 
 
-<link rel="canonical" href="/twos-complement-and-absolute-values/">
+<link rel="canonical" href="/page3/">
 <link href="/feed.xml" type="application/atom+xml" rel="alternate" title="Tadej's Blog Feed">
 
 <!-- http://t.co/dKP3o1e -->
@@ -59,7 +59,7 @@
 
 </head>
 
-<body id="post" >
+<body id="post-index" >
 
 <!--[if lt IE 9]><div class="upgrade"><strong><a href="http://whatbrowser.org/">Your browser is quite old!</strong> Why not upgrade to a different browser to better enjoy this site?</a></div><![endif]-->
 <nav id="dl-menu" class="dl-menuwrapper" role="navigation">
@@ -137,27 +137,38 @@
 </nav>
 <!-- /.dl-menuwrapper -->
 
-
+<div class="entry-header">
+  
+  
+  <div class="header-title">
+    <div class="header-title-wrap">
+      <h1>Tadej's Blog</h1>
+      <h2>Code, Coffee, Life</h2>
+    </div><!-- /.header-title-wrap -->
+  </div><!-- /.header-title -->
+</div><!-- /.entry-header -->
 
 <div id="main" role="main">
-  <article class="hentry">
-    <header class="header-title">
-      <div class="header-title-wrap">
+  
+<article class="hentry">
+  <header>
+    
+    <div class="entry-meta">
+      <span class="entry-date date published updated"><time datetime="2013-07-21T00:00:00-04:00"><a href="/twos-complement-and-absolute-values/">July 21, 2013</a></time></span><span class="author vcard"><span class="fn"><a href="/about/" title="About Tadej Slamic">Tadej Slamic</a></span></span>
+      
+      <span class="entry-reading-time">
+        <i class="fa fa-clock-o"></i>
         
-          <h1 class="entry-title"><a href="/twos-complement-and-absolute-values/" rel="bookmark" title="Two's Complement And Absolute Values">Two's Complement And Absolute Values</a></h1>
-        
-        <h2><span class="entry-date date published"><time datetime="2013-07-21T00:00:00-04:00">July 21, 2013</time></span></h2>
-        
-        <p class="entry-reading-time">
-          <i class="fa fa-clock-o"></i>
-          
-          Reading time ~7 minutes
-        </p><!-- /.entry-reading-time -->
-        
-      </div><!-- /.header-title-wrap -->
-    </header>
-    <div class="entry-content">
-      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        Reading time ~7 minutes
+      </span><!-- /.entry-reading-time -->
+      
+    </div><!-- /.entry-meta -->
+    
+      <h1 class="entry-title"><a href="/twos-complement-and-absolute-values/" rel="bookmark" title="Two's Complement And Absolute Values" itemprop="url">Two's Complement And Absolute Values</a></h1>
+    
+  </header>
+  <div class="entry-content">
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
 </script>
 
 <p>If I ask you what the result of <code>Math.abs(-10)</code> is, would you guess it’s <code>10</code>? How about <code>Math.abs(-2147483648)</code>? If you think the answer is <code>2147483648</code>, you’re wrong.</p>
@@ -560,44 +571,129 @@ For an arbitrary n-bit binary number, to get its opposite representation, first 
 
 <p>This is relevant because <code>-2147483648 == Integer.MIN_VALUE</code>, a lower bound for <code>int</code> type in Java. We know now the opposite value of a lower bound is still the lower bound, which explains why <code>Math.abs(-2147483648) != 2147483648</code>.</p>
 
-      <footer class="entry-meta">
-        <span class="entry-tags"><a href="/tags/#java" title="Pages tagged java" class="tag"><span class="term">java</span></a><a href="/tags/#two's complement" title="Pages tagged two's complement" class="tag"><span class="term">two's complement</span></a><a href="/tags/#bitshift" title="Pages tagged bitshift" class="tag"><span class="term">bitshift</span></a></span>
+  </div><!-- /.entry-content -->
+</article><!-- /.hentry -->
+
+<article class="hentry">
+  <header>
+    
+    <div class="entry-meta">
+      <span class="entry-date date published updated"><time datetime="2013-05-27T00:00:00-04:00"><a href="/java-operators-i-thought-i-knew/">May 27, 2013</a></time></span><span class="author vcard"><span class="fn"><a href="/about/" title="About Tadej Slamic">Tadej Slamic</a></span></span>
+      
+      <span class="entry-reading-time">
+        <i class="fa fa-clock-o"></i>
         
-        <div class="social-share">
-  <ul class="socialcount socialcount-small inline-list">
-    <li class="facebook"><a href="https://www.facebook.com/sharer/sharer.php?u=/twos-complement-and-absolute-values/" title="Share on Facebook"><span class="count"><i class="fa fa-facebook-square"></i> Like</span></a></li>
-    <li class="twitter"><a href="https://twitter.com/intent/tweet?text=/twos-complement-and-absolute-values/" title="Share on Twitter"><span class="count"><i class="fa fa-twitter-square"></i> Tweet</span></a></li>
-    <li class="googleplus"><a href="https://plus.google.com/share?url=/twos-complement-and-absolute-values/" title="Share on Google Plus"><span class="count"><i class="fa fa-google-plus-square"></i> +1</span></a></li>
+        Reading time ~3 minutes
+      </span><!-- /.entry-reading-time -->
+      
+    </div><!-- /.entry-meta -->
+    
+      <h1 class="entry-title"><a href="/java-operators-i-thought-i-knew/" rel="bookmark" title="Java Operators I Thought I Knew" itemprop="url">Java Operators I Thought I Knew</a></h1>
+    
+  </header>
+  <div class="entry-content">
+    <p>Today, I stumbled upon <a href="http://docs.oracle.com/javase/tutorial/java/nutsandbolts/operators.html">Java Tutorial Operators</a> page. </p>
+
+<p>I glanced the list, wondering if I know what each operator does. As you might have guessed from the title, I failed. Luckily, I failed at only two operators. </p>
+
+<h3 id="the-modulo-operator-">The modulo operator %</h3>
+
+<p>While mostly defined in the same fashion, implementations of <em>modulo</em> or <em>reminder</em> operator differ when it comes to the sign of a result. For example, a modulo operator in Python might yield a different result than a modulo operator in Java, using the exact same data. Try it out for yourself, evaluate the expression <code>-1 % 2</code> for instance.</p>
+
+<p>Why?</p>
+
+<p>It boils down to the decision language designers made when defining the operator. Recall that in an expression <code>a % b = c</code>,
+<code>a</code> is said to be the <em>dividend</em> and <code>b</code> the <em>divisor</em>. Some decided <code>c</code> should have the same sign as the dividend, others divisor. Java chose dividend, Python divisor.</p>
+
+<p>Missing this fact could lead to some “fun” late night debugging sessions. Consider the following example:</p>
+
+<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="cm">/*</span>
+<span class="cm"> * Returns true if value is odd, false otherwise.</span>
+<span class="cm"> */</span>
+<span class="kd">static</span> <span class="kt">boolean</span> <span class="nf">isOdd</span><span class="o">(</span><span class="kd">final</span> <span class="kt">int</span> <span class="n">value</span><span class="o">)</span> <span class="o">{</span>
+  <span class="k">return</span> <span class="o">(</span><span class="n">value</span> <span class="o">%</span> <span class="mi">2</span><span class="o">)</span> <span class="o">==</span> <span class="mi">1</span><span class="o">;</span>
+<span class="o">}</span></code></pre></div>
+
+<p>It works wonderful with a positive argument. But since the definition of an odd number is quite natural for any negative integer too, does <code>isOdd(-1)</code> produce a correct result? </p>
+
+<p>Java uses the dividend when determining the sign of a modulo operation. Therefore, if the argument we pass to <code>isOdd</code> is negative, the modulo operation yields a negative result. In our case <code>-1 % 2 == -1</code>, and <code>isOdd(-1) == false</code>. The result is not what one would expect.</p>
+
+<p>A quick fix could apply absolute value to a dividend. A better solution, albeit a bit cryptic, would be to just check the last bit of a number and avoid the modulo operator altogether:</p>
+
+<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="cm">/*</span>
+<span class="cm"> * Returns true if value is odd, false otherwise.</span>
+<span class="cm"> */</span>
+<span class="kd">static</span> <span class="kt">boolean</span> <span class="nf">isOdd</span><span class="o">(</span><span class="kd">final</span> <span class="kt">int</span> <span class="n">value</span><span class="o">)</span> <span class="o">{</span>
+  <span class="k">return</span> <span class="o">(</span><span class="n">value</span> <span class="o">&amp;</span> <span class="mi">1</span><span class="o">)</span> <span class="o">==</span> <span class="mi">1</span><span class="o">;</span>
+<span class="o">}</span></code></pre></div>
+
+<h3 id="the-unsigned-right-shift-">The unsigned right shift <code>&gt;&gt;&gt;</code></h3>
+
+<p>The second operator I was having trouble with was <code>&gt;&gt;&gt;</code>. I couldn’t tell the difference with <code>&gt;&gt;</code> operator, so I had to check the definition: <code>&gt;&gt;&gt;</code>is an <em>unsigned</em> right shift whereas <code>&gt;&gt;</code> is <em>signed</em>. </p>
+
+<p>Confused? Read on.</p>
+
+<center>
+<figure>
+  <img src="http://upload.wikimedia.org/wikipedia/commons/thumb/7/76/Most_significant_bit.svg/300px-Most_significant_bit.svg.png" alt="Most Significant Bit" />
+  <figcaption>The most significant bit is highlighted.</figcaption>
+</figure>
+</center>
+
+<p><code>&gt;&gt;</code> operator uses the most-significant bit value when shifting a bit pattern, whereas <code>&gt;&gt;&gt;</code> <em>always</em> uses <code>0</code>.</p>
+
+<p>Suppose we’re operating with 4-bit two’s complement numbers. Take a binary number, e.g. <code>0001</code>. The most significant bit is <code>0</code>. Performing a shift, say <code>0001 &gt;&gt; 1</code>, the value you’ll be shifting with is <code>0</code>.</p>
+
+<p>Now consider the binary number <code>1001</code>. The most significant bit in this case is <code>1</code>, so the value you’ll be shifting with is <code>1</code>.</p>
+
+<pre>
+0001 &gt;&gt; 1 == 0000
+1001 &gt;&gt; 1 == 1100
+</pre>
+
+<p>Regardless of the most significant bit value, an unsigned right shift operator <code>&gt;&gt;&gt;</code> always uses <code>0</code> as the shifting value. <code>0001</code> will be shifted with <code>0</code> as before, but so will <code>1001</code>:</p>
+
+<pre>
+0001 &gt;&gt;&gt; 1 = 0000
+1001 &gt;&gt;&gt; 1 = 0100
+</pre>
+
+<p>You may notice there is no unsigned left shift operator. Any nontrivial <code>&lt;&lt;</code> shift will actually move the significant bit out of the picture: <code>1001 &lt;&lt; 1 == 0010</code>. Shifting by 1 to the left will transform -7 to 2, changing signs along the way. Therefore, the <code>&lt;&lt;</code> operator itself is already <em>unsigned</em>.</p>
+
+  </div><!-- /.entry-content -->
+</article><!-- /.hentry -->
+
+
+<div class="pagination">
+  
+    
+      <a href="/page2" class="btn">Previous</a>
+    
+  
+  <ul class="inline-list">
+    <li>
+      
+        <a href="">1</a>
+      
+    </li>
+    
+      <li>
+        
+          <a href="/page2">2</a>
+        
+      </li>
+    
+      <li>
+        
+          <span class="current-page">3</span>
+        
+      </li>
+    
   </ul>
-</div><!-- /.social-share -->
-      </footer>
-    </div><!-- /.entry-content -->
-    <section id="disqus_thread"></section><!-- /#disqus_thread -->
-    <div class="read-more">
   
-    <div class="read-more-header">
-      <a href="/java-operators-i-thought-i-knew/" class="read-more-btn">Read More</a>
-    </div><!-- /.read-more-header -->
-    <div class="read-more-content">
-      <h3><a href="/on-advanced-task-killer/" title="On Advanced Task Killer">On Advanced Task Killer</a></h3>
-      <p>How does its internals tick? <a href="/on-advanced-task-killer/">Continue reading</a></p>
-    </div><!-- /.read-more-content -->
+    Next
   
-  <div class="read-more-list">
-    
-      <div class="list-item">
-        <h4><a href="/fancy-background/" title="Fancy Background">Fancy Background</a></h4>
-        <span>Published on February 23, 2015</span>
-      </div><!-- /.list-item -->
-    
-      <div class="list-item">
-        <h4><a href="/android-monkeys-stress-testing/" title="Android, monkeys and stress testing">Android, monkeys and stress testing</a></h4>
-        <span>Published on February 08, 2015</span>
-      </div><!-- /.list-item -->
-    
-  </div><!-- /.read-more-list -->
-</div><!-- /.read-more -->
-  </article>
+</div><!-- /.pagination -->
 </div><!-- /#main -->
 
 <div class="footer-wrapper">
@@ -624,29 +720,7 @@ For an arbitrary n-bit binary number, to get its opposite representation, first 
 </script>
 
 
-
-    <script type="text/javascript">
-        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
-        var disqus_shortname = 'tslamic'; // required: replace example with your forum shortname
-
-        /* * * DON'T EDIT BELOW THIS LINE * * */
-        (function() {
-            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
-            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
-        })();
-
-        /* * * DON'T EDIT BELOW THIS LINE * * */
-        (function () {
-            var s = document.createElement('script'); s.async = true;
-            s.type = 'text/javascript';
-            s.src = '//' + disqus_shortname + '.disqus.com/count.js';
-            (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
-        }());
-    </script>
-    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
-	        
+          
 
 </body>
 </html>

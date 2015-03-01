@@ -5,7 +5,7 @@
 <!--[if gt IE 8]><!--> <html class="no-js" lang="en"><!--<![endif]-->
 <head>
 <meta charset="utf-8">
-<title>Latest Stuff &#8211; Tadej's Blog</title>
+<title>Code, Coffee, Life &#8211; Tadej's Blog</title>
 <meta name="description" content="Tadej's Blog">
 
 
@@ -14,7 +14,7 @@
 <!-- Open Graph -->
 <meta property="og:locale" content="en_US">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Latest Stuff">
+<meta property="og:title" content="Code, Coffee, Life">
 <meta property="og:description" content="Tadej's Blog">
 <meta property="og:url" content="/page2/index.html">
 <meta property="og:site_name" content="Tadej's Blog">
@@ -143,7 +143,7 @@
   <div class="header-title">
     <div class="header-title-wrap">
       <h1>Tadej's Blog</h1>
-      <h2>Latest Stuff</h2>
+      <h2>Code, Coffee, Life</h2>
     </div><!-- /.header-title-wrap -->
   </div><!-- /.header-title -->
 </div><!-- /.entry-header -->
@@ -154,8 +154,171 @@
   <header>
     
       <div class="entry-image-index">
-        <a href="/view-animations-on-android/" title="View Animations On Android"><img src="/images/abstract-5.jpg" alt="View Animations On Android"></a>
+        <a href="/leaving-london/" title="Leaving London"><img src="/images/wajdusna.jpg" alt="Leaving London"></a>
       </div><!-- /.entry-image -->
+    
+    <div class="entry-meta">
+      <span class="entry-date date published updated"><time datetime="2013-11-17T00:00:00-05:00"><a href="/leaving-london/">November 17, 2013</a></time></span><span class="author vcard"><span class="fn"><a href="/about/" title="About Tadej Slamic">Tadej Slamic</a></span></span>
+      
+      <span class="entry-reading-time">
+        <i class="fa fa-clock-o"></i>
+        
+        Reading time ~1 minute
+      </span><!-- /.entry-reading-time -->
+      
+    </div><!-- /.entry-meta -->
+    
+      <h1 class="entry-title"><a href="/leaving-london/" rel="bookmark" title="Leaving London" itemprop="url">Leaving London</a></h1>
+    
+  </header>
+  <div class="entry-content">
+    <p>About a year ago, I bought a one way ticket to London.</p>
+
+<p>I had a job waiting for me and all I had to do was to show up. Until then, I was sure the place I was living in is a slow-paced, boring and futureless town that will never become a city. I wanted to get out.</p>
+
+<p>After buying the ticket, reality kicked in. I became sentimental and hesitant. I’m leaving my family. I’m leaving my friends. The place I grow up in, the forests, mountains and fresh air.  Mom’s dishes and nagging. Soccer after work and drinks in my favourite bar. The smell of freshly cut grass. The sun. Half an hour drive either to the snowy slopes or good enough beach. </p>
+
+<p>It sure isn’t the most opportunistic and ambitious little town. But it’s <em>home</em>.</p>
+
+<p>It was cold when I landed in Stansted. Looking through the dirty train window, I was petrified. Will I blend in with the new coworkers? Will I be up to the task?</p>
+
+<p>It all turned out great. Friendly, talkative and cool coworkers from all over the world. Different language and environment. I was put out of my comfort zone. While easing in, I was learning, progressing and evolving. I became more confident in my knowledge and the code I wrote. I learned to use new tools and adopted new practices. Cut down the buzzwords when talking to non-tech people. I stopped waving my hands all the time. Do presentations!</p>
+
+<p>One thing I picked up is for certain. You can never <em>learn</em> and <em>know</em> enough. Not only from books, articles and smart people - you can learn from <em>anyone</em>. Just pay attention and be open minded. Always think about the advice you are given, however stupid or useless you think it is. And <em>never</em> judge a book by its covers. Literally and metaphorically.</p>
+
+<center>
+  <figure>
+     <img src="http://netdna.webdesignerdepot.com/uploads/2011/02/81.jpg" />
+  </figure>
+</center>
+
+<p>I miss home. But I have grown as a person and that alone has made the move worthy. I learned. Experienced. And I don’t want to stop doing that. That’s why I’m leaving. I just started my new job in Dublin. I’m scared, but eager to learn.</p>
+
+  </div><!-- /.entry-content -->
+</article><!-- /.hentry -->
+
+<article class="hentry">
+  <header>
+    
+    <div class="entry-meta">
+      <span class="entry-date date published updated"><time datetime="2013-10-12T00:00:00-04:00"><a href="/can-you-center-a-button/">October 12, 2013</a></time></span><span class="author vcard"><span class="fn"><a href="/about/" title="About Tadej Slamic">Tadej Slamic</a></span></span>
+      
+      <span class="entry-reading-time">
+        <i class="fa fa-clock-o"></i>
+        
+        Reading time ~3 minutes
+      </span><!-- /.entry-reading-time -->
+      
+    </div><!-- /.entry-meta -->
+    
+      <h1 class="entry-title"><a href="/can-you-center-a-button/" rel="bookmark" title="To Center A Button" itemprop="url">To Center A Button</a></h1>
+    
+  </header>
+  <div class="entry-content">
+    <p>Carloss Sessa of <a href="http://www.amazon.com/50-Android-Hacks-Carlos-Sessa/dp/1617290564">50 Android Hacks</a> starts off with an interesting problem: how to center a button that is 50% of its parent width?</p>
+
+<center>
+  <figure>
+    <img src="http://i.imgur.com/DW6JWEo.png" />
+    <figcaption>Pretty cool Android phone, huh?</figcaption>
+  </figure>
+</center>
+
+<p>It’s easy to center a generic button. Using <code>FrameLayout</code>, one could simply set the appropriate layout gravity:</p>
+
+<div class="highlight"><pre><code class="language-xml" data-lang="xml"><span class="cp">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span>
+<span class="nt">&lt;FrameLayout</span> <span class="na">xmlns:android=</span><span class="s">&quot;default_schema&quot;</span>
+             <span class="na">android:layout_width=</span><span class="s">&quot;match_parent&quot;</span>
+             <span class="na">android:layout_height=</span><span class="s">&quot;match_parent&quot;</span><span class="nt">&gt;</span>
+
+    <span class="nt">&lt;Button</span> <span class="na">android:layout_width=</span><span class="s">&quot;wrap_content&quot;</span>
+            <span class="na">android:layout_height=</span><span class="s">&quot;wrap_content&quot;</span>
+            <span class="na">android:layout_gravity=</span><span class="s">&quot;center&quot;</span>
+            <span class="na">android:text=</span><span class="s">&quot;Button&quot;</span><span class="nt">/&gt;</span>
+
+<span class="nt">&lt;/FrameLayout&gt;</span></code></pre></div>
+
+<p>But how to set the button width to 50% of its parent? I decided to create a custom <code>Button</code>. </p>
+
+<p>When creating custom views, you usually want to override some <a href="http://developer.android.com/reference/android/view/View.html">standard methods</a> the framework uses. There are two I could consider in this case: </p>
+
+<ul>
+  <li><code>onMeasure</code> determines the size requirements for this view and all of its children</li>
+  <li><code>onLayout</code> assigns a size and position to all of its children.</li>
+</ul>
+
+<p>Because the parent layout already provides the position I’m after, <code>onMeasure</code> will suffice.</p>
+
+<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="kd">public</span> <span class="kd">class</span> <span class="nc">CenteredButton</span> <span class="kd">extends</span> <span class="n">Button</span> <span class="o">{</span>
+
+    <span class="c1">// Constructors ommited for clarity.</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">protected</span> <span class="kt">void</span> <span class="nf">onMeasure</span><span class="o">(</span><span class="kt">int</span> <span class="n">wMeasureSpec</span><span class="o">,</span> <span class="kt">int</span> <span class="n">hMeasureSpec</span><span class="o">)</span> <span class="o">{</span>
+        <span class="kd">super</span><span class="o">.</span><span class="na">onMeasure</span><span class="o">(</span><span class="n">wMeasureSpec</span><span class="o">,</span> <span class="n">hMeasureSpec</span><span class="o">);</span>
+
+        <span class="kd">final</span> <span class="n">View</span> <span class="n">parent</span> <span class="o">=</span> <span class="o">(</span><span class="n">View</span><span class="o">)</span> <span class="n">getParent</span><span class="o">();</span>
+        <span class="kd">final</span> <span class="kt">int</span> <span class="n">halfParentWidth</span> <span class="o">=</span> <span class="n">parent</span><span class="o">.</span><span class="na">getWidth</span><span class="o">()</span> <span class="o">/</span> <span class="mi">2</span><span class="o">;</span>
+
+        <span class="n">setMeasuredDimension</span><span class="o">(</span><span class="n">halfParentWidth</span><span class="o">,</span> <span class="n">getMeasuredHeight</span><span class="o">());</span>
+    <span class="o">}</span>
+    
+<span class="o">}</span></code></pre></div>
+
+<p>The custom <code>onMeasure</code> is straightforward: after invoking <code>super</code>, which provides initial measurements, we get the parent width, halve it and apply the result. Then, we tell the XML layout to use it:</p>
+
+<div class="highlight"><pre><code class="language-xml" data-lang="xml"><span class="cp">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span>
+<span class="nt">&lt;FrameLayout</span> <span class="na">xmlns:android=</span><span class="s">&quot;default_schema&quot;</span>
+             <span class="na">android:layout_width=</span><span class="s">&quot;match_parent&quot;</span>
+             <span class="na">android:layout_height=</span><span class="s">&quot;match_parent&quot;</span><span class="nt">&gt;</span>
+
+    <span class="nt">&lt;path.to.CenteredButton</span> <span class="na">android:layout_width=</span><span class="s">&quot;wrap_content&quot;</span>
+                            <span class="na">android:layout_height=</span><span class="s">&quot;wrap_content&quot;</span>
+                            <span class="na">android:layout_gravity=</span><span class="s">&quot;center&quot;</span>
+                            <span class="na">android:text=</span><span class="s">&quot;Button&quot;</span><span class="nt">/&gt;</span>
+
+<span class="nt">&lt;/FrameLayout&gt;</span></code></pre></div>
+
+<p>It works! However, there’s a slight hiccup - the text is not centered. Applying <code>android:gravity="center"</code> doesn’t work:</p>
+
+<center>
+  <figure>
+    <img src="http://i.imgur.com/4huD0rH.png" />
+    <figcaption>"Button" text is not centered.</figcaption>
+  </figure>
+</center>
+
+<p>Darn <code>super.onMeasure</code>! A closer look at the <a href="http://grepcode.com/file/repository.grepcode.com/java/ext/com.google.android/android/4.4.2_r1/android/widget/Button.java/">source code</a> reveals a simple text like “Button” is drawn with the help of a <code>BoringLayout</code>. The layout is also responsible for positioning the text based on the available height, width and gravity. </p>
+
+<p>Since I only change the width after <code>super.onMeasure</code>, it has no effect to the initially calculated dimensions and position.</p>
+
+<p>Is there a way to halve the width before <code>super.onMeasure</code>? Enter <a href="http://developer.android.com/reference/android/view/View.MeasureSpec.html">MeasureSpec</a>. Scary documentation hides its simple nature: the three modes, <code>AT_MOST</code>, <code>UNSPECIFIED</code> and <code>EXACTLY</code>, are a rough translation of the familiar <code>wrap_content</code>, <code>match_parent</code> and a specific size, e.g. <code>200dp</code>. </p>
+
+<p>Two encoded values of the <code>onMeasure</code> method, <code>widthMeasureSpec</code> and <code>heightMeasureSpec</code> present the <code>MeasureSpec</code> values from its parent View. This is handy, we can easily extract the parent width from it: </p>
+
+<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="kd">final</span> <span class="kt">int</span> <span class="n">parentWidth</span> <span class="o">=</span> <span class="n">MeasureSpec</span><span class="o">.</span><span class="na">getSize</span><span class="o">(</span><span class="n">widthMeasureSpec</span><span class="o">);</span></code></pre></div>
+
+<p>If we could modify the <code>widthMeasureSpec</code> to be half its parent width, and pass it to the <code>super.onMeasure</code>, our work would be done. Fortunately, that’s easy:</p>
+
+<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="nd">@Override</span>
+<span class="kd">protected</span> <span class="kt">void</span> <span class="nf">onMeasure</span><span class="o">(</span><span class="kt">int</span> <span class="n">wMeasureSpec</span><span class="o">,</span> <span class="kt">int</span> <span class="n">hMeasureSpec</span><span class="o">)</span> <span class="o">{</span>
+  <span class="kd">final</span> <span class="kt">int</span> <span class="n">widthSize</span> <span class="o">=</span> <span class="n">MeasureSpec</span><span class="o">.</span><span class="na">getSize</span><span class="o">(</span><span class="n">wMeasureSpec</span><span class="o">);</span>
+  <span class="kd">final</span> <span class="kt">int</span> <span class="n">halfWidth</span> <span class="o">=</span> <span class="n">widthSize</span> <span class="o">/</span> <span class="mi">2</span><span class="o">;</span>
+  <span class="kd">final</span> <span class="kt">int</span> <span class="n">newMeasureSpec</span> <span class="o">=</span> 
+    <span class="n">MeasureSpec</span><span class="o">.</span><span class="na">makeMeasureSpec</span><span class="o">(</span><span class="n">halfWidth</span><span class="o">,</span> <span class="n">MeasureSpec</span><span class="o">.</span><span class="na">EXACTLY</span><span class="o">);</span>
+    
+  <span class="kd">super</span><span class="o">.</span><span class="na">onMeasure</span><span class="o">(</span><span class="n">newMeasureSpec</span><span class="o">,</span> <span class="n">hMeasureSpec</span><span class="o">);</span>
+<span class="o">}</span></code></pre></div>
+
+<p>Mission accomplished! </p>
+
+<p>Of course, Carlos did things a bit differently. To see his solution, go and buy his book.</p>
+
+  </div><!-- /.entry-content -->
+</article><!-- /.hentry -->
+
+<article class="hentry">
+  <header>
     
     <div class="entry-meta">
       <span class="entry-date date published updated"><time datetime="2013-10-06T00:00:00-04:00"><a href="/view-animations-on-android/">October 06, 2013</a></time></span><span class="author vcard"><span class="fn"><a href="/about/" title="About Tadej Slamic">Tadej Slamic</a></span></span>
@@ -308,527 +471,6 @@
   </div><!-- /.entry-content -->
 </article><!-- /.hentry -->
 
-<article class="hentry">
-  <header>
-    
-      <div class="entry-image-index">
-        <a href="/twos-complement-and-absolute-values/" title="Two's Complement And Absolute Values"><img src="/images/abstract-5.jpg" alt="Two's Complement And Absolute Values"></a>
-      </div><!-- /.entry-image -->
-    
-    <div class="entry-meta">
-      <span class="entry-date date published updated"><time datetime="2013-07-21T00:00:00-04:00"><a href="/twos-complement-and-absolute-values/">July 21, 2013</a></time></span><span class="author vcard"><span class="fn"><a href="/about/" title="About Tadej Slamic">Tadej Slamic</a></span></span>
-      
-      <span class="entry-reading-time">
-        <i class="fa fa-clock-o"></i>
-        
-        Reading time ~7 minutes
-      </span><!-- /.entry-reading-time -->
-      
-    </div><!-- /.entry-meta -->
-    
-      <h1 class="entry-title"><a href="/twos-complement-and-absolute-values/" rel="bookmark" title="Two's Complement And Absolute Values" itemprop="url">Two's Complement And Absolute Values</a></h1>
-    
-  </header>
-  <div class="entry-content">
-    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
-</script>
-
-<p>If I ask you what the result of <code>Math.abs(-10)</code> is, would you guess it’s <code>10</code>? How about <code>Math.abs(-2147483648)</code>? If you think the answer is <code>2147483648</code>, you’re wrong.</p>
-
-<center>
-<figure>
-<img src="http://karengately.files.wordpress.com/2011/10/gasp.jpg" />
-<figcaption>What!?</figcaption>
-</figure>
-</center>
-
-<h3 id="how-it-all-starts">How it all starts</h3>
-
-<p>A bit can hold only one of two values, say <code>0</code> and <code>1</code>. An 8-bit value, for example, is 
-a combination of 8 bits <em>glued together</em>:</p>
-<pre>
-001: [0] [0] [0] [0] [0] [0] [0] [0]
-002: [0] [0] [0] [0] [0] [0] [0] [1]
-003: [0] [0] [0] [0] [0] [0] [1] [0]
-004: [0] [0] [0] [0] [0] [0] [1] [1]
-// ...
-256: [1] [1] [1] [1] [1] [1] [1] [1]
-</pre>
-
-<p>There are 256 possible values. Being presented with the table above and no additional information, a natural question arises: <em>what do this combinations of bits represent?</em></p>
-
-<p>Knowing computers operate with binary numbers, a good guess would be this are just binary representations of numbers. Lo and behold, you’ve discovered an <em>unsigned</em> 8-bit integer representation system. Converting to decimal, the values yield:</p>
-
-<pre>
-001: [0] [0] [0] [0] [0] [0] [0] [0] = 0
-002: [0] [0] [0] [0] [0] [0] [0] [1] = 1
-003: [0] [0] [0] [0] [0] [0] [1] [0] = 2
-004: [0] [0] [0] [0] [0] [0] [1] [1] = 3
-// ...
-256: [1] [1] [1] [1] [1] [1] [1] [1] = 255
-</pre>
-
-<p>Notice what <em>unsigned</em> means - the values we’ve calculated are all non-negative. Also, we’re only able to represent integers from 0 to 255.</p>
-
-<p>Let’s think of a way to make our system <em>signed</em> - let’s incorporate negative numbers.</p>
-
-<p>We want more or less even number of both, positive and negative numbers, so let’s make a wild guess and choose the first bit to represent the sign: <code>0</code> means the number will be positive, <code>1</code> negative:</p>
-<pre>
-[0] [0] [0] [0] [0] [0] [0] [0] = +0
-[0] [0] [0] [0] [0] [0] [0] [1] = +1
-[0] [0] [0] [0] [0] [0] [1] [0] = +2
-// ...
-[0] [1] [1] [1] [1] [1] [1] [1] = +127
-</pre>
-<pre>
-[1] [0] [0] [0] [0] [0] [0] [0] = -0
-[1] [0] [0] [0] [0] [0] [0] [1] = -1
-[1] [0] [0] [0] [0] [0] [1] [0] = -2
-// ...
-[1] [1] [1] [1] [1] [1] [1] [1] = -127
-</pre>
-
-<p>Voila! Our very first 8-bit signed integer system. Being very intuitive, this is a well known system called <em>signed magnitude</em>. It was used by some ancient computers.</p>
-
-<center>
-  <figure>
-    <img src="http://ed-thelen.org/comp-hist/BRL61-0546.jpg" />
-    <figcaption>IBM 7090</figcaption>
-  </figure>
-</center>
-
-<h3 id="enter-twos-complement">Enter Two’s Complement</h3>
-
-<p>Through time, people had come up with a clever way of storing integers, so that common math problems are simple to implement and there are no multiple zero representations.</p>
-
-<blockquote>
-For an arbitrary n-bit binary number, to get its opposite representation, first invert the number, then add 1.
-</blockquote>
-
-<p>This simple algorithm forms Two’s Complement, the most commonly used signed number representation system in use today. </p>
-
-<p>Let’s do an example: find the opposite value of the binary number <code>00001010</code>:</p>
-<pre>
-~ 00001010 // invert value
-= 11110101 // result of inverted value
-+ 00000001 // add 1
-= 11110110 // final result
-</pre>
-
-<p>Let’s check what the opposite number of <code>11110110</code> is - if the algorithm is well-defined, the result should be <code>00001010</code>:</p>
-<pre>
-~ 11110110 // invert value
-= 00001001 // result of inverted value
-+ 00000001 // add 1
-= 00001010 // final result
-</pre>
-
-<p>Now for a more juicy example. What’s the opposite binary number of <code>00000000</code>?</p>
-<pre>
-~  00000000 // invert value
-=  11111111 // result of inverted value
-+  00000001 // add 1
-= 100000000 // final result
-</pre>
-
-<p>The result is a 9-bit number in an 8-bit number system. This is called an <em>overflow</em> since the value is, well, overflowing the 8-bit size restriction. The overflow is usually discarded, leaving us with the first eight bits from the right, <code>00000000</code>. We just showed that there is exactly one representation of <code>0</code>.</p>
-
-<h3 id="sign">Sign</h3>
-
-<p>In Two’s Complement, the most significant bit represents the sign. <code>0</code> means the number will be positive, <code>1</code> negative. The implication is that with <em>n</em> bits, you can only use <em>(n-1)</em> bits to represent the number, as one bit is reserved to denote the sign. </p>
-
-<p>You may think of <code>01001010</code> as a compound value consisting of <code>0</code> (sign) and <code>1001010</code> (actual binary number). </p>
-
-<h3 id="but-i-cant-think-in-binary">But I can’t think in binary</h3>
-
-<p>Converting a binary value <code>01001010</code> to decimal is simple. Ignoring the most significant bit, we get </p>
-
-<script type="math/tex; mode=display"> 0 * 2^{0} + 1 * 2^{1} + 0 * 2^{2} + 1 * 2^{3} + 1 * 2^{6} = 138 </script>
-
-<p>What about <code>10001010</code>? </p>
-
-<p>This is a negative value, since the most significant bit is <code>1</code>. To get the actual value, we can apply Two’s Complement algorithm, ignoring the first bit: </p>
-
-<pre>
-~ 0001010 // invert value
-= 1110101 // result of inverted value
-+ 0000001 // add 1
-= 1110110 // final result
-</pre>
-
-<p>Then, </p>
-
-<script type="math/tex; mode=display"> 0 * 2^{0} + 1 * 2^{1} + 1 * 2^{3} + 0 * 2^{4} + 1 * 2^{5} + 1 * 2^{6} + 1 * 2^{7} = 118 </script>
-
-<p>Because the most significant bit is <code>1</code>, the decimal number we calculated is negative. Therefore, <code>10001010 == -118</code>.</p>
-
-<h3 id="what-about-the-bounds">What about the bounds?</h3>
-
-<p>In 8-bit unsigned integer system, we could represent integers from 0 to 255. With 8-bit sign and magnitude, we could represent numbers from -127 to 127. What about Two’s Complement bounds?</p>
-
-<p>Let’s first look at 3-bit two’s complement binary numbers and its decimal values:</p>
-
-<center>
-<table style="width:300px; text-align:center">
-  <tr>
-    <th>Bits</th>
-    <th>Values</th>
-  </tr>
-
-  <tr>
-    <td>000</td>
-    <td>0</td>
-  </tr>
-
-  <tr>
-    <td>001</td>
-    <td>1</td>
-  </tr>
-
-  <tr>
-    <td>010</td>
-    <td>2</td>
-  </tr>
-
-  <tr style="border-bottom: 2px solid #ccc;">
-    <td>011</td>
-    <td>3</td>
-  </tr>
-
- <tr>
-    <td>100</td>
-    <td>-4</td>
-  </tr>
-
-  <tr>
-    <td>101</td>
-    <td>-3</td>
-  </tr>
-  
-  <tr>
-    <td>110</td>
-    <td>-2</td>
-  </tr>
-  
-  <tr>
-    <td>111</td>
-    <td>-1</td>
-  </tr>
-  
-</table>
-</center>
-
-<p>Since one bit represents the sign, there are only two bits available for binary numbers. The upper bound seems to be 3 or \(2^{2} - 1\). The lower bound is -4 or \(-2^{2}\)</p>
-
-<p>Let’s do the same thing for 4-bit numbers:</p>
-
-<center>
-<table style="width:300px; text-align:center">
-  <tr>
-    <th>Bits</th>
-    <th>Values</th>
-  </tr>
-
-  <tr>
-    <td>0000</td>
-    <td>0</td>
-  </tr>
-
-  <tr>
-    <td>0001</td>
-    <td>1</td>
-  </tr>
-
-  <tr>
-    <td>0010</td>
-    <td>2</td>
-  </tr>
-
-  <tr>
-    <td>0011</td>
-    <td>3</td>
-  </tr>
-
- <tr>
-    <td>0100</td>
-    <td>4</td>
-  </tr>
-  
-  <tr>
-    <td>0101</td>
-    <td>5</td>
-  </tr>
-  
-  <tr>
-    <td>0110</td>
-    <td>6</td>
-  </tr>
-
-  <tr style="border-bottom: 2px solid #ccc;">
-    <td>0111</td>
-    <td>7</td>
-  </tr>
-
- <tr>
-    <td>1000</td>
-    <td>-8</td>
-  </tr>
-
-  <tr>
-    <td>1001</td>
-    <td>-7</td>
-  </tr>
-
-  <tr>
-    <td>1010</td>
-    <td>-6</td>
-  </tr>
-
-  <tr>
-    <td>1011</td>
-    <td>-5</td>
-  </tr>
-
- <tr>
-    <td>1100</td>
-    <td>-4</td>
-  </tr>
-  
-  <tr>
-    <td>1101</td>
-    <td>-3</td>
-  </tr>
-  
-  <tr>
-    <td>1110</td>
-    <td>-2</td>
-  </tr>
-
-  <tr>
-    <td>1111</td>
-    <td>-1</td>
-  </tr>
-  
-</table>
-</center>
-
-<p>Again, one bit represents the sign, so there are three bits available for binary numbers. The upper bound seems to be 7 or \(2 ^ {3} - 1\). The lower bound is -8 or \(-2^{3}\)</p>
-
-<p>Notice the bounds pattern for number of bits:</p>
-
-<center>
-<table style="width:550px; text-align:center">
-  <tr>
-    <th>Number of bits</th>
-    <th>Lower bound</th>
-    <th>Upper bound</th>
-  </tr>
-  
-  <tr>
-    <td>3</td>
-    <td>-4</td>
-    <td>3</td>
-  </tr>
-  
-  <tr>
-    <td>4</td>
-    <td>-8</td>
-    <td>7</td>
-  </tr>
-  
-  <tr>
-    <td>5</td>
-    <td>-16</td>
-    <td>15</td>
-  </tr>
-
-  <tr>
-    <td>...</td>
-    <td>...</td>
-    <td>...</td>
-  </tr>
-
- <tr>
-    <td>n</td>
-    <td>\(-2^{n - 1}\)</td>
-    <td>\(2^{n - 1} - 1\)</td>
-  </tr>
-  
-</table>
-</center>
-
-<h3 id="the-grand-finale">The grand finale</h3>
-
-<p>Let’s look at one more example. What is the opposite value of binary number <code>100</code>?</p>
-
-<pre>
-~ 100 // invert value
-= 011 // result of inverted value
-+ 001 // add 1
-= 100 // final result
-</pre>
-
-<p>The opposite value of <code>100</code> is the exact same value. Weird. Let’s do one more. What’s the opposite value of <code>1000</code>?</p>
-
-<pre>
-~ 1000 // invert value
-= 0111 // result of inverted value
-+ 0001 // add 1
-= 1000 // final result
-</pre>
-
-<p>Again, the opposite value remains the same. Does this hold for any <em>n-bit</em> value, too?</p>
-
-<pre>
-~ 1000 ... 00 // invert value
-= 0111 ... 11 // result of inverted value
-+ 0000 ... 01 // add 1
-= 1000 ... 00 // final result
-</pre>
-
-<p>Yes, it does. But what are this values? </p>
-
-<center>
-<table style="width:500px; text-align:center">
-  <tr>
-    <th>Number of bits</th>
-    <th>Bit value</th>
-    <th>Decimal value</th>
-  </tr>
-  
-  <tr>
-    <td>3</td>
-    <td>100</td>
-    <td>-4</td>
-  </tr>
-  
-  <tr>
-    <td>4</td>
-    <td>1000</td>
-    <td>-8</td>
-  </tr>
-  
-  <tr>
-    <td>5</td>
-    <td>10000</td>
-    <td>-16</td>
-  </tr>
-  
-   <tr>
-    <td>...</td>
-    <td>...</td>
-    <td>...</td>
-  </tr>
-
-  <tr>
-   <td>n</td>
-   <td></td>
-   <td>\(-2^{n - 1}\)</td> 
-  </tr>
-  
-</table>
-</center>
-
-<p>The values are lower bounds. We’ve shown that in Two’s Complement, the opposite value of a lower bound is still the lower bound. </p>
-
-<p>This is relevant because <code>-2147483648 == Integer.MIN_VALUE</code>, a lower bound for <code>int</code> type in Java. We know now the opposite value of a lower bound is still the lower bound, which explains why <code>Math.abs(-2147483648) != 2147483648</code>.</p>
-
-  </div><!-- /.entry-content -->
-</article><!-- /.hentry -->
-
-<article class="hentry">
-  <header>
-    
-      <div class="entry-image-index">
-        <a href="/java-operators-i-thought-i-knew/" title="Java Operators I Thought I Knew"><img src="/images/abstract-5.jpg" alt="Java Operators I Thought I Knew"></a>
-      </div><!-- /.entry-image -->
-    
-    <div class="entry-meta">
-      <span class="entry-date date published updated"><time datetime="2013-05-27T00:00:00-04:00"><a href="/java-operators-i-thought-i-knew/">May 27, 2013</a></time></span><span class="author vcard"><span class="fn"><a href="/about/" title="About Tadej Slamic">Tadej Slamic</a></span></span>
-      
-      <span class="entry-reading-time">
-        <i class="fa fa-clock-o"></i>
-        
-        Reading time ~3 minutes
-      </span><!-- /.entry-reading-time -->
-      
-    </div><!-- /.entry-meta -->
-    
-      <h1 class="entry-title"><a href="/java-operators-i-thought-i-knew/" rel="bookmark" title="Java Operators I Thought I Knew" itemprop="url">Java Operators I Thought I Knew</a></h1>
-    
-  </header>
-  <div class="entry-content">
-    <p>Today, I stumbled upon <a href="http://docs.oracle.com/javase/tutorial/java/nutsandbolts/operators.html">Java Tutorial Operators</a> page. </p>
-
-<p>I glanced the list, wondering if I know what each operator does. As you might have guessed from the title, I failed. Luckily, I failed at only two operators. </p>
-
-<h3 id="the-modulo-operator-">The modulo operator %</h3>
-
-<p>While mostly defined in the same fashion, implementations of <em>modulo</em> or <em>reminder</em> operator differ when it comes to the sign of a result. For example, a modulo operator in Python might yield a different result than a modulo operator in Java, using the exact same data. Try it out for yourself, evaluate the expression <code>-1 % 2</code> for instance.</p>
-
-<p>Why?</p>
-
-<p>It boils down to the decision language designers made when defining the operator. Recall that in an expression <code>a % b = c</code>,
-<code>a</code> is said to be the <em>dividend</em> and <code>b</code> the <em>divisor</em>. Some decided <code>c</code> should have the same sign as the dividend, others divisor. Java chose dividend, Python divisor.</p>
-
-<p>Missing this fact could lead to some “fun” late night debugging sessions. Consider the following example:</p>
-
-<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="cm">/*</span>
-<span class="cm"> * Returns true if value is odd, false otherwise.</span>
-<span class="cm"> */</span>
-<span class="kd">static</span> <span class="kt">boolean</span> <span class="nf">isOdd</span><span class="o">(</span><span class="kd">final</span> <span class="kt">int</span> <span class="n">value</span><span class="o">)</span> <span class="o">{</span>
-  <span class="k">return</span> <span class="o">(</span><span class="n">value</span> <span class="o">%</span> <span class="mi">2</span><span class="o">)</span> <span class="o">==</span> <span class="mi">1</span><span class="o">;</span>
-<span class="o">}</span></code></pre></div>
-
-<p>It works wonderful with a positive argument. But since the definition of an odd number is quite natural for any negative integer too, does <code>isOdd(-1)</code> produce a correct result? </p>
-
-<p>Java uses the dividend when determining the sign of a modulo operation. Therefore, if the argument we pass to <code>isOdd</code> is negative, the modulo operation yields a negative result. In our case <code>-1 % 2 == -1</code>, and <code>isOdd(-1) == false</code>. The result is not what one would expect.</p>
-
-<p>A quick fix could apply absolute value to a dividend. A better solution, albeit a bit cryptic, would be to just check the last bit of a number and avoid the modulo operator altogether:</p>
-
-<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="cm">/*</span>
-<span class="cm"> * Returns true if value is odd, false otherwise.</span>
-<span class="cm"> */</span>
-<span class="kd">static</span> <span class="kt">boolean</span> <span class="nf">isOdd</span><span class="o">(</span><span class="kd">final</span> <span class="kt">int</span> <span class="n">value</span><span class="o">)</span> <span class="o">{</span>
-  <span class="k">return</span> <span class="o">(</span><span class="n">value</span> <span class="o">&amp;</span> <span class="mi">1</span><span class="o">)</span> <span class="o">==</span> <span class="mi">1</span><span class="o">;</span>
-<span class="o">}</span></code></pre></div>
-
-<h3 id="the-unsigned-right-shift-">The unsigned right shift <code>&gt;&gt;&gt;</code></h3>
-
-<p>The second operator I was having trouble with was <code>&gt;&gt;&gt;</code>. I couldn’t tell the difference with <code>&gt;&gt;</code> operator, so I had to check the definition: <code>&gt;&gt;&gt;</code>is an <em>unsigned</em> right shift whereas <code>&gt;&gt;</code> is <em>signed</em>. </p>
-
-<p>Confused? Read on.</p>
-
-<center>
-<figure>
-  <img src="http://upload.wikimedia.org/wikipedia/commons/thumb/7/76/Most_significant_bit.svg/300px-Most_significant_bit.svg.png" alt="Most Significant Bit" />
-  <figcaption>The most significant bit is highlighted.</figcaption>
-</figure>
-</center>
-
-<p><code>&gt;&gt;</code> operator uses the most-significant bit value when shifting a bit pattern, whereas <code>&gt;&gt;&gt;</code> <em>always</em> uses <code>0</code>.</p>
-
-<p>Suppose we’re operating with 4-bit two’s complement numbers. Take a binary number, e.g. <code>0001</code>. The most significant bit is <code>0</code>. Performing a shift, say <code>0001 &gt;&gt; 1</code>, the value you’ll be shifting with is <code>0</code>.</p>
-
-<p>Now consider the binary number <code>1001</code>. The most significant bit in this case is <code>1</code>, so the value you’ll be shifting with is <code>1</code>.</p>
-
-<pre>
-0001 &gt;&gt; 1 == 0000
-1001 &gt;&gt; 1 == 1100
-</pre>
-
-<p>Regardless of the most significant bit value, an unsigned right shift operator <code>&gt;&gt;&gt;</code> always uses <code>0</code> as the shifting value. <code>0001</code> will be shifted with <code>0</code> as before, but so will <code>1001</code>:</p>
-
-<pre>
-0001 &gt;&gt;&gt; 1 = 0000
-1001 &gt;&gt;&gt; 1 = 0100
-</pre>
-
-<p>You may notice there is no unsigned left shift operator. Any nontrivial <code>&lt;&lt;</code> shift will actually move the significant bit out of the picture: <code>1001 &lt;&lt; 1 == 0010</code>. Shifting by 1 to the left will transform -7 to 2, changing signs along the way. Therefore, the <code>&lt;&lt;</code> operator itself is already <em>unsigned</em>.</p>
-
-  </div><!-- /.entry-content -->
-</article><!-- /.hentry -->
-
 
 <div class="pagination">
   
@@ -849,9 +491,15 @@ For an arbitrary n-bit binary number, to get its opposite representation, first 
         
       </li>
     
+      <li>
+        
+          <a href="/page3">3</a>
+        
+      </li>
+    
   </ul>
   
-    Next
+    <a href="/page3" class="btn">Next</a>
   
 </div><!-- /.pagination -->
 </div><!-- /#main -->

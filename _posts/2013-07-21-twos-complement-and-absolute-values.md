@@ -3,10 +3,6 @@ layout:   post
 title:    Two's Complement And Absolute Values
 description: "Examples and code for displaying images in posts."
 tags: [java, two's complement, bitshift]
-image:
-  feature: abstract-5.jpg
-  credit: dargadgetz
-  creditlink: http://www.dargadgetz.com/ios-7-abstract-wallpaper-pack-for-iphone-5-and-ipod-touch-retina/
 ---
 
 <script type="text/javascript"

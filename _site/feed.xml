@@ -4,13 +4,239 @@
 <generator uri="https://github.com/mojombo/jekyll">Jekyll</generator>
 <link rel="self" type="application/atom+xml" href="/feed.xml" />
 <link rel="alternate" type="text/html" href="" />
-<updated>2015-02-08T04:38:55-05:00</updated>
+<updated>2015-03-01T14:18:18-05:00</updated>
 <id>/</id>
 <author>
   <name>Tadej Slamic</name>
   <uri>/</uri>
   
 </author>
+
+
+<entry>
+  <title type="html"><![CDATA[On Advanced Task Killer]]></title>
+ <link rel="alternate" type="text/html" href="/on-advanced-task-killer/" />
+  <id>/on-advanced-task-killer</id>
+  <published>2015-03-01T00:00:00-05:00</published>
+  <updated>2015-03-01T00:00:00-05:00</updated>
+  <author>
+    <name>Tadej Slamic</name>
+    <uri></uri>
+    <email></email>
+  </author>
+  <content type="html">
+    &lt;p&gt;There’s not a single Android enthusiast that doesn’t know the Advanced Task Killer app.&lt;/p&gt;
+
+&lt;p&gt;It’s supposedly the #1 task management app on Google Play, designed to kill applications and boost memory. Fiddling with system management is generally a bad idea, so I was quite curious what kind of black magic are they doing under the hood. With all the popularity and more than half a million downloads, they must be doing something right. Right?&lt;/p&gt;
+
+&lt;p&gt;Firstly, an important question. Why would anyone want to &lt;em&gt;kill&lt;/em&gt; an app? I agree with &lt;a href=&quot;http://blog.radioactiveyak.com/2010/05/when-to-include-exit-button-in-android.html&quot;&gt;Reto Meier&lt;/a&gt;:&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;… in my experience what users really want is an unambiguous way to guarantee that an app will stop consuming resources (battery, CPU cycles, data transfer, etc). Many perceive that an exit button implements this requirement and ask for it to be added. Developers, looking to please their users, obligingly add one…&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;With seamless state restoration, Android (and iOS) apps seem to run forever. They give no real &lt;em&gt;exit&lt;/em&gt; notion. Misunderstanding this non-desktop behaviour is, I’m guessing, why apps such as Advanced Task Killer (ATK henceforth) are well received. Few realize Android is clever enough to manage itself much better than we ever will, and there’s no need to interfere. In development world, manual or forced quitting is actually &lt;a href=&quot;http://stackoverflow.com/a/2034238/905349&quot;&gt;frowned upon&lt;/a&gt;, or, as Romain Guy &lt;a href=&quot;https://groups.google.com/d/msg/android-developers/G_D3pKnGLt0/0mFuZnjxjP4J&quot;&gt;explains:&lt;/a&gt; &lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;… the system handles it automatically. That’s what the Activity lifecycle (especially onPause/onStop/onDestroy) is for. No matter what you do, do not put a “quit” or “exit” application button. It is useless with Android’s application model.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;In reality, quiting could make matters worse. Killed apps might be restarted if they are, for example, receiving system events. Same goes for some services. You esentially force Android to do more work and consume more resources, such as battery life, to achieve absolutely nothing.&lt;/p&gt;
+
+&lt;p&gt;With this in mind, it’s fair to speculate ATK is redundant. To see it tick, the initial step is to observe its source. Reversing an apk is, with tools available online, a piece of cake. Given the app feel, I didn’t expect it to be obfuscated. To my surprise, it was. Browsing through, I had to admit defeat - no &lt;code&gt;killProcess&lt;/code&gt; invocation anywhere, which I was expecting. At least not explicitly, that is.&lt;/p&gt;
+
+&lt;p&gt;For fun (and no profit), let’s try to recreate the app. &lt;/p&gt;
+
+&lt;p&gt;First, we need to get a list of all activities currently running. ATK can also extract running services. We’re going to ignore them, but you can try and add them yourself - it’s easy.&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-java&quot; data-lang=&quot;java&quot;&gt;&lt;span class=&quot;cm&quot;&gt;/*&lt;/span&gt;
+&lt;span class=&quot;cm&quot;&gt; * Returns the list of all available launcher Activities.&lt;/span&gt;
+&lt;span class=&quot;cm&quot;&gt; */&lt;/span&gt;
+&lt;span class=&quot;kd&quot;&gt;private&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;List&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ResolveInfo&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;getAvailableActivityLaunchers&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;kd&quot;&gt;final&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;PackageManager&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;manager&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;getPackageManager&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;
+    &lt;span class=&quot;kd&quot;&gt;final&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Intent&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;intent&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;Intent&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Intent&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;ACTION_MAIN&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;null&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;intent&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;addCategory&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Intent&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;CATEGORY_LAUNCHER&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;manager&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;queryIntentActivities&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;intent&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Next, we want to filter out the activities currently running, but ignore the ones associated with the system:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-java&quot; data-lang=&quot;java&quot;&gt;&lt;span class=&quot;cm&quot;&gt;/*&lt;/span&gt;
+&lt;span class=&quot;cm&quot;&gt; * Create a mapping from a process name to its ResolveInfo.&lt;/span&gt;
+&lt;span class=&quot;cm&quot;&gt; */&lt;/span&gt;
+&lt;span class=&quot;kd&quot;&gt;private&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Map&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;String&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ResolveInfo&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;getAvailableActivityLaunchersMap&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;kd&quot;&gt;final&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;List&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ResolveInfo&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;list&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;getAvailableActivityLaunchers&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;
+    &lt;span class=&quot;kd&quot;&gt;final&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;HashMap&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;String&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ResolveInfo&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;map&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;HashMap&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;String&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ResolveInfo&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;list&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;size&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;());&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ResolveInfo&lt;/span&gt; &lt;span class=&quot;nl&quot;&gt;info:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;list&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;map&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;put&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;info&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;activityInfo&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;processName&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;info&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;map&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;cm&quot;&gt;/*&lt;/span&gt;
+&lt;span class=&quot;cm&quot;&gt; * Return a filtered list of currently running Activities.&lt;/span&gt;
+&lt;span class=&quot;cm&quot;&gt; */&lt;/span&gt;
+&lt;span class=&quot;kd&quot;&gt;private&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;List&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ResolveInfo&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;getAvailableLaunchersCurrentlyRunning&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;kd&quot;&gt;final&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ActivityManager&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;manager&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;getActivityManager&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;kd&quot;&gt;final&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Map&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;String&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ResolveInfo&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;map&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;getAvailableActivityLaunchersMap&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;
+
+    &lt;span class=&quot;kd&quot;&gt;final&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;List&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ActivityManager&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;RunningAppProcessInfo&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;runningApps&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;manager&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;getRunningAppProcesses&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;
+    &lt;span class=&quot;kd&quot;&gt;final&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;List&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ResolveInfo&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;available&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ArrayList&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ResolveInfo&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;runningApps&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;size&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;());&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ActivityManager&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;RunningAppProcessInfo&lt;/span&gt; &lt;span class=&quot;nl&quot;&gt;runningApp:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;runningApps&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(!&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;skip&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;runningApp&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;))&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;// skips system-related Activities&lt;/span&gt;
+            &lt;span class=&quot;kd&quot;&gt;final&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ResolveInfo&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;info&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;map&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;get&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;runningApp&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;processName&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+            &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;null&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;!=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;info&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+                &lt;span class=&quot;n&quot;&gt;available&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;add&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;info&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+            &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+        &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;available&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;This is, believe it or not, the gist of ATK. The only thing missing is the ability to &lt;em&gt;kill&lt;/em&gt; a selected list item. ATK does it by invoking &lt;code&gt;activityManager.restartPackage(packageName)&lt;/code&gt;. Initially, &lt;a href=&quot;http://grepcode.com/file/repository.grepcode.com/java/ext/com.google.android/android/2.0_r1/android/app/ActivityManager.java#ActivityManager.restartPackage%28java.lang.String%29&quot;&gt;this method&lt;/a&gt; had the system perform a force stop of everything associated with the given application package (killed processes with same uid, stopped running services, removed activities, etc). Heavily abused by task killers, it caused all sorts of issues. Android engineers eventually had enough. They’ve changed its behaviour, leaving &lt;a href=&quot;https://android.googlesource.com/platform/frameworks/base.git/+/03abb8179f0d912e6dabfc0e2b0f129d85066d17&quot;&gt;this comment&lt;/a&gt;: &lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Kill the task killers. &lt;br /&gt;&lt;br /&gt; The &lt;code&gt;ActivityManager.restartPackage()&lt;/code&gt; API is now deprecated, and no longer
+allows applications to mess up the state of other applications.  This was
+being abused by task killers, causing users to think their other applications
+had bugs. &lt;br /&gt;&lt;br /&gt; A new API is introduced for task killers,
+&lt;code&gt;ActivityManager.killBackgroundProcesses()&lt;/code&gt;, which allows these applications
+to kill processes but only the same amount that the out of memory
+killer does, thus causing no permanent damage.  The old &lt;code&gt;restartPackage()&lt;/code&gt;
+API is now a wrapper for calling this new API.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;From API level 8, calling &lt;code&gt;restartPackage&lt;/code&gt; is therefore the same as calling &lt;code&gt;killBackgroundProcesses&lt;/code&gt;. Following the source code from, let’s say, &lt;code&gt;ActivityThread.handleLowMemory()&lt;/code&gt; which is presumably called when memory becomes tight, we end up in the same method: &lt;code&gt;killPackageProcessesLocked&lt;/code&gt;. It’s safe to assume ATK provides the exact same functionality as the system. The only difference is that ATK explicitly selects a package to be killed, whereas the system pick is based on an algorithm. Since the system knows its internals, it’s much better at determining when and what to do when resource management is required. &lt;/p&gt;
+
+&lt;p&gt;With this in mind, one could argue ATK is harmless. The real problem is us, killing apps at random, without knowing what they do behind the scenes. We should stop interfeering and our system will run just fine.&lt;/p&gt;
+
+&lt;p&gt;To finish off the fake ATK, we: &lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;show the &lt;code&gt;getAvailableLaunchersCurrentlyRunning()&lt;/code&gt; list in a &lt;code&gt;ListView&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;add a listener that, on item click, triggers the &lt;code&gt;killBackgroundProcesses()&lt;/code&gt; method.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;You can view the complete implementation, with very appealing UI, on &lt;a href=&quot;https://github.com/tslamic/AndroidExamples/tree/master/TaskKiller/TaskKiller&quot;&gt;Github&lt;/a&gt;. In the near future, I plan to write a post about the &lt;em&gt;out-of-memory killer&lt;/em&gt;. Some of the topics I’ll touch are already included in the app, so just ignore them for now.&lt;/p&gt;
+
+    &lt;p&gt;&lt;a href=&quot;/on-advanced-task-killer/&quot;&gt;On Advanced Task Killer&lt;/a&gt; was originally published by Tadej Slamic at &lt;a href=&quot;&quot;&gt;Tadej's Blog&lt;/a&gt; on March 01, 2015.&lt;/p&gt;
+  </content>
+</entry>
+
+
+<entry>
+  <title type="html"><![CDATA[Fancy Background]]></title>
+ <link rel="alternate" type="text/html" href="/fancy-background/" />
+  <id>/fancy-background</id>
+  <published>2015-02-23T00:00:00-05:00</published>
+  <updated>2015-02-23T00:00:00-05:00</updated>
+  <author>
+    <name>Tadej Slamic</name>
+    <uri></uri>
+    <email></email>
+  </author>
+  <content type="html">
+    &lt;p&gt;FancyBackground is a tiny Android library designed to animate images on a View instance.&lt;/p&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th style=&quot;text-align: center&quot;&gt;Before&lt;/th&gt;
+      &lt;th style=&quot;text-align: center&quot;&gt;After&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;&lt;img src=&quot;http://i.imgur.com/7kH0FIN.png?1&quot; alt=&quot;plain&quot; /&gt;&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;&lt;img src=&quot;http://i.imgur.com/Sh4XegD.gif&quot; alt=&quot;fancybg&quot; /&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;Android runs on a variety of devices, with different screen sizes and densities. Providing alternative resources is a standard practice. Let’s assume that in our case, the design team only gave us resources of &lt;code&gt;xxhdpi&lt;/code&gt; size. To make matters worse, an &lt;code&gt;OutOfMemoryError&lt;/code&gt; is thrown when we try to load any image into memory on our S3 mini. &lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Given that you are working with limited memory, ideally you only want to load a lower resolution version in memory. The lower resolution version should match the size of the UI component that displays it. An image with a higher resolution does not provide any visible benefit, but still takes up precious memory and incurs additional performance overhead due to additional on the fly scaling.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;is what the &lt;a href=&quot;http://developer.android.com/training/displaying-bitmaps/load-bitmap.html&quot;&gt;docs&lt;/a&gt; say about efficient bitmap loading. Therefore, in order to load the background images into memory successfully, we have to subsample and, most likely, scale them. &lt;/p&gt;
+
+&lt;p&gt;This real-world scenario is the motivation behind FancyBackground. FancyBackground animates through a set of resource Drawables. It ensures they are subsampled and cached, if need be, with all the heavy lifting done in the background. The usage is simple. To animate between &lt;code&gt;R.drawable.fst&lt;/code&gt;, &lt;code&gt;R.drawable.snd&lt;/code&gt; and &lt;code&gt;R.drawable.trd&lt;/code&gt;, showing each for 2.5 seconds, simply do:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-java&quot; data-lang=&quot;java&quot;&gt;&lt;span class=&quot;n&quot;&gt;FancyBackground&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;on&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;view&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+               &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;set&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;R&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;drawable&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;fst&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;R&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;drawable&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;snd&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;R&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;drawable&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;trd&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+               &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;inAnimation&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;R&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;anim&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;fade_in&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+               &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;outAnimation&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;R&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;anim&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;fade_out&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+               &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;interval&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2500&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+               &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;start&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;The code above gives us subsampling, caching and automatic transitions for free. &lt;/p&gt;
+
+&lt;p&gt;There are other options available, so let’s do a quick abstract:&lt;/p&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th style=&quot;text-align: left&quot;&gt;Method name&lt;/th&gt;
+      &lt;th style=&quot;text-align: left&quot;&gt;Description&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;&lt;code&gt;set&lt;/code&gt;&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;sets the Drawable resources we wish to show/animate&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;&lt;code&gt;inAnimation&lt;/code&gt;&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;specifies the animation used to animate a &lt;code&gt;View&lt;/code&gt; entering the screen.&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;&lt;code&gt;outAnimation&lt;/code&gt;&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;specifies the animation used to animate a &lt;code&gt;View&lt;/code&gt; exiting the screen.&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;&lt;code&gt;loop&lt;/code&gt;&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;continuously loop through the Drawables or stop after the first cycle is complete.&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;&lt;code&gt;interval&lt;/code&gt;&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;the millisecond interval a Drawable instance will be displayed for.&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;&lt;code&gt;scale&lt;/code&gt;&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;determines how the Drawables should be resized or moved to match the size of the view we’re animating on.&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;&lt;code&gt;listener&lt;/code&gt;&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;receives the &lt;code&gt;FancyBackground&lt;/code&gt; events (described below)&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;&lt;code&gt;cache&lt;/code&gt;&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;caches loaded bitmaps so we don’t have to do it again&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;&lt;code&gt;FancyListener&lt;/code&gt; can receive four events: &lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;code&gt;onStarted&lt;/code&gt; when the FancyBackground is started &lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;onNew&lt;/code&gt; when a new image is set&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;onLoopDone&lt;/code&gt; if looping is set to false and the first cycle is complete&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;onStopped&lt;/code&gt; when the FancyBackground stops.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;code&gt;FancyCache&lt;/code&gt; enables you to create your own bitmap cache. &lt;code&gt;FancyLruCache&lt;/code&gt; is the default, targeting ~25% of the available heap and evicting the least recently used bitmap if over capacity. Use &lt;code&gt;null&lt;/code&gt; to avoid caching.&lt;/p&gt;
+
+&lt;p&gt;To try it out, make sure to add the following to your dependency list: &lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;compile &lt;span class=&quot;s1&quot;&gt;&amp;#39;com.github.tslamic.fancybackground:library:1.0&amp;#39;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;For an example, visit my &lt;a href=&quot;https://github.com/tslamic/FancyBackground&quot;&gt;Github profile&lt;/a&gt;. &lt;/p&gt;
+
+    &lt;p&gt;&lt;a href=&quot;/fancy-background/&quot;&gt;Fancy Background&lt;/a&gt; was originally published by Tadej Slamic at &lt;a href=&quot;&quot;&gt;Tadej's Blog&lt;/a&gt; on February 23, 2015.&lt;/p&gt;
+  </content>
+</entry>
 
 
 <entry>
