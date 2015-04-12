@@ -151,689 +151,220 @@
 <div id="main" role="main">
   
 <article class="hentry">
-  <header>
-    
-    <div class="entry-meta">
-      <span class="entry-date date published updated"><time datetime="2015-04-11T00:00:00-04:00"><a href="/android-menu-icon/">April 11, 2015</a></time></span><span class="author vcard"><span class="fn"><a href="/about/" title="About Tadej Slamic">Tadej Slamic</a></span></span>
-      
+   
+   <h1 class="entry-title"><a href="/android-menu-icon/" rel="bookmark" title="Android menu icon, delightfully" itemprop="url">Android menu icon, delightfully</a></h1>
+   
+   
+   <div class="entry-content">
+      Starting a redesign of my app, a contemporary menu to back-arrow icon - like the one introduced in Material design, would come handy. I thought recreating it from scratch would be a great how-to exercise. Here's my recipe.
+   </div>
+   <!-- /.entry-content -->
+   
+   
+   <div class="entry-meta">
       <span class="entry-reading-time">
-        <i class="fa fa-clock-o"></i>
-        
-        Reading time ~11 minutes
-      </span><!-- /.entry-reading-time -->
+      <i class="fa fa-clock-o"></i>
       
-    </div><!-- /.entry-meta -->
-    
-      <h1 class="entry-title"><a href="/android-menu-icon/" rel="bookmark" title="Android menu icon, delightfully" itemprop="url">Android menu icon, delightfully</a></h1>
-    
-  </header>
-  <div class="entry-content">
-    <p>There’s probably not a single Android developer in the wild that hasn’t heard about Material design yet. </p>
-
-<p>One of my favorite elements are subtle icon transitions, like the ones presented in <a href="http://www.google.com/design/spec/animation/delightful-details.html">delightful details</a>.</p>
-
-<div class="center-align">
-<video width="320" height="240" loop="true" autoplay="autoplay" controls="">
-<source src="//material-design.storage.googleapis.com/publish/v_2/material_ext_publish/0B2wX4iIvu8L6ZHZfV1NfRHdCZHM/animation-delightfuldetails-030401_Status_Change_xhdpi_003.webm" type="video/webm" />
-</video>
-</div>
-
-<p>Starting a redesign of my app, a menu to back-arrow icon - like the one in the top left corner - would come handy. I thought recreating it from scratch would be a great how-to exercise. </p>
-
-<p><a name="sec_1"></a> </p>
-
-<h3 id="a-birds-eye-view">A bird’s eye view</h3>
-
-<p>Menu to back-arrow icon is a simple drawable with transition animation. Both <em>states</em> consist of three sole lines. The easiest way to define the transition is to mark the points of interest: </p>
-
-<figure class="center-align">
-	<img src="http://i.imgur.com/VezpDYs.png" title="mapping" />
-	<figcaption>Points will help us define the transition.</figcaption>
-</figure>
-
-<p>Intuitively, the mapping is:</p>
-
-<ul>
-  <li><strong>A to S</strong></li>
-  <li><strong>B to U</strong></li>
-  <li>C to T</li>
-  <li>D to U</li>
-  <li><strong>E to V</strong></li>
-  <li><strong>F to U</strong></li>
-</ul>
-
-<p>Points C and D are roughly equal to T and U, so we’ll only focus on the bold ones.</p>
-
-<h3 id="measures">Measures</h3>
-
-<p>To extract the width and height of lines in both states, we inspect them in its final form and determine relative lengths compared to the drawable bounds:</p>
-
-<figure class="center-align">
-	<img src="http://i.imgur.com/6tgjmsm.png" title="measures" />
-	<figcaption>Measuring agains the bounds.</figcaption>
-</figure>
-
-<p>At <em>hdpi</em> density, the estimates are:</p>
-
-<ul>
-  <li>$l$ = 60% of bounds.width</li>
-  <li>$g$ = 15% of bounds.height</li>
-  <li>$w$ = 5% of bounds.height</li>
-  <li>$m$ = l/2</li>
-  <li>$t$ =  45 deg</li>
-</ul>
-
-<p>Rememeber the variable names, as they will be used throughout this post.</p>
-
-<h3 id="progress">Progress</h3>
-
-<p>To get a smooth transition from e.g. A to S, we have to know the inbetween point at each animation frame. But first, we have to decide how to track animation progress. </p>
-
-<p>Assuming we’ll use property animation, it’s on us to provide a property and set of values we want to animate between. </p>
-
-<p>Let <em>progress</em> denote an arbitrary float value between 0.0 and 1.0, inclusive. This will be our property. We’ll start the animation by executing</p>
-
-<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="n">ObjectAnimator</span> <span class="n">o</span> <span class="o">=</span> <span class="n">ObjectAnimator</span><span class="o">.</span><span class="na">ofFloat</span><span class="o">(</span><span class="n">drawable</span><span class="o">,</span> <span class="s">&quot;progress&quot;</span><span class="o">,</span> <span class="mi">0</span><span class="n">f</span><span class="o">,</span> <span class="mi">1</span><span class="n">f</span><span class="o">);</span>
-<span class="n">o</span><span class="o">.</span><span class="na">setDuration</span><span class="o">(</span><span class="n">animationDuration</span><span class="o">)</span>
-<span class="n">o</span><span class="o">.</span><span class="na">start</span><span class="o">();</span></code></pre></div>
-
-<p>If progress is 0, we show the menu icon. Else if progress is 1, we show the back-arrow icon. </p>
-
-<p>Progressing from 0 to 1 transforms a home icon to a back-arrow. Conversely, 1 to 0 goes from a back-arrow to home.</p>
-
-<p><a name="sec_4"></a> </p>
-
-<h3 id="math">Math</h3>
-
-<p>Remember, the points we refer to are all defined in the <a href="#sec_1">upper section</a>.</p>
-
-<figure class="center-align">
-	<img src="http://i.imgur.com/3n4SaAz.png" title="A to S" />
-	<figcaption>Pic 1</figcaption>
-</figure>
-
-<p>P is the point at progress $0 &lt; q &lt; 1$, moving between A and S. We want to know $dx$ and $dy$. </p>
-
-<p>Let’s find coordinates of S first, assuming A is the origin. 
-Clearly its $x$ coordinate is $m$. To determine $n$, a bigger picture helps:</p>
-
-<figure class="center-align">
-	<img src="http://i.imgur.com/Zq5PZ5D.png" title="Bigger A to S" />
-	<figcaption>Pic 2</figcaption>
-</figure>
-
-<p>Let $z = g + n$ and $h$ the length between S and D. Recall $t = 45 \deg$. Using trigonometric ratios, we know</p>
-
-<script type="math/tex; mode=display">\sin t = \frac{z}{h}</script>
-
-<p>We can get $h$ from</p>
-
-<script type="math/tex; mode=display">% <![CDATA[
-
-\begin{align}
-\cos t &= \frac{m}{h}\\
-\frac{\sqrt 2}{2} &= \frac{m}{h}\\
-h &= m\sqrt 2\\
-\end{align}
- %]]></script>
-
-<p>Since $h$ is of the same length as a square with an edge $m$, we deduct $z=m$, thus $n = (m-g)$ and $S=(m, (m-g))$. </p>
-
-<p>Observe that in pic 1, at progress $p=0$, we must be at A. When $p=1$, we must be at S. It’s clear that at progress $q$</p>
-
-<script type="math/tex; mode=display">% <![CDATA[
-
-\begin{align}
-dx &= qm \\
-dy &= q(m-g)
-\end{align}
- %]]></script>
-
-<p>Another movement we have to take care of is B to U:</p>
-
-<figure class="center-align">
-	<img src="http://i.imgur.com/TheualZ.png" title="B to D" />
-	<figcaption>Pic 3</figcaption>
-</figure>
-
-<p>Only $dg$ is changing. Applying similar logic as above, we know</p>
-
-<script type="math/tex; mode=display">
-dg = qg
-</script>
-
-<p>Note that C-D line (or T-U) is a mirror line. As such, reflecting the $y$ coordinate gets us E-F line changes for free.</p>
-
-<blockquote>
-  <p>To read more about the approach we’ve taken, visit the <a href="http://en.wikipedia.org/wiki/Linear_interpolation">linear interpolation</a> wiki page.</p>
-</blockquote>
-
-<h3 id="draw">Draw</h3>
-
-<p>As mentioned, both drawable states have only three simple lines. <code>Canvas</code> has a convenient method <code>drawLine</code>, which is all we need. </p>
-
-<p>To be able to draw, we need to calculate <code>dx</code>,  <code>dy</code> and <code>dv</code> and know points A, B, C, D, E, F. </p>
-
-<p>First three change when progress changes, but others just need bounds. We can compute them in a helper method, which is only invoked when the bounds are set.</p>
-
-<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="kd">private</span> <span class="kt">void</span> <span class="nf">measure</span><span class="o">()</span> <span class="o">{</span>
-	<span class="kd">final</span> <span class="n">Rect</span> <span class="n">bounds</span> <span class="o">=</span> <span class="n">getBounds</span><span class="o">();</span>
-	<span class="kd">final</span> <span class="kt">float</span> <span class="n">w</span> <span class="o">=</span> <span class="n">bounds</span><span class="o">.</span><span class="na">width</span><span class="o">();</span>
-	<span class="kd">final</span> <span class="kt">float</span> <span class="n">h</span> <span class="o">=</span> <span class="n">bounds</span><span class="o">.</span><span class="na">height</span><span class="o">();</span>
-
-	<span class="c1">// LINE_LENGTH denotes l</span>
-	<span class="kd">final</span> <span class="kt">float</span> <span class="n">lineLength</span> <span class="o">=</span> <span class="n">LINE_LENGTH</span> <span class="o">*</span> <span class="n">w</span><span class="o">;</span>
-	<span class="n">mHalfLineLength</span> <span class="o">=</span> <span class="n">lineLength</span> <span class="o">/</span> <span class="mi">2</span><span class="o">;</span>
-
-	<span class="c1">// LINE_GAP denotes g</span>
-	<span class="n">mLineGap</span> <span class="o">=</span> <span class="n">LINE_GAP</span> <span class="o">*</span> <span class="n">h</span><span class="o">;</span>
-
-	<span class="c1">// LINE_WIDTH denotes w</span>
-	<span class="kd">final</span> <span class="kt">float</span> <span class="n">strokeWidth</span> <span class="o">=</span> <span class="n">LINE_WIDTH</span> <span class="o">*</span> <span class="n">h</span><span class="o">;</span>
-	<span class="n">mPaint</span><span class="o">.</span><span class="na">setStrokeWidth</span><span class="o">(</span><span class="n">strokeWidth</span><span class="o">);</span>
-
-	<span class="n">mCenterY</span> <span class="o">=</span> <span class="n">w</span> <span class="o">/</span> <span class="mi">2</span><span class="o">;</span>
-	<span class="n">mStartX</span> <span class="o">=</span> <span class="n">bounds</span><span class="o">.</span><span class="na">left</span> <span class="o">+</span> <span class="o">(</span><span class="n">w</span> <span class="o">-</span> <span class="n">lineLength</span><span class="o">)</span> <span class="o">/</span> <span class="mi">2</span><span class="o">;</span>
-	<span class="n">mEndX</span> <span class="o">=</span> <span class="n">mStartX</span> <span class="o">+</span> <span class="n">lineLength</span><span class="o">;</span>
-	<span class="n">mTopY</span> <span class="o">=</span> <span class="n">mCenterY</span> <span class="o">-</span> <span class="n">mLineGap</span><span class="o">;</span>
-	<span class="n">mBottomY</span> <span class="o">=</span> <span class="n">mCenterY</span> <span class="o">+</span> <span class="n">mLineGap</span><span class="o">;</span>
-
-	<span class="n">invalidateSelf</span><span class="o">();</span>
-<span class="o">}</span></code></pre></div>
-
-<p>The instance variables fully determine the points: </p>
-
-<ul>
-  <li>A(<code>mStartX</code>, <code>mTopY</code>)</li>
-  <li>B(<code>mEndX</code>, <code>mTopY</code>)</li>
-  <li>C(<code>mStartX</code>, <code>mCenterY</code>)</li>
-  <li>D(<code>mEndX</code>, <code>mCenterY</code>)</li>
-  <li>E(<code>mStartX</code>, <code>mBottomY</code>)</li>
-  <li>F(<code>mEndX</code>, <code>mBottomY</code>)</li>
-</ul>
-
-<p>Each time progress is updated, we invalidate the drawable. Consequently, <code>draw</code> method is invoked</p>
-
-<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="nd">@Override</span>
-<span class="kd">public</span> <span class="kt">void</span> <span class="nf">draw</span><span class="o">(</span><span class="n">Canvas</span> <span class="n">canvas</span><span class="o">)</span> <span class="o">{</span>
-	<span class="kd">final</span> <span class="kt">float</span> <span class="n">dx</span> <span class="o">=</span> <span class="n">mProgress</span> <span class="o">*</span> <span class="n">mHalfLineLength</span><span class="o">;</span>
-	<span class="kd">final</span> <span class="kt">float</span> <span class="n">dy</span> <span class="o">=</span> <span class="n">mProgress</span> <span class="o">*</span> <span class="o">(</span><span class="n">mHalfLineLength</span> <span class="o">-</span> <span class="n">mLineGap</span><span class="o">);</span>
-	<span class="kd">final</span> <span class="kt">float</span> <span class="n">dg</span> <span class="o">=</span> <span class="n">mProgress</span> <span class="o">*</span> <span class="n">mLineGap</span><span class="o">;</span>
-
-	<span class="n">canvas</span><span class="o">.</span><span class="na">drawLine</span><span class="o">(</span><span class="n">mStartX</span> <span class="o">+</span> <span class="n">dx</span><span class="o">,</span> <span class="n">mTopY</span> <span class="o">-</span> <span class="n">dy</span><span class="o">,</span> <span class="n">mEndX</span><span class="o">,</span> <span class="n">mTopY</span> <span class="o">+</span> <span class="n">dg</span><span class="o">,</span> <span class="n">mPaint</span><span class="o">);</span>
-	<span class="n">canvas</span><span class="o">.</span><span class="na">drawLine</span><span class="o">(</span><span class="n">mStartX</span><span class="o">,</span> <span class="n">mCenterY</span><span class="o">,</span> <span class="n">mEndX</span><span class="o">,</span> <span class="n">mCenterY</span><span class="o">,</span> <span class="n">mPaint</span><span class="o">);</span>
-	<span class="n">canvas</span><span class="o">.</span><span class="na">drawLine</span><span class="o">(</span><span class="n">mStartX</span> <span class="o">+</span> <span class="n">dx</span><span class="o">,</span> <span class="n">mBottomY</span> <span class="o">+</span> <span class="n">dy</span><span class="o">,</span> <span class="n">mEndX</span><span class="o">,</span> <span class="n">mBottomY</span> <span class="o">-</span> <span class="n">dg</span><span class="o">,</span> <span class="n">mPaint</span><span class="o">);</span>
-<span class="o">}</span></code></pre></div>
-
-<p>Note that we apply the transformations computed in the <a href="#sec_4">math section</a>. </p>
-
-<h3 id="demo">Demo</h3>
-
-<p>Because I’m nice, I’ve wrapped everything we’ve done so far in a widget for you to try out:</p>
-
-<div class="center-align">
-	<div>
-	    <canvas id="canvas" width="300" height="300" style="border:1px solid #000000;" />
-	</div>
-	<div>0.0
-	    <input id="slider" type="range" min="0.0" max="1.0" step="0.01" value="0.0" width="300" />1.0
-	    <p id="prog"></p>
-	</div>
-</div>
-
-<h3 id="class-4-strategic-theatre-emergency">Class 4 Strategic Theatre Emergency</h3>
-
-<p>If progress is 1, the above widget reveals the pointy end of the arrow is not really pointy.</p>
-
-<p>When drawing on a <code>Canvas</code> instance, Android uses <a href="https://code.google.com/p/skia/">Skia</a>, a 2D graphics library, to do the actual drawing. <code>Canvas.drawLine</code> invokes a native method <code>SkCanvas::drawLine</code>, which invokes <code>SkCanvas::onDrawPoints</code>. Because our <code>mPaint</code> instance is not complex (it has no path effects, for example), <code>SkPaint::doComputeFastBounds</code> is called. </p>
-
-<p>We care because in this case, if the <code>mPaint</code> stroke width is $w$, the rendered point has a radius of $w/2$. </p>
-
-<p>Here’s a zoomed in look at U, where B and F meet and progress is 1:</p>
-
-<figure class="center-align">
-	<img src="http://i.imgur.com/4pGRr4J.png" title="source: imgur.com" />
-	<figcaption>
-	Line A-B is colored purple. Line E-F is colored green. Red square is the issue we're trying to resolve. </figcaption>
-</figure>
-
-<p>If we offset B and F by $(zx, -zy), (zx, zy)$ respectively, we cover the red square. </p>
-
-<p>Because of the above analysis, we know $r=\frac{w}{2}$. Both lines come at a 45 degree angle, hence $k = 45\deg$ too. We can use trigonometric ratios again:</p>
-
-<script type="math/tex; mode=display">% <![CDATA[
-
-\begin{align}
-zx &= h\cos k \\
-zy &= h\sin k
-\end{align}
- %]]></script>
-
-<p>Because $\cos 45 = \frac{\sqrt 2}{2} = \sin 45$ and $h= \frac{w}{2}$, we get</p>
-
-<script type="math/tex; mode=display">
-zx = \frac{w}{2} \cdot \frac{\sqrt 2}{2} = zy = \frac{\sqrt 2}{4}w
-</script>
-
-<p>Applying progress and updating the <code>draw</code> method, we get</p>
-
-<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="nd">@Override</span>
-<span class="kd">public</span> <span class="kt">void</span> <span class="nf">draw</span><span class="o">(</span><span class="n">Canvas</span> <span class="n">canvas</span><span class="o">)</span> <span class="o">{</span>
-	<span class="kd">final</span> <span class="kt">float</span> <span class="n">dx</span> <span class="o">=</span> <span class="n">mProgress</span> <span class="o">*</span> <span class="n">mHalfLineLength</span><span class="o">;</span>
-	<span class="kd">final</span> <span class="kt">float</span> <span class="n">dy</span> <span class="o">=</span> <span class="n">mProgress</span> <span class="o">*</span> <span class="o">(</span><span class="n">mHalfLineLength</span> <span class="o">-</span> <span class="n">mLineGap</span><span class="o">);</span>
-	<span class="kd">final</span> <span class="kt">float</span> <span class="n">dv</span> <span class="o">=</span> <span class="n">mProgress</span> <span class="o">*</span> <span class="n">mLineGap</span><span class="o">;</span>
-
-	<span class="c1">// zx/zy computation can be easily moved to the measure method</span>
-	<span class="kd">final</span> <span class="kt">float</span> <span class="n">dz</span> <span class="o">=</span> <span class="n">mProgress</span> <span class="o">*</span> <span class="o">((</span><span class="n">Math</span><span class="o">.</span><span class="na">sqrt</span><span class="o">(</span><span class="mi">2</span><span class="o">)/</span><span class="mi">4</span><span class="o">)*</span><span class="n">mPaint</span><span class="o">.</span><span class="na">getStrokeWidth</span><span class="o">());</span>
-
-	<span class="n">canvas</span><span class="o">.</span><span class="na">drawLine</span><span class="o">(</span><span class="n">mStartX</span> <span class="o">+</span> <span class="n">dx</span><span class="o">,</span> <span class="n">mTopY</span> <span class="o">-</span> <span class="n">dy</span><span class="o">,</span> <span class="n">mEndX</span> <span class="o">+</span> <span class="n">dz</span><span class="o">,</span> <span class="n">mTopY</span> <span class="o">+</span> <span class="n">dv</span> <span class="o">+</span> <span class="n">dz</span><span class="o">,</span> <span class="n">mPaint</span><span class="o">);</span>
-	<span class="n">canvas</span><span class="o">.</span><span class="na">drawLine</span><span class="o">(</span><span class="n">mStartX</span><span class="o">,</span> <span class="n">mCenterY</span><span class="o">,</span> <span class="n">mEndX</span><span class="o">,</span> <span class="n">mCenterY</span><span class="o">,</span> <span class="n">mPaint</span><span class="o">);</span>
-	<span class="n">canvas</span><span class="o">.</span><span class="na">drawLine</span><span class="o">(</span><span class="n">mStartX</span> <span class="o">+</span> <span class="n">dx</span><span class="o">,</span> <span class="n">mBottomY</span> <span class="o">+</span> <span class="n">dy</span><span class="o">,</span> <span class="n">mEndX</span> <span class="o">+</span> <span class="n">dz</span><span class="o">,</span> <span class="n">mBottomY</span> <span class="o">-</span> <span class="n">dv</span> <span class="o">-</span> <span class="n">dz</span><span class="o">,</span> <span class="n">mPaint</span><span class="o">);</span>
-<span class="o">}</span></code></pre></div>
-
-<h3 id="again-demo">Again, demo</h3>
-
-<p>Confirm the fix in previous section resolves the issue:</p>
-
-<div class="center-align">
-	<div>
-	    <canvas id="canvas2" width="300" height="300" style="border:1px solid #000000;" />
-	</div>
-	<div>0.0
-	    <input id="slider2" type="range" min="0.0" max="1.0" step="0.01" value="0.0" width="300" />1.0
-	    <p id="prog2"></p>
-	</div>
-</div>
-
-<h3 id="a-final-touch">A final touch</h3>
-
-<p>To finish off, we have to add rotation. The one in <a href="http://www.google.com/design/spec/animation/delightful-details.html">delightful details</a> goes from:</p>
-
-<ul>
-  <li>0 to 180, if progress goes from 0 to 1</li>
-  <li>-180 to 0, if progress goes from 1 to 0</li>
-</ul>
-
-<p>Because, at this point, you are a master of linear interpolation, the updated <code>draw</code> method makes sense</p>
-
-<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="nd">@Override</span>
-<span class="kd">public</span> <span class="kt">void</span> <span class="nf">draw</span><span class="o">(</span><span class="n">Canvas</span> <span class="n">canvas</span><span class="o">)</span> <span class="o">{</span>
-	<span class="kd">final</span> <span class="kt">float</span> <span class="n">dx</span> <span class="o">=</span> <span class="n">mProgress</span> <span class="o">*</span> <span class="n">mHalfLineLength</span><span class="o">;</span>
-	<span class="kd">final</span> <span class="kt">float</span> <span class="n">dy</span> <span class="o">=</span> <span class="n">mProgress</span> <span class="o">*</span> <span class="o">(</span><span class="n">mHalfLineLength</span> <span class="o">-</span> <span class="n">mLineGap</span><span class="o">);</span>
-	<span class="kd">final</span> <span class="kt">float</span> <span class="n">dg</span> <span class="o">=</span> <span class="n">mProgress</span> <span class="o">*</span> <span class="n">mLineGap</span><span class="o">;</span>
-
-	<span class="c1">// dx/dy computation was moved to measure method</span>
-	<span class="kd">final</span> <span class="kt">float</span> <span class="n">dz</span> <span class="o">=</span> <span class="n">mProgress</span> <span class="o">*</span> <span class="n">mArrowFactor</span><span class="o">;</span>
-
-	<span class="c1">// mIsBack is true if the icon is currently showing the back arrow</span>
-	<span class="kd">final</span> <span class="kt">float</span> <span class="n">rotationTarget</span> <span class="o">=</span> <span class="n">mIsBack</span> <span class="o">?</span> <span class="o">-</span><span class="mi">180</span> <span class="o">:</span> <span class="mi">180</span><span class="o">;</span>
-	<span class="kd">final</span> <span class="kt">float</span> <span class="n">rotation</span> <span class="o">=</span> <span class="n">mProgress</span> <span class="o">*</span> <span class="n">rotationTarget</span><span class="o">;</span>
-	<span class="kd">final</span> <span class="kt">float</span> <span class="n">pivotX</span> <span class="o">=</span> <span class="n">getBounds</span><span class="o">.</span><span class="na">centerX</span><span class="o">();</span>
-	<span class="kd">final</span> <span class="kt">float</span> <span class="n">pivotY</span> <span class="o">=</span> <span class="n">getBounds</span><span class="o">().</span><span class="na">centerY</span><span class="o">();</span>
-
-	<span class="n">canvas</span><span class="o">.</span><span class="na">save</span><span class="o">();</span>
-	<span class="n">canvas</span><span class="o">.</span><span class="na">rotate</span><span class="o">(</span><span class="n">rotation</span><span class="o">,</span> <span class="n">pivotX</span><span class="o">,</span> <span class="n">pivotY</span><span class="o">);</span>
-	<span class="n">canvas</span><span class="o">.</span><span class="na">drawLine</span><span class="o">(</span><span class="n">mStartX</span> <span class="o">+</span> <span class="n">dx</span><span class="o">,</span> <span class="n">mTopY</span> <span class="o">-</span> <span class="n">dy</span><span class="o">,</span> <span class="n">mEndX</span> <span class="o">+</span> <span class="n">dz</span><span class="o">,</span> <span class="n">mTopY</span> <span class="o">+</span> <span class="n">dg</span> <span class="o">+</span> <span class="n">dz</span><span class="o">,</span> <span class="n">mPaint</span><span class="o">);</span>
-	<span class="n">canvas</span><span class="o">.</span><span class="na">drawLine</span><span class="o">(</span><span class="n">mStartX</span><span class="o">,</span> <span class="n">mCenterY</span><span class="o">,</span> <span class="n">mEndX</span><span class="o">,</span> <span class="n">mCenterY</span><span class="o">,</span> <span class="n">mPaint</span><span class="o">);</span>
-	<span class="n">canvas</span><span class="o">.</span><span class="na">drawLine</span><span class="o">(</span><span class="n">mStartX</span> <span class="o">+</span> <span class="n">dx</span><span class="o">,</span> <span class="n">mBottomY</span> <span class="o">+</span> <span class="n">dy</span><span class="o">,</span> <span class="n">mEndX</span> <span class="o">+</span> <span class="n">dz</span><span class="o">,</span> <span class="n">mBottomY</span> <span class="o">-</span> <span class="n">dg</span> <span class="o">-</span> <span class="n">dz</span><span class="o">,</span> <span class="n">mPaint</span><span class="o">);</span>
-	<span class="n">canvas</span><span class="o">.</span><span class="na">restore</span><span class="o">();</span>
-<span class="o">}</span></code></pre></div>
-
-<h3 id="parting-words">Parting words</h3>
-
-<p>Good on ya for making it this far. I hope math section was clear enough, and the widgets helped. I’m sure some parts can be improved, so I’ll be grateful for any feedback I get. The full implementation is available on GitHub.</p>
-
-<script type="text/x-mathjax-config">
-	MathJax.Hub.Config({
-		tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}
-	});
-</script>
-
-<script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
-
-	var DelightfulDrawable = {};
-
-	DelightfulDrawable.newInstance = function (canvasId, sliderId, progressId, isPointy) {
-
-	    // Elements
-	    var canvas = document.getElementById(canvasId);
-	    var slider = document.getElementById(sliderId);
-	    var progress = document.getElementById(progressId);
-	    var context = canvas.getContext("2d");
-
-	    // Event handler
-	    slider.addEventListener("input", function () {
-	    	update(slider.value);
-	    }, false);
-
-	    // Bounds
-	    var width = canvas.width;
-	    var height = canvas.height;
-
-	    // Measure
-	    var l = 0.60 * width;
-	    var g = 0.15 * height;
-	    var w = 0.05 * height;
-	    var m = l / 2;
-
-	    // Helpers
-	    var centerY = height / 2;
-	    var startX = (width - l) / 2;
-	    var endX = startX + l;
-	    var topY = centerY - g;
-	    var bottomY = centerY + g;
-	    var pointyFactor = isPointy ? (.3536 * w) : 0;
-
-	    // Show UI
-	    context.lineWidth = w;
-	    update(0.0);
-
-	    function update(prog) {
-	    	progress.innerHTML = "Current progress: " + parseFloat(prog).toFixed(2);
-	    	draw(context, prog);
-	    }
-
-	    function draw(canv, prog) {
-	    	var dx = prog * m;
-	    	var dy = prog * (m - g);
-	    	var dg = prog * g;
-	    	var dz = prog * pointyFactor;
-
-	        // Reset canvas
-	        canv.clearRect(0, 0, width, height);
-	        canv.beginPath();
-
-	        // Top line
-	        canv.moveTo(startX + dx, topY - dy);
-	        canv.lineTo(endX + dz, topY + dg + dz);
-
-	        // Middle line
-	        canv.moveTo(startX, centerY);
-	        canv.lineTo(endX, centerY);
-
-	        // Bottom line
-	        canv.moveTo(startX + dx, bottomY + dy);
-	        canv.lineTo(endX + dz, bottomY - dg - dz);
-
-	        // Draw
-	        canv.closePath();
-	        canv.stroke();
-	    }
-
-	};
-
-	DelightfulDrawable.newInstance("canvas", "slider", "prog", false);
-	DelightfulDrawable.newInstance("canvas2", "slider2", "prog2", true);
-
-</script>
-
-
-  </div><!-- /.entry-content -->
-</article><!-- /.hentry -->
+      Reading time ~11 minutes
+      </span><!-- /.entry-reading-time -->
+   </div>
+   <!-- /.entry-meta -->
+   
+</article>
 
 <article class="hentry">
-  <header>
-    
-    <div class="entry-meta">
-      <span class="entry-date date published updated"><time datetime="2015-03-01T00:00:00-05:00"><a href="/on-advanced-task-killer/">March 01, 2015</a></time></span><span class="author vcard"><span class="fn"><a href="/about/" title="About Tadej Slamic">Tadej Slamic</a></span></span>
-      
+   
+   <h1 class="entry-title"><a href="/on-advanced-task-killer/" rel="bookmark" title="On Advanced Task Killer" itemprop="url">On Advanced Task Killer</a></h1>
+   
+   
+   <div class="entry-content">
+      There’s not a single Android enthusiast that doesn’t know the Advanced Task Killer app. But how does it work and what does it really do?
+   </div>
+   <!-- /.entry-content -->
+   
+   
+   <div class="entry-meta">
       <span class="entry-reading-time">
-        <i class="fa fa-clock-o"></i>
-        
-        Reading time ~5 minutes
-      </span><!-- /.entry-reading-time -->
+      <i class="fa fa-clock-o"></i>
       
-    </div><!-- /.entry-meta -->
-    
-      <h1 class="entry-title"><a href="/on-advanced-task-killer/" rel="bookmark" title="On Advanced Task Killer" itemprop="url">On Advanced Task Killer</a></h1>
-    
-  </header>
-  <div class="entry-content">
-    <p>There’s not a single Android enthusiast that doesn’t know the Advanced Task Killer app.</p>
-
-<p>It’s supposedly the #1 task management app on Google Play, designed to kill applications and boost memory. Fiddling with system management is generally a bad idea, so I was quite curious what kind of black magic are they doing under the hood. With all the popularity and more than half a million downloads, they must be doing something right. Right?</p>
-
-<p>Firstly, an important question. Why would anyone want to <em>kill</em> an app? I agree with <a href="http://blog.radioactiveyak.com/2010/05/when-to-include-exit-button-in-android.html">Reto Meier</a>:</p>
-
-<blockquote>
-  <p>… in my experience what users really want is an unambiguous way to guarantee that an app will stop consuming resources (battery, CPU cycles, data transfer, etc). Many perceive that an exit button implements this requirement and ask for it to be added. Developers, looking to please their users, obligingly add one…</p>
-</blockquote>
-
-<p>With seamless state restoration, Android (and iOS) apps seem to run forever. They give no real <em>exit</em> notion. Misunderstanding this non-desktop behaviour is, I’m guessing, why apps such as Advanced Task Killer (ATK henceforth) are well received. Few realize Android is clever enough to manage itself much better than we ever will, and there’s no need to interfere. In development world, manual or forced quitting is actually <a href="http://stackoverflow.com/a/2034238/905349">frowned upon</a>, or, as Romain Guy <a href="https://groups.google.com/d/msg/android-developers/G_D3pKnGLt0/0mFuZnjxjP4J">explains:</a> </p>
-
-<blockquote>
-  <p>… the system handles it automatically. That’s what the Activity lifecycle (especially onPause/onStop/onDestroy) is for. No matter what you do, do not put a “quit” or “exit” application button. It is useless with Android’s application model.</p>
-</blockquote>
-
-<p>In reality, quiting could make matters worse. Killed apps might be restarted if they are, for example, receiving system events. Same goes for some services. You esentially force Android to do more work and consume more resources, such as battery life, to achieve absolutely nothing.</p>
-
-<p>With this in mind, it’s fair to speculate ATK is redundant. To see it tick, the initial step is to observe its source. Reversing an apk is, with tools available online, a piece of cake. Given the app feel, I didn’t expect it to be obfuscated. To my surprise, it was. Browsing through, I had to admit defeat - no <code>killProcess</code> invocation anywhere, which I was expecting. At least not explicitly, that is.</p>
-
-<p>For fun (and no profit), let’s try to recreate the app. </p>
-
-<p>First, we need to get a list of all activities currently running. ATK can also extract running services. We’re going to ignore them, but you can try and add them yourself - it’s easy.</p>
-
-<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="cm">/*</span>
-<span class="cm"> * Returns the list of all available launcher Activities.</span>
-<span class="cm"> */</span>
-<span class="kd">private</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">ResolveInfo</span><span class="o">&gt;</span> <span class="nf">getAvailableActivityLaunchers</span><span class="o">()</span> <span class="o">{</span>
-    <span class="kd">final</span> <span class="n">PackageManager</span> <span class="n">manager</span> <span class="o">=</span> <span class="n">getPackageManager</span><span class="o">();</span>
-    <span class="kd">final</span> <span class="n">Intent</span> <span class="n">intent</span> <span class="o">=</span> <span class="k">new</span> <span class="nf">Intent</span><span class="o">(</span><span class="n">Intent</span><span class="o">.</span><span class="na">ACTION_MAIN</span><span class="o">,</span> <span class="kc">null</span><span class="o">);</span>
-    <span class="n">intent</span><span class="o">.</span><span class="na">addCategory</span><span class="o">(</span><span class="n">Intent</span><span class="o">.</span><span class="na">CATEGORY_LAUNCHER</span><span class="o">);</span>
-    <span class="k">return</span> <span class="n">manager</span><span class="o">.</span><span class="na">queryIntentActivities</span><span class="o">(</span><span class="n">intent</span><span class="o">,</span> <span class="mi">0</span><span class="o">);</span>
-<span class="o">}</span></code></pre></div>
-
-<p>Next, we want to filter out the activities currently running, but ignore the ones associated with the system:</p>
-
-<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="cm">/*</span>
-<span class="cm"> * Create a mapping from a process name to its ResolveInfo.</span>
-<span class="cm"> */</span>
-<span class="kd">private</span> <span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="n">ResolveInfo</span><span class="o">&gt;</span> <span class="nf">getAvailableActivityLaunchersMap</span><span class="o">()</span> <span class="o">{</span>
-    <span class="kd">final</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">ResolveInfo</span><span class="o">&gt;</span> <span class="n">list</span> <span class="o">=</span> <span class="n">getAvailableActivityLaunchers</span><span class="o">();</span>
-    <span class="kd">final</span> <span class="n">HashMap</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="n">ResolveInfo</span><span class="o">&gt;</span> <span class="n">map</span> <span class="o">=</span> <span class="k">new</span> <span class="n">HashMap</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="n">ResolveInfo</span><span class="o">&gt;(</span><span class="n">list</span><span class="o">.</span><span class="na">size</span><span class="o">());</span>
-    <span class="k">for</span> <span class="o">(</span><span class="n">ResolveInfo</span> <span class="nl">info:</span> <span class="n">list</span><span class="o">)</span> <span class="o">{</span>
-        <span class="n">map</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="n">info</span><span class="o">.</span><span class="na">activityInfo</span><span class="o">.</span><span class="na">processName</span><span class="o">,</span> <span class="n">info</span><span class="o">);</span>
-    <span class="o">}</span>
-    <span class="k">return</span> <span class="n">map</span><span class="o">;</span>
-<span class="o">}</span>
-
-<span class="cm">/*</span>
-<span class="cm"> * Return a filtered list of currently running Activities.</span>
-<span class="cm"> */</span>
-<span class="kd">private</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">ResolveInfo</span><span class="o">&gt;</span> <span class="nf">getAvailableLaunchersCurrentlyRunning</span><span class="o">()</span> <span class="o">{</span>
-    <span class="kd">final</span> <span class="n">ActivityManager</span> <span class="n">manager</span> <span class="o">=</span> <span class="n">getActivityManager</span><span class="o">(</span><span class="k">this</span><span class="o">);</span>
-    <span class="kd">final</span> <span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="n">ResolveInfo</span><span class="o">&gt;</span> <span class="n">map</span> <span class="o">=</span> <span class="n">getAvailableActivityLaunchersMap</span><span class="o">();</span>
-
-    <span class="kd">final</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">ActivityManager</span><span class="o">.</span><span class="na">RunningAppProcessInfo</span><span class="o">&gt;</span> <span class="n">runningApps</span> <span class="o">=</span> <span class="n">manager</span><span class="o">.</span><span class="na">getRunningAppProcesses</span><span class="o">();</span>
-    <span class="kd">final</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">ResolveInfo</span><span class="o">&gt;</span> <span class="n">available</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ArrayList</span><span class="o">&lt;</span><span class="n">ResolveInfo</span><span class="o">&gt;(</span><span class="n">runningApps</span><span class="o">.</span><span class="na">size</span><span class="o">());</span>
-    <span class="k">for</span> <span class="o">(</span><span class="n">ActivityManager</span><span class="o">.</span><span class="na">RunningAppProcessInfo</span> <span class="nl">runningApp:</span> <span class="n">runningApps</span><span class="o">)</span> <span class="o">{</span>
-        <span class="k">if</span> <span class="o">(!</span><span class="n">skip</span><span class="o">(</span><span class="n">runningApp</span><span class="o">))</span> <span class="o">{</span> <span class="c1">// skips system-related Activities</span>
-            <span class="kd">final</span> <span class="n">ResolveInfo</span> <span class="n">info</span> <span class="o">=</span> <span class="n">map</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">runningApp</span><span class="o">.</span><span class="na">processName</span><span class="o">);</span>
-            <span class="k">if</span> <span class="o">(</span><span class="kc">null</span> <span class="o">!=</span> <span class="n">info</span><span class="o">)</span> <span class="o">{</span>
-                <span class="n">available</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">info</span><span class="o">);</span>
-            <span class="o">}</span>
-        <span class="o">}</span>
-    <span class="o">}</span>
-    <span class="k">return</span> <span class="n">available</span><span class="o">;</span>
-<span class="o">}</span></code></pre></div>
-
-<p>This is, believe it or not, the gist of ATK. The only thing missing is the ability to <em>kill</em> a selected list item. ATK does it by invoking <code>activityManager.restartPackage(packageName)</code>. Initially, <a href="http://grepcode.com/file/repository.grepcode.com/java/ext/com.google.android/android/2.0_r1/android/app/ActivityManager.java#ActivityManager.restartPackage%28java.lang.String%29">this method</a> had the system perform a force stop of everything associated with the given application package (killed processes with same uid, stopped running services, removed activities, etc). Heavily abused by task killers, it caused all sorts of issues. Android engineers eventually had enough. They’ve changed its behaviour, leaving <a href="https://android.googlesource.com/platform/frameworks/base.git/+/03abb8179f0d912e6dabfc0e2b0f129d85066d17">this comment</a>: </p>
-
-<blockquote>
-  <p>Kill the task killers. <br /><br /> The <code>ActivityManager.restartPackage()</code> API is now deprecated, and no longer
-allows applications to mess up the state of other applications.  This was
-being abused by task killers, causing users to think their other applications
-had bugs. <br /><br /> A new API is introduced for task killers,
-<code>ActivityManager.killBackgroundProcesses()</code>, which allows these applications
-to kill processes but only the same amount that the out of memory
-killer does, thus causing no permanent damage.  The old <code>restartPackage()</code>
-API is now a wrapper for calling this new API.</p>
-</blockquote>
-
-<p>From API level 8, calling <code>restartPackage</code> is therefore the same as calling <code>killBackgroundProcesses</code>. Following the source code from, let’s say, <code>ActivityThread.handleLowMemory()</code> which is presumably called when memory becomes tight, we end up in the same method: <code>killPackageProcessesLocked</code>. It’s safe to assume ATK provides the exact same functionality as the system. The only difference is that ATK explicitly selects a package to be killed, whereas the system pick is based on an algorithm. Since the system knows its internals, it’s much better at determining when and what to do when resource management is required. </p>
-
-<p>With this in mind, one could argue ATK is harmless. The real problem is us, killing apps at random, without knowing what they do behind the scenes. We should stop interfeering and our system will run just fine.</p>
-
-<p>To finish off the fake ATK, we: </p>
-
-<ul>
-  <li>show the <code>getAvailableLaunchersCurrentlyRunning()</code> list in a <code>ListView</code></li>
-  <li>add a listener that, on item click, triggers the <code>killBackgroundProcesses()</code> method.</li>
-</ul>
-
-<p>You can view the complete implementation, with very appealing UI, on <a href="https://github.com/tslamic/AndroidExamples/tree/master/TaskKiller/TaskKiller">Github</a>. In the near future, I plan to write a post about the <em>out-of-memory killer</em>. Some of the topics I’ll touch are already included in the app, so just ignore them for now.</p>
-
-  </div><!-- /.entry-content -->
-</article><!-- /.hentry -->
+      Reading time ~5 minutes
+      </span><!-- /.entry-reading-time -->
+   </div>
+   <!-- /.entry-meta -->
+   
+</article>
 
 <article class="hentry">
-  <header>
-    
-    <div class="entry-meta">
-      <span class="entry-date date published updated"><time datetime="2015-02-23T00:00:00-05:00"><a href="/fancy-background/">February 23, 2015</a></time></span><span class="author vcard"><span class="fn"><a href="/about/" title="About Tadej Slamic">Tadej Slamic</a></span></span>
-      
+   
+   <h1 class="entry-title"><a href="/fancy-background/" rel="bookmark" title="Fancy Background" itemprop="url">Fancy Background</a></h1>
+   
+   
+   <div class="entry-content">
+      A brief introduction to FancyBackground - a library that animates resource Drawables while subsampling and efficiently loading Bitmap drawables.
+   </div>
+   <!-- /.entry-content -->
+   
+   
+   <div class="entry-meta">
       <span class="entry-reading-time">
-        <i class="fa fa-clock-o"></i>
-        
-        Reading time ~3 minutes
-      </span><!-- /.entry-reading-time -->
+      <i class="fa fa-clock-o"></i>
       
-    </div><!-- /.entry-meta -->
-    
-      <h1 class="entry-title"><a href="/fancy-background/" rel="bookmark" title="Fancy Background" itemprop="url">Fancy Background</a></h1>
-    
-  </header>
-  <div class="entry-content">
-    <p>FancyBackground is a tiny Android library designed to animate images on a View instance.</p>
+      Reading time ~3 minutes
+      </span><!-- /.entry-reading-time -->
+   </div>
+   <!-- /.entry-meta -->
+   
+</article>
 
-<table>
-  <thead>
-    <tr>
-      <th style="text-align: center">Before</th>
-      <th style="text-align: center">After</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td style="text-align: center"><img src="http://i.imgur.com/7kH0FIN.png?1" alt="plain" /></td>
-      <td style="text-align: center"><img src="http://i.imgur.com/Sh4XegD.gif" alt="fancybg" /></td>
-    </tr>
-  </tbody>
-</table>
+<article class="hentry">
+   
+   <h1 class="entry-title"><a href="/android-monkeys-stress-testing/" rel="bookmark" title="Android, monkeys and stress testing" itemprop="url">Android, monkeys and stress testing</a></h1>
+   
+   
+   <div class="entry-content">
+      Android - or, more precisely, its debug bridge - has a very handy tool called the monkey. Its purpose is to stress-test your app by generating pseudo-random user events in a repeatable manner. Sometimes, the usage is a bit clunky or unclear. Enter Dumpey.
+   </div>
+   <!-- /.entry-content -->
+   
+   
+   <div class="entry-meta">
+      <span class="entry-reading-time">
+      <i class="fa fa-clock-o"></i>
+      
+      Reading time ~3 minutes
+      </span><!-- /.entry-reading-time -->
+   </div>
+   <!-- /.entry-meta -->
+   
+</article>
 
-<p>Android runs on a variety of devices, with different screen sizes and densities. Providing alternative resources is a standard practice. Let’s assume that in our case, the design team only gave us resources of <code>xxhdpi</code> size. To make matters worse, an <code>OutOfMemoryError</code> is thrown when we try to load any image into memory on our S3 mini. </p>
+<article class="hentry">
+   
+   <h1 class="entry-title"><a href="/leaving-london/" rel="bookmark" title="Leaving London" itemprop="url">Leaving London</a></h1>
+   
+   
+   <div class="entry-content">
+      Packing my bags, leaving London behind. Next destination: Dublin. Here's why.
+   </div>
+   <!-- /.entry-content -->
+   
+   
+   <div class="entry-meta">
+      <span class="entry-reading-time">
+      <i class="fa fa-clock-o"></i>
+      
+      Reading time ~1 minute
+      </span><!-- /.entry-reading-time -->
+   </div>
+   <!-- /.entry-meta -->
+   
+</article>
 
-<blockquote>
-  <p>Given that you are working with limited memory, ideally you only want to load a lower resolution version in memory. The lower resolution version should match the size of the UI component that displays it. An image with a higher resolution does not provide any visible benefit, but still takes up precious memory and incurs additional performance overhead due to additional on the fly scaling.</p>
-</blockquote>
+<article class="hentry">
+   
+   <h1 class="entry-title"><a href="/can-you-center-a-button/" rel="bookmark" title="To Center A Button" itemprop="url">To Center A Button</a></h1>
+   
+   
+   <div class="entry-content">
+      Inspired by 50 Android Hacks, I wonder how to center a button that must be 50% of its parent?
+   </div>
+   <!-- /.entry-content -->
+   
+   
+   <div class="entry-meta">
+      <span class="entry-reading-time">
+      <i class="fa fa-clock-o"></i>
+      
+      Reading time ~3 minutes
+      </span><!-- /.entry-reading-time -->
+   </div>
+   <!-- /.entry-meta -->
+   
+</article>
 
-<p>is what the <a href="http://developer.android.com/training/displaying-bitmaps/load-bitmap.html">docs</a> say about efficient bitmap loading. Therefore, in order to load the background images into memory successfully, we have to subsample and, most likely, scale them. </p>
+<article class="hentry">
+   
+   <h1 class="entry-title"><a href="/view-animations-on-android/" rel="bookmark" title="View Animations On Android" itemprop="url">View Animations On Android</a></h1>
+   
+   
+   <div class="entry-content">
+      A short but sweet intro to view animations on Android.
+   </div>
+   <!-- /.entry-content -->
+   
+   
+   <div class="entry-meta">
+      <span class="entry-reading-time">
+      <i class="fa fa-clock-o"></i>
+      
+      Reading time ~4 minutes
+      </span><!-- /.entry-reading-time -->
+   </div>
+   <!-- /.entry-meta -->
+   
+</article>
 
-<p>This real-world scenario is the motivation behind FancyBackground. FancyBackground animates through a set of resource Drawables. It ensures they are subsampled and cached, if need be, with all the heavy lifting done in the background. The usage is simple. To animate between <code>R.drawable.fst</code>, <code>R.drawable.snd</code> and <code>R.drawable.trd</code>, showing each for 2.5 seconds, simply do:</p>
+<article class="hentry">
+   
+   <h1 class="entry-title"><a href="/twos-complement-and-absolute-values/" rel="bookmark" title="Two's Complement And Absolute Values" itemprop="url">Two's Complement And Absolute Values</a></h1>
+   
+   
+   <div class="entry-content">
+      A gentle introduction to two's complement and a quirky property that comes with it.
+   </div>
+   <!-- /.entry-content -->
+   
+   
+   <div class="entry-meta">
+      <span class="entry-reading-time">
+      <i class="fa fa-clock-o"></i>
+      
+      Reading time ~7 minutes
+      </span><!-- /.entry-reading-time -->
+   </div>
+   <!-- /.entry-meta -->
+   
+</article>
 
-<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="n">FancyBackground</span><span class="o">.</span><span class="na">on</span><span class="o">(</span><span class="n">view</span><span class="o">)</span>
-               <span class="o">.</span><span class="na">set</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">drawable</span><span class="o">.</span><span class="na">fst</span><span class="o">,</span> <span class="n">R</span><span class="o">.</span><span class="na">drawable</span><span class="o">.</span><span class="na">snd</span><span class="o">,</span> <span class="n">R</span><span class="o">.</span><span class="na">drawable</span><span class="o">.</span><span class="na">trd</span><span class="o">)</span>
-               <span class="o">.</span><span class="na">inAnimation</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">anim</span><span class="o">.</span><span class="na">fade_in</span><span class="o">)</span>
-               <span class="o">.</span><span class="na">outAnimation</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">anim</span><span class="o">.</span><span class="na">fade_out</span><span class="o">)</span>
-               <span class="o">.</span><span class="na">interval</span><span class="o">(</span><span class="mi">2500</span><span class="o">)</span>
-               <span class="o">.</span><span class="na">start</span><span class="o">();</span></code></pre></div>
-
-<p>The code above gives us subsampling, caching and automatic transitions for free. </p>
-
-<p>There are other options available, so let’s do a quick abstract:</p>
-
-<table>
-  <thead>
-    <tr>
-      <th style="text-align: left">Method name</th>
-      <th style="text-align: left">Description</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td style="text-align: left"><code>set</code></td>
-      <td style="text-align: left">sets the Drawable resources we wish to show/animate</td>
-    </tr>
-    <tr>
-      <td style="text-align: left"><code>inAnimation</code></td>
-      <td style="text-align: left">specifies the animation used to animate a <code>View</code> entering the screen.</td>
-    </tr>
-    <tr>
-      <td style="text-align: left"><code>outAnimation</code></td>
-      <td style="text-align: left">specifies the animation used to animate a <code>View</code> exiting the screen.</td>
-    </tr>
-    <tr>
-      <td style="text-align: left"><code>loop</code></td>
-      <td style="text-align: left">continuously loop through the Drawables or stop after the first cycle is complete.</td>
-    </tr>
-    <tr>
-      <td style="text-align: left"><code>interval</code></td>
-      <td style="text-align: left">the millisecond interval a Drawable instance will be displayed for.</td>
-    </tr>
-    <tr>
-      <td style="text-align: left"><code>scale</code></td>
-      <td style="text-align: left">determines how the Drawables should be resized or moved to match the size of the view we’re animating on.</td>
-    </tr>
-    <tr>
-      <td style="text-align: left"><code>listener</code></td>
-      <td style="text-align: left">receives the <code>FancyBackground</code> events (described below)</td>
-    </tr>
-    <tr>
-      <td style="text-align: left"><code>cache</code></td>
-      <td style="text-align: left">caches loaded bitmaps so we don’t have to do it again</td>
-    </tr>
-  </tbody>
-</table>
-
-<p><code>FancyListener</code> can receive four events: </p>
-
-<ul>
-  <li><code>onStarted</code> when the FancyBackground is started </li>
-  <li><code>onNew</code> when a new image is set</li>
-  <li><code>onLoopDone</code> if looping is set to false and the first cycle is complete</li>
-  <li><code>onStopped</code> when the FancyBackground stops.</li>
-</ul>
-
-<p><code>FancyCache</code> enables you to create your own bitmap cache. <code>FancyLruCache</code> is the default, targeting ~25% of the available heap and evicting the least recently used bitmap if over capacity. Use <code>null</code> to avoid caching.</p>
-
-<p>To try it out, make sure to add the following to your dependency list: </p>
-
-<div class="highlight"><pre><code class="language-bash" data-lang="bash">compile <span class="s1">&#39;com.github.tslamic.fancybackground:library:1.0&#39;</span></code></pre></div>
-
-<p>For an example, visit my <a href="https://github.com/tslamic/FancyBackground">Github profile</a>. </p>
-
-  </div><!-- /.entry-content -->
-</article><!-- /.hentry -->
-
+<article class="hentry">
+   
+   <h1 class="entry-title"><a href="/java-operators-i-thought-i-knew/" rel="bookmark" title="Java Operators I Thought I Knew" itemprop="url">Java Operators I Thought I Knew</a></h1>
+   
+   
+   <div class="entry-content">
+      I thought I know all the operators used in Java. Turns's out I was wrong...
+   </div>
+   <!-- /.entry-content -->
+   
+   
+   <div class="entry-meta">
+      <span class="entry-reading-time">
+      <i class="fa fa-clock-o"></i>
+      
+      Reading time ~3 minutes
+      </span><!-- /.entry-reading-time -->
+   </div>
+   <!-- /.entry-meta -->
+   
+</article>
 
 <div class="pagination">
-  
-    Previous
-  
-  <ul class="inline-list">
-    <li>
-      
-        <span class="current-page">1</span>
-      
-    </li>
-    
+   
+   Previous
+   
+   <ul class="inline-list">
       <li>
-        
-          <a href="/page2">2</a>
-        
+         
+         <span class="current-page">1</span>
+         
       </li>
-    
-      <li>
-        
-          <a href="/page3">3</a>
-        
-      </li>
-    
-  </ul>
-  
-    <a href="/page2" class="btn">Next</a>
-  
-</div><!-- /.pagination -->
+      
+   </ul>
+   
+   Next
+   
+</div>
+<!-- /.pagination -->
 </div><!-- /#main -->
 
 <div class="footer-wrapper">

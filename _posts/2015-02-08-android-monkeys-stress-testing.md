@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Android, monkeys and stress testing"
-description: "Automating the monkey and heap dumps."
+description: "Android - or, more precisely, its debug bridge - has a very handy tool called the monkey. Its purpose is to stress-test your app by generating pseudo-random user events in a repeatable manner. Sometimes, the usage is a bit clunky or unclear. Enter Dumpey."
 tags: [android, monkey, memory, automation, dumpey]
 ---
 

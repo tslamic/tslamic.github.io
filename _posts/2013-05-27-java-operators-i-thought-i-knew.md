@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Java Operators I Thought I Knew
-description: "I thought I know them all..."
+description: "I thought I know all the operators used in Java. Turns's out I was wrong..."
 tags: [java, modulo, bitshift]
 ---
 
@@ -18,7 +18,7 @@ Why?
 It boils down to the decision language designers made when defining the operator. Recall that in an expression `a % b = c`,
 `a` is said to be the _dividend_ and `b` the _divisor_. Some decided `c` should have the same sign as the dividend, others divisor. Java chose dividend, Python divisor.
 
-Missing this fact could lead to some "fun" late night debugging sessions. Consider the following example:
+Missing this fact could lead to some fun late night debugging sessions. Consider the following example:
 
 {% highlight java %}
 /*
@@ -51,7 +51,7 @@ The second operator I was having trouble with was `>>>`. I couldn't tell the dif
 Confused? Read on.
 
 <center>
-<figure>
+<figure >
   <img src="http://upload.wikimedia.org/wikipedia/commons/thumb/7/76/Most_significant_bit.svg/300px-Most_significant_bit.svg.png" alt="Most Significant Bit">
   <figcaption>The most significant bit is highlighted.</figcaption>
 </figure>

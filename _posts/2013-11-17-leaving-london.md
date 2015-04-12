@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Leaving London
-description: "Goodbye London, hello Dublin."
+description: "Packing my bags, leaving London behind. Next destination: Dublin. Here's why."
 tags: [London, Dublin, travel]
 image:
   feature: wajdusna.jpg

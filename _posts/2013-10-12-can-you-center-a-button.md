@@ -1,7 +1,7 @@
 ---
 layout: post
 title: To Center A Button
-description: "How to center a button that is 50% of its parent?"
+description: "Inspired by 50 Android Hacks, I wonder how to center a button that must be 50% of its parent?"
 tags: [android, button, custom view]
 ---
 

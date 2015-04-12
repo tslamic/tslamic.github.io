@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Android menu icon, delightfully"
-description: "Material design menu-to-back-arrow drawable implementation."
+description: "Starting a redesign of my app, a contemporary menu to back-arrow icon - like the one introduced in Material design, would come handy. I thought recreating it from scratch would be a great how-to exercise. Here's my recipe."
 tags: [android, ui, drawable]
 ---
 

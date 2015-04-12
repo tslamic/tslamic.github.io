@@ -1,7 +1,7 @@
 ---
 layout: post
 title: View Animations On Android
-description: "How to do view animations on Android"
+description: "A short but sweet intro to view animations on Android."
 tags: [android, animation, interpolator]
 ---
 

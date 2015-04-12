@@ -1,7 +1,7 @@
 ---
 layout:   post
 title:    Two's Complement And Absolute Values
-description: "Examples and code for displaying images in posts."
+description: "A gentle introduction to two's complement and a quirky property that comes with it."
 tags: [java, two's complement, bitshift]
 ---
 
