@@ -4,13 +4,430 @@
 <generator uri="https://github.com/mojombo/jekyll">Jekyll</generator>
 <link rel="self" type="application/atom+xml" href="/feed.xml" />
 <link rel="alternate" type="text/html" href="" />
-<updated>2015-03-01T14:18:18-05:00</updated>
+<updated>2015-04-12T07:45:25-04:00</updated>
 <id>/</id>
 <author>
   <name>Tadej Slamic</name>
   <uri>/</uri>
   
 </author>
+
+
+<entry>
+  <title type="html"><![CDATA[Android menu icon, delightfully]]></title>
+ <link rel="alternate" type="text/html" href="/android-menu-icon/" />
+  <id>/android-menu-icon</id>
+  <published>2015-04-11T00:00:00-04:00</published>
+  <updated>2015-04-11T00:00:00-04:00</updated>
+  <author>
+    <name>Tadej Slamic</name>
+    <uri></uri>
+    <email></email>
+  </author>
+  <content type="html">
+    &lt;p&gt;There’s probably not a single Android developer in the wild that hasn’t heard about Material design yet. &lt;/p&gt;
+
+&lt;p&gt;One of my favorite elements are subtle icon transitions, like the ones presented in &lt;a href=&quot;http://www.google.com/design/spec/animation/delightful-details.html&quot;&gt;delightful details&lt;/a&gt;.&lt;/p&gt;
+
+&lt;div class=&quot;center-align&quot;&gt;
+&lt;video width=&quot;320&quot; height=&quot;240&quot; loop=&quot;true&quot; autoplay=&quot;autoplay&quot; controls=&quot;&quot;&gt;
+&lt;source src=&quot;//material-design.storage.googleapis.com/publish/v_2/material_ext_publish/0B2wX4iIvu8L6ZHZfV1NfRHdCZHM/animation-delightfuldetails-030401_Status_Change_xhdpi_003.webm&quot; type=&quot;video/webm&quot; /&gt;
+&lt;/video&gt;
+&lt;/div&gt;
+
+&lt;p&gt;Starting a redesign of my app, a menu to back-arrow icon - like the one in the top left corner - would come handy. I thought recreating it from scratch would be a great how-to exercise. &lt;/p&gt;
+
+&lt;p&gt;&lt;a name=&quot;sec_1&quot;&gt;&lt;/a&gt; &lt;/p&gt;
+
+&lt;h3 id=&quot;a-birds-eye-view&quot;&gt;A bird’s eye view&lt;/h3&gt;
+
+&lt;p&gt;Menu to back-arrow icon is a simple drawable with transition animation. Both &lt;em&gt;states&lt;/em&gt; consist of three sole lines. The easiest way to define the transition is to mark the points of interest: &lt;/p&gt;
+
+&lt;figure class=&quot;center-align&quot;&gt;
+	&lt;img src=&quot;http://i.imgur.com/VezpDYs.png&quot; title=&quot;mapping&quot; /&gt;
+	&lt;figcaption&gt;Points will help us define the transition.&lt;/figcaption&gt;
+&lt;/figure&gt;
+
+&lt;p&gt;Intuitively, the mapping is:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;strong&gt;A to S&lt;/strong&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;B to U&lt;/strong&gt;&lt;/li&gt;
+  &lt;li&gt;C to T&lt;/li&gt;
+  &lt;li&gt;D to U&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;E to V&lt;/strong&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;F to U&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Points C and D are roughly equal to T and U, so we’ll only focus on the bold ones.&lt;/p&gt;
+
+&lt;h3 id=&quot;measures&quot;&gt;Measures&lt;/h3&gt;
+
+&lt;p&gt;To extract the width and height of lines in both states, we inspect them in its final form and determine relative lengths compared to the drawable bounds:&lt;/p&gt;
+
+&lt;figure class=&quot;center-align&quot;&gt;
+	&lt;img src=&quot;http://i.imgur.com/6tgjmsm.png&quot; title=&quot;measures&quot; /&gt;
+	&lt;figcaption&gt;Measuring agains the bounds.&lt;/figcaption&gt;
+&lt;/figure&gt;
+
+&lt;p&gt;At &lt;em&gt;hdpi&lt;/em&gt; density, the estimates are:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;$l$ = 60% of bounds.width&lt;/li&gt;
+  &lt;li&gt;$g$ = 15% of bounds.height&lt;/li&gt;
+  &lt;li&gt;$w$ = 5% of bounds.height&lt;/li&gt;
+  &lt;li&gt;$m$ = l/2&lt;/li&gt;
+  &lt;li&gt;$t$ =  45 deg&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Rememeber the variable names, as they will be used throughout this post.&lt;/p&gt;
+
+&lt;h3 id=&quot;progress&quot;&gt;Progress&lt;/h3&gt;
+
+&lt;p&gt;To get a smooth transition from e.g. A to S, we have to know the inbetween point at each animation frame. But first, we have to decide how to track animation progress. &lt;/p&gt;
+
+&lt;p&gt;Assuming we’ll use property animation, it’s on us to provide a property and set of values we want to animate between. &lt;/p&gt;
+
+&lt;p&gt;Let &lt;em&gt;progress&lt;/em&gt; denote an arbitrary float value between 0.0 and 1.0, inclusive. This will be our property. We’ll start the animation by executing&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-java&quot; data-lang=&quot;java&quot;&gt;&lt;span class=&quot;n&quot;&gt;ObjectAnimator&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;o&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ObjectAnimator&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;ofFloat&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;drawable&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;progress&amp;quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;f&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;f&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;o&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;setDuration&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;animationDuration&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;o&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;start&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;If progress is 0, we show the menu icon. Else if progress is 1, we show the back-arrow icon. &lt;/p&gt;
+
+&lt;p&gt;Progressing from 0 to 1 transforms a home icon to a back-arrow. Conversely, 1 to 0 goes from a back-arrow to home.&lt;/p&gt;
+
+&lt;p&gt;&lt;a name=&quot;sec_4&quot;&gt;&lt;/a&gt; &lt;/p&gt;
+
+&lt;h3 id=&quot;math&quot;&gt;Math&lt;/h3&gt;
+
+&lt;p&gt;Remember, the points we refer to are all defined in the &lt;a href=&quot;#sec_1&quot;&gt;upper section&lt;/a&gt;.&lt;/p&gt;
+
+&lt;figure class=&quot;center-align&quot;&gt;
+	&lt;img src=&quot;http://i.imgur.com/3n4SaAz.png&quot; title=&quot;A to S&quot; /&gt;
+	&lt;figcaption&gt;Pic 1&lt;/figcaption&gt;
+&lt;/figure&gt;
+
+&lt;p&gt;P is the point at progress $0 &amp;lt; q &amp;lt; 1$, moving between A and S. We want to know $dx$ and $dy$. &lt;/p&gt;
+
+&lt;p&gt;Let’s find coordinates of S first, assuming A is the origin. 
+Clearly its $x$ coordinate is $m$. To determine $n$, a bigger picture helps:&lt;/p&gt;
+
+&lt;figure class=&quot;center-align&quot;&gt;
+	&lt;img src=&quot;http://i.imgur.com/Zq5PZ5D.png&quot; title=&quot;Bigger A to S&quot; /&gt;
+	&lt;figcaption&gt;Pic 2&lt;/figcaption&gt;
+&lt;/figure&gt;
+
+&lt;p&gt;Let $z = g + n$ and $h$ the length between S and D. Recall $t = 45 \deg$. Using trigonometric ratios, we know&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\sin t = \frac{z}{h}&lt;/script&gt;
+
+&lt;p&gt;We can get $h$ from&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
+
+\begin{align}
+\cos t &amp;= \frac{m}{h}\\
+\frac{\sqrt 2}{2} &amp;= \frac{m}{h}\\
+h &amp;= m\sqrt 2\\
+\end{align}
+ %]]&gt;&lt;/script&gt;
+
+&lt;p&gt;Since $h$ is of the same length as a square with an edge $m$, we deduct $z=m$, thus $n = (m-g)$ and $S=(m, (m-g))$. &lt;/p&gt;
+
+&lt;p&gt;Observe that in pic 1, at progress $p=0$, we must be at A. When $p=1$, we must be at S. It’s clear that at progress $q$&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
+
+\begin{align}
+dx &amp;= qm \\
+dy &amp;= q(m-g)
+\end{align}
+ %]]&gt;&lt;/script&gt;
+
+&lt;p&gt;Another movement we have to take care of is B to U:&lt;/p&gt;
+
+&lt;figure class=&quot;center-align&quot;&gt;
+	&lt;img src=&quot;http://i.imgur.com/TheualZ.png&quot; title=&quot;B to D&quot; /&gt;
+	&lt;figcaption&gt;Pic 3&lt;/figcaption&gt;
+&lt;/figure&gt;
+
+&lt;p&gt;Only $dg$ is changing. Applying similar logic as above, we know&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;
+dg = qg
+&lt;/script&gt;
+
+&lt;p&gt;Note that C-D line (or T-U) is a mirror line. As such, reflecting the $y$ coordinate gets us E-F line changes for free.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;To read more about the approach we’ve taken, visit the &lt;a href=&quot;http://en.wikipedia.org/wiki/Linear_interpolation&quot;&gt;linear interpolation&lt;/a&gt; wiki page.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h3 id=&quot;draw&quot;&gt;Draw&lt;/h3&gt;
+
+&lt;p&gt;As mentioned, both drawable states have only three simple lines. &lt;code&gt;Canvas&lt;/code&gt; has a convenient method &lt;code&gt;drawLine&lt;/code&gt;, which is all we need. &lt;/p&gt;
+
+&lt;p&gt;To be able to draw, we need to calculate &lt;code&gt;dx&lt;/code&gt;,  &lt;code&gt;dy&lt;/code&gt; and &lt;code&gt;dv&lt;/code&gt; and know points A, B, C, D, E, F. &lt;/p&gt;
+
+&lt;p&gt;First three change when progress changes, but others just need bounds. We can compute them in a helper method, which is only invoked when the bounds are set.&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-java&quot; data-lang=&quot;java&quot;&gt;&lt;span class=&quot;kd&quot;&gt;private&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;measure&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+	&lt;span class=&quot;kd&quot;&gt;final&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Rect&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;bounds&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;getBounds&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;
+	&lt;span class=&quot;kd&quot;&gt;final&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;float&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;w&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;bounds&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;width&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;
+	&lt;span class=&quot;kd&quot;&gt;final&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;float&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;h&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;bounds&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;height&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;
+
+	&lt;span class=&quot;c1&quot;&gt;// LINE_LENGTH denotes l&lt;/span&gt;
+	&lt;span class=&quot;kd&quot;&gt;final&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;float&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;lineLength&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;LINE_LENGTH&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;w&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
+	&lt;span class=&quot;n&quot;&gt;mHalfLineLength&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;lineLength&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;/&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
+
+	&lt;span class=&quot;c1&quot;&gt;// LINE_GAP denotes g&lt;/span&gt;
+	&lt;span class=&quot;n&quot;&gt;mLineGap&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;LINE_GAP&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;h&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
+
+	&lt;span class=&quot;c1&quot;&gt;// LINE_WIDTH denotes w&lt;/span&gt;
+	&lt;span class=&quot;kd&quot;&gt;final&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;float&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;strokeWidth&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;LINE_WIDTH&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;h&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
+	&lt;span class=&quot;n&quot;&gt;mPaint&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;setStrokeWidth&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;strokeWidth&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+
+	&lt;span class=&quot;n&quot;&gt;mCenterY&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;w&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;/&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
+	&lt;span class=&quot;n&quot;&gt;mStartX&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;bounds&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;left&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;w&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;lineLength&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;/&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
+	&lt;span class=&quot;n&quot;&gt;mEndX&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mStartX&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;lineLength&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
+	&lt;span class=&quot;n&quot;&gt;mTopY&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mCenterY&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mLineGap&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
+	&lt;span class=&quot;n&quot;&gt;mBottomY&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mCenterY&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mLineGap&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
+
+	&lt;span class=&quot;n&quot;&gt;invalidateSelf&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;The instance variables fully determine the points: &lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;A(&lt;code&gt;mStartX&lt;/code&gt;, &lt;code&gt;mTopY&lt;/code&gt;)&lt;/li&gt;
+  &lt;li&gt;B(&lt;code&gt;mEndX&lt;/code&gt;, &lt;code&gt;mTopY&lt;/code&gt;)&lt;/li&gt;
+  &lt;li&gt;C(&lt;code&gt;mStartX&lt;/code&gt;, &lt;code&gt;mCenterY&lt;/code&gt;)&lt;/li&gt;
+  &lt;li&gt;D(&lt;code&gt;mEndX&lt;/code&gt;, &lt;code&gt;mCenterY&lt;/code&gt;)&lt;/li&gt;
+  &lt;li&gt;E(&lt;code&gt;mStartX&lt;/code&gt;, &lt;code&gt;mBottomY&lt;/code&gt;)&lt;/li&gt;
+  &lt;li&gt;F(&lt;code&gt;mEndX&lt;/code&gt;, &lt;code&gt;mBottomY&lt;/code&gt;)&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Each time progress is updated, we invalidate the drawable. Consequently, &lt;code&gt;draw&lt;/code&gt; method is invoked&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-java&quot; data-lang=&quot;java&quot;&gt;&lt;span class=&quot;nd&quot;&gt;@Override&lt;/span&gt;
+&lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;draw&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Canvas&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;canvas&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+	&lt;span class=&quot;kd&quot;&gt;final&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;float&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dx&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mProgress&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mHalfLineLength&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
+	&lt;span class=&quot;kd&quot;&gt;final&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;float&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dy&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mProgress&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mHalfLineLength&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mLineGap&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+	&lt;span class=&quot;kd&quot;&gt;final&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;float&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dg&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mProgress&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mLineGap&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
+
+	&lt;span class=&quot;n&quot;&gt;canvas&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;drawLine&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mStartX&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dx&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mTopY&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dy&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mEndX&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mTopY&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dg&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mPaint&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+	&lt;span class=&quot;n&quot;&gt;canvas&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;drawLine&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mStartX&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mCenterY&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mEndX&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mCenterY&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mPaint&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+	&lt;span class=&quot;n&quot;&gt;canvas&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;drawLine&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mStartX&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dx&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mBottomY&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dy&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mEndX&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mBottomY&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dg&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mPaint&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Note that we apply the transformations computed in the &lt;a href=&quot;#sec_4&quot;&gt;math section&lt;/a&gt;. &lt;/p&gt;
+
+&lt;h3 id=&quot;demo&quot;&gt;Demo&lt;/h3&gt;
+
+&lt;p&gt;Because I’m nice, I’ve wrapped everything we’ve done so far in a widget for you to try out:&lt;/p&gt;
+
+&lt;div class=&quot;center-align&quot;&gt;
+	&lt;div&gt;
+	    &lt;canvas id=&quot;canvas&quot; width=&quot;300&quot; height=&quot;300&quot; style=&quot;border:1px solid #000000;&quot; /&gt;
+	&lt;/div&gt;
+	&lt;div&gt;0.0
+	    &lt;input id=&quot;slider&quot; type=&quot;range&quot; min=&quot;0.0&quot; max=&quot;1.0&quot; step=&quot;0.01&quot; value=&quot;0.0&quot; width=&quot;300&quot; /&gt;1.0
+	    &lt;p id=&quot;prog&quot;&gt;&lt;/p&gt;
+	&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;h3 id=&quot;class-4-strategic-theatre-emergency&quot;&gt;Class 4 Strategic Theatre Emergency&lt;/h3&gt;
+
+&lt;p&gt;If progress is 1, the above widget reveals the pointy end of the arrow is not really pointy.&lt;/p&gt;
+
+&lt;p&gt;When drawing on a &lt;code&gt;Canvas&lt;/code&gt; instance, Android uses &lt;a href=&quot;https://code.google.com/p/skia/&quot;&gt;Skia&lt;/a&gt;, a 2D graphics library, to do the actual drawing. &lt;code&gt;Canvas.drawLine&lt;/code&gt; invokes a native method &lt;code&gt;SkCanvas::drawLine&lt;/code&gt;, which invokes &lt;code&gt;SkCanvas::onDrawPoints&lt;/code&gt;. Because our &lt;code&gt;mPaint&lt;/code&gt; instance is not complex (it has no path effects, for example), &lt;code&gt;SkPaint::doComputeFastBounds&lt;/code&gt; is called. &lt;/p&gt;
+
+&lt;p&gt;We care because in this case, if the &lt;code&gt;mPaint&lt;/code&gt; stroke width is $w$, the rendered point has a radius of $w/2$. &lt;/p&gt;
+
+&lt;p&gt;Here’s a zoomed in look at U, where B and F meet and progress is 1:&lt;/p&gt;
+
+&lt;figure class=&quot;center-align&quot;&gt;
+	&lt;img src=&quot;http://i.imgur.com/4pGRr4J.png&quot; title=&quot;source: imgur.com&quot; /&gt;
+	&lt;figcaption&gt;
+	Line A-B is colored purple. Line E-F is colored green. Red square is the issue we&#39;re trying to resolve. &lt;/figcaption&gt;
+&lt;/figure&gt;
+
+&lt;p&gt;If we offset B and F by $(zx, -zy), (zx, zy)$ respectively, we cover the red square. &lt;/p&gt;
+
+&lt;p&gt;Because of the above analysis, we know $r=\frac{w}{2}$. Both lines come at a 45 degree angle, hence $k = 45\deg$ too. We can use trigonometric ratios again:&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
+
+\begin{align}
+zx &amp;= h\cos k \\
+zy &amp;= h\sin k
+\end{align}
+ %]]&gt;&lt;/script&gt;
+
+&lt;p&gt;Because $\cos 45 = \frac{\sqrt 2}{2} = \sin 45$ and $h= \frac{w}{2}$, we get&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;
+zx = \frac{w}{2} \cdot \frac{\sqrt 2}{2} = zy = \frac{\sqrt 2}{4}w
+&lt;/script&gt;
+
+&lt;p&gt;Applying progress and updating the &lt;code&gt;draw&lt;/code&gt; method, we get&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-java&quot; data-lang=&quot;java&quot;&gt;&lt;span class=&quot;nd&quot;&gt;@Override&lt;/span&gt;
+&lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;draw&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Canvas&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;canvas&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+	&lt;span class=&quot;kd&quot;&gt;final&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;float&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dx&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mProgress&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mHalfLineLength&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
+	&lt;span class=&quot;kd&quot;&gt;final&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;float&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dy&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mProgress&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mHalfLineLength&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mLineGap&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+	&lt;span class=&quot;kd&quot;&gt;final&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;float&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dv&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mProgress&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mLineGap&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
+
+	&lt;span class=&quot;c1&quot;&gt;// zx/zy computation can be easily moved to the measure method&lt;/span&gt;
+	&lt;span class=&quot;kd&quot;&gt;final&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;float&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dz&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mProgress&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;((&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Math&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;sqrt&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)/&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;4&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mPaint&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;getStrokeWidth&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;());&lt;/span&gt;
+
+	&lt;span class=&quot;n&quot;&gt;canvas&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;drawLine&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mStartX&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dx&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mTopY&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dy&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mEndX&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dz&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mTopY&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dv&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dz&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mPaint&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+	&lt;span class=&quot;n&quot;&gt;canvas&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;drawLine&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mStartX&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mCenterY&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mEndX&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mCenterY&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mPaint&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+	&lt;span class=&quot;n&quot;&gt;canvas&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;drawLine&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mStartX&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dx&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mBottomY&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dy&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mEndX&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dz&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mBottomY&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dv&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dz&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mPaint&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;again-demo&quot;&gt;Again, demo&lt;/h3&gt;
+
+&lt;p&gt;Confirm the fix in previous section resolves the issue:&lt;/p&gt;
+
+&lt;div class=&quot;center-align&quot;&gt;
+	&lt;div&gt;
+	    &lt;canvas id=&quot;canvas2&quot; width=&quot;300&quot; height=&quot;300&quot; style=&quot;border:1px solid #000000;&quot; /&gt;
+	&lt;/div&gt;
+	&lt;div&gt;0.0
+	    &lt;input id=&quot;slider2&quot; type=&quot;range&quot; min=&quot;0.0&quot; max=&quot;1.0&quot; step=&quot;0.01&quot; value=&quot;0.0&quot; width=&quot;300&quot; /&gt;1.0
+	    &lt;p id=&quot;prog2&quot;&gt;&lt;/p&gt;
+	&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;h3 id=&quot;a-final-touch&quot;&gt;A final touch&lt;/h3&gt;
+
+&lt;p&gt;To finish off, we have to add rotation. The one in &lt;a href=&quot;http://www.google.com/design/spec/animation/delightful-details.html&quot;&gt;delightful details&lt;/a&gt; goes from:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;0 to 180, if progress goes from 0 to 1&lt;/li&gt;
+  &lt;li&gt;-180 to 0, if progress goes from 1 to 0&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Because, at this point, you are a master of linear interpolation, the updated &lt;code&gt;draw&lt;/code&gt; method makes sense&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-java&quot; data-lang=&quot;java&quot;&gt;&lt;span class=&quot;nd&quot;&gt;@Override&lt;/span&gt;
+&lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;draw&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Canvas&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;canvas&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+	&lt;span class=&quot;kd&quot;&gt;final&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;float&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dx&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mProgress&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mHalfLineLength&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
+	&lt;span class=&quot;kd&quot;&gt;final&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;float&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dy&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mProgress&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mHalfLineLength&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mLineGap&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+	&lt;span class=&quot;kd&quot;&gt;final&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;float&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dg&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mProgress&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mLineGap&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
+
+	&lt;span class=&quot;c1&quot;&gt;// dx/dy computation was moved to measure method&lt;/span&gt;
+	&lt;span class=&quot;kd&quot;&gt;final&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;float&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dz&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mProgress&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mArrowFactor&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
+
+	&lt;span class=&quot;c1&quot;&gt;// mIsBack is true if the icon is currently showing the back arrow&lt;/span&gt;
+	&lt;span class=&quot;kd&quot;&gt;final&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;float&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;rotationTarget&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mIsBack&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;?&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;180&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;180&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
+	&lt;span class=&quot;kd&quot;&gt;final&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;float&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;rotation&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mProgress&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;rotationTarget&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
+	&lt;span class=&quot;kd&quot;&gt;final&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;float&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pivotX&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;getBounds&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;centerX&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;
+	&lt;span class=&quot;kd&quot;&gt;final&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;float&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pivotY&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;getBounds&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;().&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;centerY&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;
+
+	&lt;span class=&quot;n&quot;&gt;canvas&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;save&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;
+	&lt;span class=&quot;n&quot;&gt;canvas&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;rotate&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;rotation&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pivotX&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pivotY&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+	&lt;span class=&quot;n&quot;&gt;canvas&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;drawLine&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mStartX&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dx&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mTopY&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dy&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mEndX&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dz&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mTopY&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dg&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dz&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mPaint&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+	&lt;span class=&quot;n&quot;&gt;canvas&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;drawLine&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mStartX&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mCenterY&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mEndX&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mCenterY&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mPaint&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+	&lt;span class=&quot;n&quot;&gt;canvas&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;drawLine&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mStartX&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dx&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mBottomY&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dy&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mEndX&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dz&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mBottomY&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dg&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dz&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mPaint&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+	&lt;span class=&quot;n&quot;&gt;canvas&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;restore&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;parting-words&quot;&gt;Parting words&lt;/h3&gt;
+
+&lt;p&gt;Good on ya for making it this far. I hope math section was clear enough, and the widgets helped. I’m sure some parts can be improved, so I’ll be grateful for any feedback I get. The full implementation is available on GitHub.&lt;/p&gt;
+
+&lt;script type=&quot;text/x-mathjax-config&quot;&gt;
+	MathJax.Hub.Config({
+		tex2jax: {inlineMath: [[&#39;$&#39;,&#39;$&#39;], [&#39;\\(&#39;,&#39;\\)&#39;]]}
+	});
+&lt;/script&gt;
+
+&lt;script type=&quot;text/javascript&quot; src=&quot;https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML&quot;&gt;
+
+	var DelightfulDrawable = {};
+
+	DelightfulDrawable.newInstance = function (canvasId, sliderId, progressId, isPointy) {
+
+	    // Elements
+	    var canvas = document.getElementById(canvasId);
+	    var slider = document.getElementById(sliderId);
+	    var progress = document.getElementById(progressId);
+	    var context = canvas.getContext(&quot;2d&quot;);
+
+	    // Event handler
+	    slider.addEventListener(&quot;input&quot;, function () {
+	    	update(slider.value);
+	    }, false);
+
+	    // Bounds
+	    var width = canvas.width;
+	    var height = canvas.height;
+
+	    // Measure
+	    var l = 0.60 * width;
+	    var g = 0.15 * height;
+	    var w = 0.05 * height;
+	    var m = l / 2;
+
+	    // Helpers
+	    var centerY = height / 2;
+	    var startX = (width - l) / 2;
+	    var endX = startX + l;
+	    var topY = centerY - g;
+	    var bottomY = centerY + g;
+	    var pointyFactor = isPointy ? (.3536 * w) : 0;
+
+	    // Show UI
+	    context.lineWidth = w;
+	    update(0.0);
+
+	    function update(prog) {
+	    	progress.innerHTML = &quot;Current progress: &quot; + parseFloat(prog).toFixed(2);
+	    	draw(context, prog);
+	    }
+
+	    function draw(canv, prog) {
+	    	var dx = prog * m;
+	    	var dy = prog * (m - g);
+	    	var dg = prog * g;
+	    	var dz = prog * pointyFactor;
+
+	        // Reset canvas
+	        canv.clearRect(0, 0, width, height);
+	        canv.beginPath();
+
+	        // Top line
+	        canv.moveTo(startX + dx, topY - dy);
+	        canv.lineTo(endX + dz, topY + dg + dz);
+
+	        // Middle line
+	        canv.moveTo(startX, centerY);
+	        canv.lineTo(endX, centerY);
+
+	        // Bottom line
+	        canv.moveTo(startX + dx, bottomY + dy);
+	        canv.lineTo(endX + dz, bottomY - dg - dz);
+
+	        // Draw
+	        canv.closePath();
+	        canv.stroke();
+	    }
+
+	};
+
+	DelightfulDrawable.newInstance(&quot;canvas&quot;, &quot;slider&quot;, &quot;prog&quot;, false);
+	DelightfulDrawable.newInstance(&quot;canvas2&quot;, &quot;slider2&quot;, &quot;prog2&quot;, true);
+
+&lt;/script&gt;
+
+
+    &lt;p&gt;&lt;a href=&quot;/android-menu-icon/&quot;&gt;Android menu icon, delightfully&lt;/a&gt; was originally published by Tadej Slamic at &lt;a href=&quot;&quot;&gt;Tadej's Blog&lt;/a&gt; on April 11, 2015.&lt;/p&gt;
+  </content>
+</entry>
 
 
 <entry>

@@ -462,3 +462,9 @@ header .entry-meta {
 #goog-wm-sb {
 	@extend .btn;
 }
+
+.center-align { 
+	margin-left: auto;
+    margin-right: auto;
+	text-align: center;
+}
