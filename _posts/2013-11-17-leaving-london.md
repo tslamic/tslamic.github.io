@@ -23,10 +23,8 @@ It all turned out great. Friendly, talkative and cool coworkers from all over th
 
 One thing I picked up is for certain. You can never _learn_ and _know_ enough. Not only from books, articles and smart people - you can learn from _anyone_. Just pay attention and be open minded. Always think about the advice you are given, however stupid or useless you think it is. And _never_ judge a book by its covers. Literally and metaphorically.
 
-<center>
-  <figure>
-     <img src="http://netdna.webdesignerdepot.com/uploads/2011/02/81.jpg"/>
-  </figure>
-</center>
+<figure class="center-align">
+	<img src="http://netdna.webdesignerdepot.com/uploads/2011/02/81.jpg"/>
+</figure>
 
 I miss home. But I have grown as a person and that alone has made the move worthy. I learned. Experienced. And I don't want to stop doing that. That's why I'm leaving. I just started my new job in Dublin. I'm scared, but eager to learn.

@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "On Advanced Task Killer"
-description: "There’s not a single Android enthusiast that doesn’t know the Advanced Task Killer app. But how does it work and what does it really do?"
+description: "There’s not a single Android enthusiast that doesn’t know the Advanced Task Killer app. But how does it work and what does it actually do?"
 tags: [android, task killer, memory]
 ---
 

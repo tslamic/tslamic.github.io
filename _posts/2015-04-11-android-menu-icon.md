@@ -97,7 +97,7 @@ Clearly its $x$ coordinate is $m$. To determine $n$, a bigger picture helps:
 	<figcaption>Pic 2</figcaption>
 </figure>
 
-Let $z = g + n$ and $h$ the length between S and D. Recall $t = 45 \deg$. Using trigonometric ratios, we know
+Assume $z = g + n$ and $h$ the length between S and D. Recall $t = 45 \deg$. Using trigonometric ratios, we know
 
 $$\sin t = \frac{z}{h}$$
 
@@ -122,7 +122,7 @@ dy &= q(m-g)
 \end{align}
 $$
 
-Another movement we have to take care of is B to U:
+Another movement we have to take care of is B to D:
 
 <figure class="center-align">
 	<img src="http://i.imgur.com/TheualZ.png" title="B to D" />
@@ -153,14 +153,11 @@ private void measure() {
 	final float w = bounds.width();
 	final float h = bounds.height();
 
-	// LINE_LENGTH denotes l
 	final float lineLength = LINE_LENGTH * w;
 	mHalfLineLength = lineLength / 2;
 
-	// LINE_GAP denotes g
 	mLineGap = LINE_GAP * h;
 
-	// LINE_WIDTH denotes w
 	final float strokeWidth = LINE_WIDTH * h;
 	mPaint.setStrokeWidth(strokeWidth);
 
@@ -174,7 +171,7 @@ private void measure() {
 }
 {% endhighlight %}
 
-The instance variables fully determine the points: 
+In the code above, `mHalfLineLength` denotes $m$, `mLineGap` denotes $g$ and `strokeWidth` is $w$. Other instance variables fully determine the points: 
 
 - A(`mStartX`, `mTopY`)
 - B(`mEndX`, `mTopY`)
@@ -227,7 +224,7 @@ Here's a zoomed in look at U, where B and F meet and progress is 1:
 <figure class="center-align">
 	<img src="http://i.imgur.com/4pGRr4J.png" title="source: imgur.com" />
 	<figcaption>
-	Line A-B is colored purple. Line E-F is colored green. Red square is the issue we're trying to resolve. </figcaption>
+	Line A-B (S-U) is colored purple. Line E-F (V-U) is colored green. Red square is the issue we're trying to resolve. </figcaption>
 </figure>
 
 If we offset B and F by $(zx, -zy), (zx, zy)$ respectively, we cover the red square. 
@@ -241,7 +238,7 @@ zy &= h\sin k
 \end{align}
 $$
 
-Because $\cos 45 = \frac{\sqrt 2}{2} = \sin 45$ and $h= \frac{w}{2}$, we get
+Because $\cos 45 = \sin 45 = \frac{\sqrt 2}{2}$ and $h= \frac{w}{2}$, we get
 
 $$
 zx = \frac{w}{2} \cdot \frac{\sqrt 2}{2} = zy = \frac{\sqrt 2}{4}w

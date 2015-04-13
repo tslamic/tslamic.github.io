@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Fancy Background"
-description: "A brief introduction to FancyBackground - a library that animates resource Drawables while subsampling and efficiently loading Bitmap drawables."
+description: "A brief introduction to FancyBackground - a library animating resource drawables while subsampling and efficiently loading bitmaps."
 tags: [android, bitmap, memory, cache, subsampling]
 ---
 

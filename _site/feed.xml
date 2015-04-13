@@ -4,7 +4,7 @@
 <generator uri="https://github.com/mojombo/jekyll">Jekyll</generator>
 <link rel="self" type="application/atom+xml" href="/feed.xml" />
 <link rel="alternate" type="text/html" href="" />
-<updated>2015-04-12T09:24:39-04:00</updated>
+<updated>2015-04-13T02:15:47-04:00</updated>
 <id>/</id>
 <author>
   <name>Tadej Slamic</name>
@@ -119,7 +119,7 @@ Clearly its $x$ coordinate is $m$. To determine $n$, a bigger picture helps:&lt;
 	&lt;figcaption&gt;Pic 2&lt;/figcaption&gt;
 &lt;/figure&gt;
 
-&lt;p&gt;Let $z = g + n$ and $h$ the length between S and D. Recall $t = 45 \deg$. Using trigonometric ratios, we know&lt;/p&gt;
+&lt;p&gt;Assume $z = g + n$ and $h$ the length between S and D. Recall $t = 45 \deg$. Using trigonometric ratios, we know&lt;/p&gt;
 
 &lt;script type=&quot;math/tex; mode=display&quot;&gt;\sin t = \frac{z}{h}&lt;/script&gt;
 
@@ -146,7 +146,7 @@ dy &amp;= q(m-g)
 \end{align}
  %]]&gt;&lt;/script&gt;
 
-&lt;p&gt;Another movement we have to take care of is B to U:&lt;/p&gt;
+&lt;p&gt;Another movement we have to take care of is B to D:&lt;/p&gt;
 
 &lt;figure class=&quot;center-align&quot;&gt;
 	&lt;img src=&quot;http://i.imgur.com/TheualZ.png&quot; title=&quot;B to D&quot; /&gt;
@@ -178,14 +178,11 @@ dg = qg
 	&lt;span class=&quot;kd&quot;&gt;final&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;float&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;w&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;bounds&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;width&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;
 	&lt;span class=&quot;kd&quot;&gt;final&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;float&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;h&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;bounds&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;height&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;
 
-	&lt;span class=&quot;c1&quot;&gt;// LINE_LENGTH denotes l&lt;/span&gt;
 	&lt;span class=&quot;kd&quot;&gt;final&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;float&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;lineLength&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;LINE_LENGTH&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;w&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
 	&lt;span class=&quot;n&quot;&gt;mHalfLineLength&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;lineLength&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;/&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
 
-	&lt;span class=&quot;c1&quot;&gt;// LINE_GAP denotes g&lt;/span&gt;
 	&lt;span class=&quot;n&quot;&gt;mLineGap&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;LINE_GAP&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;h&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
 
-	&lt;span class=&quot;c1&quot;&gt;// LINE_WIDTH denotes w&lt;/span&gt;
 	&lt;span class=&quot;kd&quot;&gt;final&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;float&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;strokeWidth&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;LINE_WIDTH&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;h&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
 	&lt;span class=&quot;n&quot;&gt;mPaint&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;setStrokeWidth&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;strokeWidth&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
 
@@ -198,7 +195,7 @@ dg = qg
 	&lt;span class=&quot;n&quot;&gt;invalidateSelf&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;
 &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;The instance variables fully determine the points: &lt;/p&gt;
+&lt;p&gt;In the code above, &lt;code&gt;mHalfLineLength&lt;/code&gt; denotes $m$, &lt;code&gt;mLineGap&lt;/code&gt; denotes $g$ and &lt;code&gt;strokeWidth&lt;/code&gt; is $w$. Other instance variables fully determine the points: &lt;/p&gt;
 
 &lt;ul&gt;
   &lt;li&gt;A(&lt;code&gt;mStartX&lt;/code&gt;, &lt;code&gt;mTopY&lt;/code&gt;)&lt;/li&gt;
@@ -251,7 +248,7 @@ dg = qg
 &lt;figure class=&quot;center-align&quot;&gt;
 	&lt;img src=&quot;http://i.imgur.com/4pGRr4J.png&quot; title=&quot;source: imgur.com&quot; /&gt;
 	&lt;figcaption&gt;
-	Line A-B is colored purple. Line E-F is colored green. Red square is the issue we&#39;re trying to resolve. &lt;/figcaption&gt;
+	Line A-B (S-U) is colored purple. Line E-F (V-U) is colored green. Red square is the issue we&#39;re trying to resolve. &lt;/figcaption&gt;
 &lt;/figure&gt;
 
 &lt;p&gt;If we offset B and F by $(zx, -zy), (zx, zy)$ respectively, we cover the red square. &lt;/p&gt;
@@ -266,7 +263,7 @@ zy &amp;= h\sin k
 \end{align}
  %]]&gt;&lt;/script&gt;
 
-&lt;p&gt;Because $\cos 45 = \frac{\sqrt 2}{2} = \sin 45$ and $h= \frac{w}{2}$, we get&lt;/p&gt;
+&lt;p&gt;Because $\cos 45 = \sin 45 = \frac{\sqrt 2}{2}$ and $h= \frac{w}{2}$, we get&lt;/p&gt;
 
 &lt;script type=&quot;math/tex; mode=display&quot;&gt;
 zx = \frac{w}{2} \cdot \frac{\sqrt 2}{2} = zy = \frac{\sqrt 2}{4}w
@@ -782,11 +779,9 @@ List of devices attached
 
 &lt;p&gt;One thing I picked up is for certain. You can never &lt;em&gt;learn&lt;/em&gt; and &lt;em&gt;know&lt;/em&gt; enough. Not only from books, articles and smart people - you can learn from &lt;em&gt;anyone&lt;/em&gt;. Just pay attention and be open minded. Always think about the advice you are given, however stupid or useless you think it is. And &lt;em&gt;never&lt;/em&gt; judge a book by its covers. Literally and metaphorically.&lt;/p&gt;
 
-&lt;center&gt;
-  &lt;figure&gt;
-     &lt;img src=&quot;http://netdna.webdesignerdepot.com/uploads/2011/02/81.jpg&quot; /&gt;
-  &lt;/figure&gt;
-&lt;/center&gt;
+&lt;figure class=&quot;center-align&quot;&gt;
+	&lt;img src=&quot;http://netdna.webdesignerdepot.com/uploads/2011/02/81.jpg&quot; /&gt;
+&lt;/figure&gt;
 
 &lt;p&gt;I miss home. But I have grown as a person and that alone has made the move worthy. I learned. Experienced. And I don’t want to stop doing that. That’s why I’m leaving. I just started my new job in Dublin. I’m scared, but eager to learn.&lt;/p&gt;
 
@@ -951,14 +946,12 @@ List of devices attached
 
 &lt;p&gt;&lt;code&gt;Interpolator&lt;/code&gt; defines the rate of change of an animation. We can specify, for example, how fast something is going to fade out or if the animation should be accelerating, decelerating, etc.&lt;/p&gt;
 
-&lt;center&gt;
-  &lt;figure&gt;
+&lt;figure class=&quot;center-align&quot;&gt;
     &lt;a href=&quot;http://cogitolearning.co.uk/?p=1078&quot; target=&quot;_blank&quot;&gt;
       &lt;img src=&quot;http://i.imgur.com/xVlimsR.png&quot; /&gt;
     &lt;/a&gt;
     &lt;figcaption&gt;Rate of change for some interpolators.&lt;/figcaption&gt;
-  &lt;/figure&gt;
-&lt;/center&gt;
+&lt;/figure&gt;
 
 &lt;p&gt;Constructing an &lt;code&gt;Animation&lt;/code&gt; is simple:&lt;/p&gt;
 

@@ -251,7 +251,7 @@ Clearly its $x$ coordinate is $m$. To determine $n$, a bigger picture helps:</p>
 	<figcaption>Pic 2</figcaption>
 </figure>
 
-<p>Let $z = g + n$ and $h$ the length between S and D. Recall $t = 45 \deg$. Using trigonometric ratios, we know</p>
+<p>Assume $z = g + n$ and $h$ the length between S and D. Recall $t = 45 \deg$. Using trigonometric ratios, we know</p>
 
 <script type="math/tex; mode=display">\sin t = \frac{z}{h}</script>
 
@@ -278,7 +278,7 @@ dy &= q(m-g)
 \end{align}
  %]]></script>
 
-<p>Another movement we have to take care of is B to U:</p>
+<p>Another movement we have to take care of is B to D:</p>
 
 <figure class="center-align">
 	<img src="http://i.imgur.com/TheualZ.png" title="B to D" />
@@ -310,14 +310,11 @@ dg = qg
 	<span class="kd">final</span> <span class="kt">float</span> <span class="n">w</span> <span class="o">=</span> <span class="n">bounds</span><span class="o">.</span><span class="na">width</span><span class="o">();</span>
 	<span class="kd">final</span> <span class="kt">float</span> <span class="n">h</span> <span class="o">=</span> <span class="n">bounds</span><span class="o">.</span><span class="na">height</span><span class="o">();</span>
 
-	<span class="c1">// LINE_LENGTH denotes l</span>
 	<span class="kd">final</span> <span class="kt">float</span> <span class="n">lineLength</span> <span class="o">=</span> <span class="n">LINE_LENGTH</span> <span class="o">*</span> <span class="n">w</span><span class="o">;</span>
 	<span class="n">mHalfLineLength</span> <span class="o">=</span> <span class="n">lineLength</span> <span class="o">/</span> <span class="mi">2</span><span class="o">;</span>
 
-	<span class="c1">// LINE_GAP denotes g</span>
 	<span class="n">mLineGap</span> <span class="o">=</span> <span class="n">LINE_GAP</span> <span class="o">*</span> <span class="n">h</span><span class="o">;</span>
 
-	<span class="c1">// LINE_WIDTH denotes w</span>
 	<span class="kd">final</span> <span class="kt">float</span> <span class="n">strokeWidth</span> <span class="o">=</span> <span class="n">LINE_WIDTH</span> <span class="o">*</span> <span class="n">h</span><span class="o">;</span>
 	<span class="n">mPaint</span><span class="o">.</span><span class="na">setStrokeWidth</span><span class="o">(</span><span class="n">strokeWidth</span><span class="o">);</span>
 
@@ -330,7 +327,7 @@ dg = qg
 	<span class="n">invalidateSelf</span><span class="o">();</span>
 <span class="o">}</span></code></pre></div>
 
-<p>The instance variables fully determine the points: </p>
+<p>In the code above, <code>mHalfLineLength</code> denotes $m$, <code>mLineGap</code> denotes $g$ and <code>strokeWidth</code> is $w$. Other instance variables fully determine the points: </p>
 
 <ul>
   <li>A(<code>mStartX</code>, <code>mTopY</code>)</li>
@@ -383,7 +380,7 @@ dg = qg
 <figure class="center-align">
 	<img src="http://i.imgur.com/4pGRr4J.png" title="source: imgur.com" />
 	<figcaption>
-	Line A-B is colored purple. Line E-F is colored green. Red square is the issue we're trying to resolve. </figcaption>
+	Line A-B (S-U) is colored purple. Line E-F (V-U) is colored green. Red square is the issue we're trying to resolve. </figcaption>
 </figure>
 
 <p>If we offset B and F by $(zx, -zy), (zx, zy)$ respectively, we cover the red square. </p>
@@ -398,7 +395,7 @@ zy &= h\sin k
 \end{align}
  %]]></script>
 
-<p>Because $\cos 45 = \frac{\sqrt 2}{2} = \sin 45$ and $h= \frac{w}{2}$, we get</p>
+<p>Because $\cos 45 = \sin 45 = \frac{\sqrt 2}{2}$ and $h= \frac{w}{2}$, we get</p>
 
 <script type="math/tex; mode=display">
 zx = \frac{w}{2} \cdot \frac{\sqrt 2}{2} = zy = \frac{\sqrt 2}{4}w
@@ -577,7 +574,7 @@ zx = \frac{w}{2} \cdot \frac{\sqrt 2}{2} = zy = \frac{\sqrt 2}{4}w
     </div><!-- /.read-more-header -->
     <div class="read-more-content">
       <h3><a href="/on-advanced-task-killer/" title="On Advanced Task Killer">On Advanced Task Killer</a></h3>
-      <p>There’s not a single Android enthusiast that doesn’t know the Advanced Task Killer app. But how does it work and what does it really do? <a href="/on-advanced-task-killer/">Continue reading</a></p>
+      <p>There’s not a single Android enthusiast that doesn’t know the Advanced Task Killer app. But how does it work and what does it actually do? <a href="/on-advanced-task-killer/">Continue reading</a></p>
     </div><!-- /.read-more-content -->
   
   <div class="read-more-list">

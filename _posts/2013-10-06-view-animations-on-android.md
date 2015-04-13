@@ -2,7 +2,7 @@
 layout: post
 title: View Animations On Android
 description: "A short but sweet intro to view animations on Android."
-tags: [android, animation, interpolator]
+tags: [android, animation, view, interpolator]
 ---
 
 The Android framework provides two animation systems:
@@ -29,14 +29,12 @@ The system lives in the `android.view.animation` package, with `Animation`, `Ani
 
 `Interpolator` defines the rate of change of an animation. We can specify, for example, how fast something is going to fade out or if the animation should be accelerating, decelerating, etc.
 
-<center>
-  <figure>
+<figure class="center-align">
     <a href="http://cogitolearning.co.uk/?p=1078" target="_blank">
       <img src="http://i.imgur.com/xVlimsR.png" />
     </a>
     <figcaption>Rate of change for some interpolators.</figcaption>
-  </figure>
-</center>
+</figure>
 
 Constructing an `Animation` is simple:
  
