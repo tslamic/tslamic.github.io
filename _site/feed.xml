@@ -4,7 +4,7 @@
 <generator uri="https://github.com/mojombo/jekyll">Jekyll</generator>
 <link rel="self" type="application/atom+xml" href="/feed.xml" />
 <link rel="alternate" type="text/html" href="" />
-<updated>2015-04-13T03:01:34-04:00</updated>
+<updated>2015-04-14T02:47:12-04:00</updated>
 <id>/</id>
 <author>
   <name>Tadej Slamic</name>
@@ -36,6 +36,10 @@
 &lt;/div&gt;
 
 &lt;p&gt;Starting a redesign of my app, a menu to back-arrow icon - like the one in the top left corner - would come handy. I thought recreating it from scratch would be a great how-to exercise. &lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;TL;DR Here’s the &lt;a href=&quot;https://github.com/tslamic/DelightfulMenuDrawable&quot;&gt;GitHub repo&lt;/a&gt;.&lt;/p&gt;
+&lt;/blockquote&gt;
 
 &lt;p&gt;&lt;a name=&quot;sec_1&quot;&gt;&lt;/a&gt; &lt;/p&gt;
 
@@ -335,7 +339,7 @@ zx = \frac{w}{2} \cdot \frac{\sqrt 2}{2} = zy = \frac{\sqrt 2}{4}w
 
 &lt;h3 id=&quot;parting-words&quot;&gt;Parting words&lt;/h3&gt;
 
-&lt;p&gt;Good on ya for making it this far. I hope math section was clear enough, and the widgets helped. I’m sure some parts can be improved, so I’ll be grateful for any feedback I get. The full implementation is available on GitHub.&lt;/p&gt;
+&lt;p&gt;Good on ya for making it this far. I hope math section was clear enough, and the widgets helped. I’m sure some parts can be improved, so I’ll be grateful for any feedback I get. The full implementation is &lt;a href=&quot;https://github.com/tslamic/DelightfulMenuDrawable&quot;&gt;available on GitHub&lt;/a&gt;.&lt;/p&gt;
 
 &lt;script type=&quot;text/x-mathjax-config&quot;&gt;
 	MathJax.Hub.Config({

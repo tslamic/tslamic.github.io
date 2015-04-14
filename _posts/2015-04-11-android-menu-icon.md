@@ -17,6 +17,8 @@ One of my favorite elements are subtle icon transitions, like the ones presented
 
 Starting a redesign of my app, a menu to back-arrow icon - like the one in the top left corner - would come handy. I thought recreating it from scratch would be a great how-to exercise. 
 
+> TL;DR Here's the [GitHub repo](https://github.com/tslamic/DelightfulMenuDrawable).
+
 <a name="sec_1"/> 
 
 ### A bird's eye view
@@ -313,7 +315,7 @@ public void draw(Canvas canvas) {
 
 ### Parting words
 
-Good on ya for making it this far. I hope math section was clear enough, and the widgets helped. I'm sure some parts can be improved, so I'll be grateful for any feedback I get. The full implementation is available on GitHub.
+Good on ya for making it this far. I hope math section was clear enough, and the widgets helped. I'm sure some parts can be improved, so I'll be grateful for any feedback I get. The full implementation is [available on GitHub](https://github.com/tslamic/DelightfulMenuDrawable).
 
 <script type="text/x-mathjax-config">
 	MathJax.Hub.Config({
