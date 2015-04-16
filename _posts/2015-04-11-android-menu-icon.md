@@ -113,7 +113,7 @@ h &= m\sqrt 2\\
 \end{align}
 $$
 
-Since $h$ is of the same length as a square with an edge $m$, we deduct $z=m$, thus $n = (m-g)$ and $S=(m, (m-g))$. 
+Since $h$ is of the same length as the diagonal of a square with an edge $m$, we deduct $z=m$, thus $n = (m-g)$ and $S=(m, (m-g))$. 
 
 Observe that in pic 1, at progress $p=0$, we must be at A. When $p=1$, we must be at S. It's clear that at progress $q$
 
