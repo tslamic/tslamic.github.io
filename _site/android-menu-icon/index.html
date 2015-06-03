@@ -157,7 +157,7 @@
       </div><!-- /.header-title-wrap -->
     </header>
     <div class="entry-content">
-      <p>There’s probably not a single Android developer in the wild that hasn’t heard about Material design yet. </p>
+      <p>There’s probably not a single Android developer in the wild that hasn’t heard about Material design yet.</p>
 
 <p>One of my favorite elements are subtle icon transitions, like the ones presented in <a href="http://www.google.com/design/spec/animation/delightful-details.html">delightful details</a>.</p>
 
@@ -167,17 +167,17 @@
 </video>
 </div>
 
-<p>Starting a redesign of my app, a menu to back-arrow icon - like the one in the top left corner - would come handy. I thought recreating it from scratch would be a great how-to exercise. </p>
+<p>Starting a redesign of my app, a menu to back-arrow icon - like the one in the top left corner - would come handy. I thought recreating it from scratch would be a great how-to exercise.</p>
 
 <blockquote>
   <p>TL;DR Here’s the <a href="https://github.com/tslamic/DelightfulMenuDrawable">GitHub repo</a>.</p>
 </blockquote>
 
-<p><a name="sec_1"></a> </p>
+<p><a name="sec_1"></a></p>
 
 <h3 id="a-birds-eye-view">A bird’s eye view</h3>
 
-<p>Menu to back-arrow icon is a simple drawable with transition animation. Both <em>states</em> consist of three sole lines. The easiest way to define the transition is to mark the points of interest: </p>
+<p>Menu to back-arrow icon is a simple drawable with transition animation. Both <em>states</em> consist of three sole lines. The easiest way to define the transition is to mark the points of interest:</p>
 
 <figure class="center-align">
 	<img src="http://i.imgur.com/VezpDYs.png" title="mapping" />
@@ -220,9 +220,9 @@
 
 <h3 id="progress">Progress</h3>
 
-<p>To get a smooth transition from e.g. A to S, we have to know the inbetween point at each animation frame. But first, we have to decide how to track animation progress. </p>
+<p>To get a smooth transition from e.g. A to S, we have to know the inbetween point at each animation frame. But first, we have to decide how to track animation progress.</p>
 
-<p>Assuming we’ll use property animation, it’s on us to provide a property and set of values we want to animate between. </p>
+<p>Assuming we’ll use property animation, it’s on us to provide a property and set of values we want to animate between.</p>
 
 <p>Let <em>progress</em> denote an arbitrary float value between 0.0 and 1.0, inclusive. This will be our property. We’ll start the animation by executing</p>
 
@@ -230,11 +230,11 @@
 <span class="n">o</span><span class="o">.</span><span class="na">setDuration</span><span class="o">(</span><span class="n">animationDuration</span><span class="o">)</span>
 <span class="n">o</span><span class="o">.</span><span class="na">start</span><span class="o">();</span></code></pre></div>
 
-<p>If progress is 0, we show the menu icon. Else if progress is 1, we show the back-arrow icon. </p>
+<p>If progress is 0, we show the menu icon. Else if progress is 1, we show the back-arrow icon.</p>
 
 <p>Progressing from 0 to 1 transforms a home icon to a back-arrow. Conversely, 1 to 0 goes from a back-arrow to home.</p>
 
-<p><a name="sec_4"></a> </p>
+<p><a name="sec_4"></a></p>
 
 <h3 id="math">Math</h3>
 
@@ -245,7 +245,7 @@
 	<figcaption>Pic 1</figcaption>
 </figure>
 
-<p>P is the point at progress $0 &lt; q &lt; 1$, moving between A and S. We want to know $dx$ and $dy$. </p>
+<p>P is the point at progress $0 &lt; q &lt; 1$, moving between A and S. We want to know $dx$ and $dy$.</p>
 
 <p>Let’s find coordinates of S first, assuming A is the origin. 
 Clearly its $x$ coordinate is $m$. To determine $n$, a bigger picture helps:</p>
@@ -262,25 +262,21 @@ Clearly its $x$ coordinate is $m$. To determine $n$, a bigger picture helps:</p>
 <p>We can get $h$ from</p>
 
 <script type="math/tex; mode=display">% <![CDATA[
-
 \begin{align}
 \cos t &= \frac{m}{h}\\
 \frac{\sqrt 2}{2} &= \frac{m}{h}\\
 h &= m\sqrt 2\\
-\end{align}
- %]]></script>
+\end{align} %]]></script>
 
-<p>Since $h$ is of the same length as the diagonal of a square with an edge $m$, we deduct $z=m$, thus $n = (m-g)$ and $S=(m, (m-g))$. </p>
+<p>Since $h$ is of the same length as the diagonal of a square with an edge $m$, we deduct $z=m$, thus $n = (m-g)$ and $S=(m, (m-g))$.</p>
 
 <p>Observe that in pic 1, at progress $p=0$, we must be at A. When $p=1$, we must be at S. It’s clear that at progress $q$</p>
 
 <script type="math/tex; mode=display">% <![CDATA[
-
 \begin{align}
 dx &= qm \\
 dy &= q(m-g)
-\end{align}
- %]]></script>
+\end{align} %]]></script>
 
 <p>Another movement we have to take care of is B to D:</p>
 
@@ -291,9 +287,7 @@ dy &= q(m-g)
 
 <p>Only $dg$ is changing. Applying similar logic as above, we know</p>
 
-<script type="math/tex; mode=display">
-dg = qg
-</script>
+<script type="math/tex; mode=display">dg = qg</script>
 
 <p>Note that C-D line (or T-U) is a mirror line. As such, reflecting the $y$ coordinate gets us E-F line changes for free.</p>
 
@@ -303,9 +297,9 @@ dg = qg
 
 <h3 id="draw">Draw</h3>
 
-<p>As mentioned, both drawable states have only three simple lines. <code>Canvas</code> has a convenient method <code>drawLine</code>, which is all we need. </p>
+<p>As mentioned, both drawable states have only three simple lines. <code>Canvas</code> has a convenient method <code>drawLine</code>, which is all we need.</p>
 
-<p>To be able to draw, we need to calculate <code>dx</code>,  <code>dy</code> and <code>dv</code> and know points A, B, C, D, E, F. </p>
+<p>To be able to draw, we need to calculate <code>dx</code>,  <code>dy</code> and <code>dv</code> and know points A, B, C, D, E, F.</p>
 
 <p>First three change when progress changes, but others just need bounds. We can compute them in a helper method, which is only invoked when the bounds are set.</p>
 
@@ -331,7 +325,7 @@ dg = qg
 	<span class="n">invalidateSelf</span><span class="o">();</span>
 <span class="o">}</span></code></pre></div>
 
-<p>In the code above, <code>mHalfLineLength</code> denotes $m$, <code>mLineGap</code> denotes $g$ and <code>strokeWidth</code> is $w$. Other instance variables fully determine the points: </p>
+<p>In the code above, <code>mHalfLineLength</code> denotes $m$, <code>mLineGap</code> denotes $g$ and <code>strokeWidth</code> is $w$. Other instance variables fully determine the points:</p>
 
 <ul>
   <li>A(<code>mStartX</code>, <code>mTopY</code>)</li>
@@ -355,7 +349,7 @@ dg = qg
 	<span class="n">canvas</span><span class="o">.</span><span class="na">drawLine</span><span class="o">(</span><span class="n">mStartX</span> <span class="o">+</span> <span class="n">dx</span><span class="o">,</span> <span class="n">mBottomY</span> <span class="o">+</span> <span class="n">dy</span><span class="o">,</span> <span class="n">mEndX</span><span class="o">,</span> <span class="n">mBottomY</span> <span class="o">-</span> <span class="n">dg</span><span class="o">,</span> <span class="n">mPaint</span><span class="o">);</span>
 <span class="o">}</span></code></pre></div>
 
-<p>Note that we apply the transformations computed in the <a href="#sec_4">math section</a>. </p>
+<p>Note that we apply the transformations computed in the <a href="#sec_4">math section</a>.</p>
 
 <h3 id="demo">Demo</h3>
 
@@ -375,9 +369,9 @@ dg = qg
 
 <p>If progress is 1, the above widget reveals the pointy end of the arrow is not really pointy.</p>
 
-<p>When drawing on a <code>Canvas</code> instance, Android uses <a href="https://code.google.com/p/skia/">Skia</a>, a 2D graphics library, to do the actual drawing. <code>Canvas.drawLine</code> invokes a native method <code>SkCanvas::drawLine</code>, which invokes <code>SkCanvas::onDrawPoints</code>. Because our <code>mPaint</code> instance is not complex (it has no path effects, for example), <code>SkPaint::doComputeFastBounds</code> is called. </p>
+<p>When drawing on a <code>Canvas</code> instance, Android uses <a href="https://code.google.com/p/skia/">Skia</a>, a 2D graphics library, to do the actual drawing. <code>Canvas.drawLine</code> invokes a native method <code>SkCanvas::drawLine</code>, which invokes <code>SkCanvas::onDrawPoints</code>. Because our <code>mPaint</code> instance is not complex (it has no path effects, for example), <code>SkPaint::doComputeFastBounds</code> is called.</p>
 
-<p>We care because in this case, if the <code>mPaint</code> stroke width is $w$, the rendered point has a radius of $w/2$. </p>
+<p>We care because in this case, if the <code>mPaint</code> stroke width is $w$, the rendered point has a radius of $w/2$.</p>
 
 <p>Here’s a zoomed in look at U, where B and F meet and progress is 1:</p>
 
@@ -387,23 +381,19 @@ dg = qg
 	Line A-B (S-U) is colored purple. Line E-F (V-U) is colored green. Red square is the issue we're trying to resolve. </figcaption>
 </figure>
 
-<p>If we offset B and F by $(zx, -zy), (zx, zy)$ respectively, we cover the red square. </p>
+<p>If we offset B and F by $(zx, -zy), (zx, zy)$ respectively, we cover the red square.</p>
 
 <p>Because of the above analysis, we know $r=\frac{w}{2}$. Both lines come at a 45 degree angle, hence $k = 45\deg$ too. We can use trigonometric ratios again:</p>
 
 <script type="math/tex; mode=display">% <![CDATA[
-
 \begin{align}
 zx &= h\cos k \\
 zy &= h\sin k
-\end{align}
- %]]></script>
+\end{align} %]]></script>
 
 <p>Because $\cos 45 = \sin 45 = \frac{\sqrt 2}{2}$ and $h= \frac{w}{2}$, we get</p>
 
-<script type="math/tex; mode=display">
-zx = \frac{w}{2} \cdot \frac{\sqrt 2}{2} = zy = \frac{\sqrt 2}{4}w
-</script>
+<script type="math/tex; mode=display">zx = \frac{w}{2} \cdot \frac{\sqrt 2}{2} = zy = \frac{\sqrt 2}{4}w</script>
 
 <p>Applying progress and updating the <code>draw</code> method, we get</p>
 
@@ -577,20 +567,20 @@ zx = \frac{w}{2} \cdot \frac{\sqrt 2}{2} = zy = \frac{\sqrt 2}{4}w
       <a href="/on-advanced-task-killer/" class="read-more-btn">Read More</a>
     </div><!-- /.read-more-header -->
     <div class="read-more-content">
-      <h3><a href="/on-advanced-task-killer/" title="On Advanced Task Killer">On Advanced Task Killer</a></h3>
-      <p>There’s not a single Android enthusiast that doesn’t know the Advanced Task Killer app. But how does it work and what does it actually do? <a href="/on-advanced-task-killer/">Continue reading</a></p>
+      <h3><a href="/sync-folders-with-python/" title="Sync folders with Python">Sync folders with Python</a></h3>
+      <p>Manually comparing and synchronizing two folders can be tedious. Add long, confusing and very similar filenames and it's no fun at all. Here's how to automate the process with Python. <a href="/sync-folders-with-python/">Continue reading</a></p>
     </div><!-- /.read-more-content -->
   
   <div class="read-more-list">
     
       <div class="list-item">
-        <h4><a href="/fancy-background/" title="Fancy Background">Fancy Background</a></h4>
-        <span>Published on February 23, 2015</span>
+        <h4><a href="/on-advanced-task-killer/" title="On Advanced Task Killer">On Advanced Task Killer</a></h4>
+        <span>Published on March 01, 2015</span>
       </div><!-- /.list-item -->
     
       <div class="list-item">
-        <h4><a href="/android-monkeys-stress-testing/" title="Android, monkeys and stress testing">Android, monkeys and stress testing</a></h4>
-        <span>Published on February 08, 2015</span>
+        <h4><a href="/fancy-background/" title="Fancy Background">Fancy Background</a></h4>
+        <span>Published on February 23, 2015</span>
       </div><!-- /.list-item -->
     
   </div><!-- /.read-more-list -->

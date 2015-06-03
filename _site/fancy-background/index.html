@@ -151,7 +151,7 @@
         <p class="entry-reading-time">
           <i class="fa fa-clock-o"></i>
           
-          Reading time ~3 minutes
+          Reading time ~2 minutes
         </p><!-- /.entry-reading-time -->
         
       </div><!-- /.header-title-wrap -->
@@ -174,13 +174,13 @@
   </tbody>
 </table>
 
-<p>Android runs on a variety of devices, with different screen sizes and densities. Providing alternative resources is a standard practice. Let’s assume that in our case, the design team only gave us resources of <code>xxhdpi</code> size. To make matters worse, an <code>OutOfMemoryError</code> is thrown when we try to load any image into memory on our S3 mini. </p>
+<p>Android runs on a variety of devices, with different screen sizes and densities. Providing alternative resources is a standard practice. Let’s assume that in our case, the design team only gave us resources of <code>xxhdpi</code> size. To make matters worse, an <code>OutOfMemoryError</code> is thrown when we try to load any image into memory on our S3 mini.</p>
 
 <blockquote>
   <p>Given that you are working with limited memory, ideally you only want to load a lower resolution version in memory. The lower resolution version should match the size of the UI component that displays it. An image with a higher resolution does not provide any visible benefit, but still takes up precious memory and incurs additional performance overhead due to additional on the fly scaling.</p>
 </blockquote>
 
-<p>is what the <a href="http://developer.android.com/training/displaying-bitmaps/load-bitmap.html">docs</a> say about efficient bitmap loading. Therefore, in order to load the background images into memory successfully, we have to subsample and, most likely, scale them. </p>
+<p>is what the <a href="http://developer.android.com/training/displaying-bitmaps/load-bitmap.html">docs</a> say about efficient bitmap loading. Therefore, in order to load the background images into memory successfully, we have to subsample and, most likely, scale them.</p>
 
 <p>This real-world scenario is the motivation behind FancyBackground. FancyBackground animates through a set of resource Drawables. It ensures they are subsampled and cached, if need be, with all the heavy lifting done in the background. The usage is simple. To animate between <code>R.drawable.fst</code>, <code>R.drawable.snd</code> and <code>R.drawable.trd</code>, showing each for 2.5 seconds, simply do:</p>
 
@@ -191,7 +191,7 @@
                <span class="o">.</span><span class="na">interval</span><span class="o">(</span><span class="mi">2500</span><span class="o">)</span>
                <span class="o">.</span><span class="na">start</span><span class="o">();</span></code></pre></div>
 
-<p>The code above gives us subsampling, caching and automatic transitions for free. </p>
+<p>The code above gives us subsampling, caching and automatic transitions for free.</p>
 
 <p>There are other options available, so let’s do a quick abstract:</p>
 
@@ -238,10 +238,10 @@
   </tbody>
 </table>
 
-<p><code>FancyListener</code> can receive four events: </p>
+<p><code>FancyListener</code> can receive four events:</p>
 
 <ul>
-  <li><code>onStarted</code> when the FancyBackground is started </li>
+  <li><code>onStarted</code> when the FancyBackground is started</li>
   <li><code>onNew</code> when a new image is set</li>
   <li><code>onLoopDone</code> if looping is set to false and the first cycle is complete</li>
   <li><code>onStopped</code> when the FancyBackground stops.</li>
@@ -249,11 +249,11 @@
 
 <p><code>FancyCache</code> enables you to create your own bitmap cache. <code>FancyLruCache</code> is the default, targeting ~25% of the available heap and evicting the least recently used bitmap if over capacity. Use <code>null</code> to avoid caching.</p>
 
-<p>To try it out, make sure to add the following to your dependency list: </p>
+<p>To try it out, make sure to add the following to your dependency list:</p>
 
 <div class="highlight"><pre><code class="language-bash" data-lang="bash">compile <span class="s1">&#39;com.github.tslamic.fancybackground:library:1.0&#39;</span></code></pre></div>
 
-<p>For an example, visit my <a href="https://github.com/tslamic/FancyBackground">Github profile</a>. </p>
+<p>For an example, visit my <a href="https://github.com/tslamic/FancyBackground">Github profile</a>.</p>
 
       <footer class="entry-meta">
         <span class="entry-tags"><a href="/tags/#android" title="Pages tagged android" class="tag"><span class="term">android</span></a><a href="/tags/#bitmap" title="Pages tagged bitmap" class="tag"><span class="term">bitmap</span></a><a href="/tags/#memory" title="Pages tagged memory" class="tag"><span class="term">memory</span></a><a href="/tags/#cache" title="Pages tagged cache" class="tag"><span class="term">cache</span></a><a href="/tags/#subsampling" title="Pages tagged subsampling" class="tag"><span class="term">subsampling</span></a></span>
@@ -274,20 +274,20 @@
       <a href="/android-monkeys-stress-testing/" class="read-more-btn">Read More</a>
     </div><!-- /.read-more-header -->
     <div class="read-more-content">
-      <h3><a href="/android-menu-icon/" title="Android menu icon, delightfully">Android menu icon, delightfully</a></h3>
-      <p>Starting a redesign of my app, a contemporary menu to back-arrow icon - like the one introduced in Material design, would come handy. I thought recreating it from scratch would be a great how-to exercise. Here's my recipe. <a href="/android-menu-icon/">Continue reading</a></p>
+      <h3><a href="/sync-folders-with-python/" title="Sync folders with Python">Sync folders with Python</a></h3>
+      <p>Manually comparing and synchronizing two folders can be tedious. Add long, confusing and very similar filenames and it's no fun at all. Here's how to automate the process with Python. <a href="/sync-folders-with-python/">Continue reading</a></p>
     </div><!-- /.read-more-content -->
   
   <div class="read-more-list">
     
       <div class="list-item">
-        <h4><a href="/on-advanced-task-killer/" title="On Advanced Task Killer">On Advanced Task Killer</a></h4>
-        <span>Published on March 01, 2015</span>
+        <h4><a href="/android-menu-icon/" title="Android menu icon, delightfully">Android menu icon, delightfully</a></h4>
+        <span>Published on April 11, 2015</span>
       </div><!-- /.list-item -->
     
       <div class="list-item">
-        <h4><a href="/android-monkeys-stress-testing/" title="Android, monkeys and stress testing">Android, monkeys and stress testing</a></h4>
-        <span>Published on February 08, 2015</span>
+        <h4><a href="/on-advanced-task-killer/" title="On Advanced Task Killer">On Advanced Task Killer</a></h4>
+        <span>Published on March 01, 2015</span>
       </div><!-- /.list-item -->
     
   </div><!-- /.read-more-list -->

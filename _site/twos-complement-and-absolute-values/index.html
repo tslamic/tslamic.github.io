@@ -232,7 +232,7 @@ a combination of 8 bits <em>glued together</em>:</p>
 For an arbitrary n-bit binary number, to get its opposite representation, first invert the number, then add 1.
 </blockquote>
 
-<p>This simple algorithm forms Two’s Complement, the most commonly used signed number representation system in use today. </p>
+<p>This simple algorithm forms Two’s Complement, the most commonly used signed number representation system in use today.</p>
 
 <p>Let’s do an example: find the opposite value of the binary number <code>00001010</code>:</p>
 <pre>
@@ -262,19 +262,19 @@ For an arbitrary n-bit binary number, to get its opposite representation, first 
 
 <h3 id="sign">Sign</h3>
 
-<p>In Two’s Complement, the most significant bit represents the sign. <code>0</code> means the number will be positive, <code>1</code> negative. The implication is that with <em>n</em> bits, you can only use <em>(n-1)</em> bits to represent the number, as one bit is reserved to denote the sign. </p>
+<p>In Two’s Complement, the most significant bit represents the sign. <code>0</code> means the number will be positive, <code>1</code> negative. The implication is that with <em>n</em> bits, you can only use <em>(n-1)</em> bits to represent the number, as one bit is reserved to denote the sign.</p>
 
-<p>You may think of <code>01001010</code> as a compound value consisting of <code>0</code> (sign) and <code>1001010</code> (actual binary number). </p>
+<p>You may think of <code>01001010</code> as a compound value consisting of <code>0</code> (sign) and <code>1001010</code> (actual binary number).</p>
 
 <h3 id="but-i-cant-think-in-binary">But I can’t think in binary</h3>
 
-<p>Converting a binary value <code>01001010</code> to decimal is simple. Ignoring the most significant bit, we get </p>
+<p>Converting a binary value <code>01001010</code> to decimal is simple. Ignoring the most significant bit, we get</p>
 
-<script type="math/tex; mode=display"> 0 * 2^{0} + 1 * 2^{1} + 0 * 2^{2} + 1 * 2^{3} + 1 * 2^{6} = 138 </script>
+<script type="math/tex; mode=display">0 * 2^{0} + 1 * 2^{1} + 0 * 2^{2} + 1 * 2^{3} + 1 * 2^{6} = 138</script>
 
-<p>What about <code>10001010</code>? </p>
+<p>What about <code>10001010</code>?</p>
 
-<p>This is a negative value, since the most significant bit is <code>1</code>. To get the actual value, we can apply Two’s Complement algorithm, ignoring the first bit: </p>
+<p>This is a negative value, since the most significant bit is <code>1</code>. To get the actual value, we can apply Two’s Complement algorithm, ignoring the first bit:</p>
 
 <pre>
 ~ 0001010 // invert value
@@ -283,9 +283,9 @@ For an arbitrary n-bit binary number, to get its opposite representation, first 
 = 1110110 // final result
 </pre>
 
-<p>Then, </p>
+<p>Then,</p>
 
-<script type="math/tex; mode=display"> 0 * 2^{0} + 1 * 2^{1} + 1 * 2^{3} + 0 * 2^{4} + 1 * 2^{5} + 1 * 2^{6} + 1 * 2^{7} = 118 </script>
+<script type="math/tex; mode=display">0 * 2^{0} + 1 * 2^{1} + 1 * 2^{3} + 0 * 2^{4} + 1 * 2^{5} + 1 * 2^{6} + 1 * 2^{7} = 118</script>
 
 <p>Because the most significant bit is <code>1</code>, the decimal number we calculated is negative. Therefore, <code>10001010 == -118</code>.</p>
 
@@ -513,7 +513,7 @@ For an arbitrary n-bit binary number, to get its opposite representation, first 
 = 1000 ... 00 // final result
 </pre>
 
-<p>Yes, it does. But what are this values? </p>
+<p>Yes, it does. But what are this values?</p>
 
 <center>
 <table style="width:500px; text-align:center">
@@ -556,7 +556,7 @@ For an arbitrary n-bit binary number, to get its opposite representation, first 
 </table>
 </center>
 
-<p>The values are lower bounds. We’ve shown that in Two’s Complement, the opposite value of a lower bound is still the lower bound. </p>
+<p>The values are lower bounds. We’ve shown that in Two’s Complement, the opposite value of a lower bound is still the lower bound.</p>
 
 <p>This is relevant because <code>-2147483648 == Integer.MIN_VALUE</code>, a lower bound for <code>int</code> type in Java. We know now the opposite value of a lower bound is still the lower bound, which explains why <code>Math.abs(-2147483648) != 2147483648</code>.</p>
 
@@ -579,20 +579,20 @@ For an arbitrary n-bit binary number, to get its opposite representation, first 
       <a href="/java-operators-i-thought-i-knew/" class="read-more-btn">Read More</a>
     </div><!-- /.read-more-header -->
     <div class="read-more-content">
-      <h3><a href="/android-menu-icon/" title="Android menu icon, delightfully">Android menu icon, delightfully</a></h3>
-      <p>Starting a redesign of my app, a contemporary menu to back-arrow icon - like the one introduced in Material design, would come handy. I thought recreating it from scratch would be a great how-to exercise. Here's my recipe. <a href="/android-menu-icon/">Continue reading</a></p>
+      <h3><a href="/sync-folders-with-python/" title="Sync folders with Python">Sync folders with Python</a></h3>
+      <p>Manually comparing and synchronizing two folders can be tedious. Add long, confusing and very similar filenames and it's no fun at all. Here's how to automate the process with Python. <a href="/sync-folders-with-python/">Continue reading</a></p>
     </div><!-- /.read-more-content -->
   
   <div class="read-more-list">
     
       <div class="list-item">
-        <h4><a href="/on-advanced-task-killer/" title="On Advanced Task Killer">On Advanced Task Killer</a></h4>
-        <span>Published on March 01, 2015</span>
+        <h4><a href="/android-menu-icon/" title="Android menu icon, delightfully">Android menu icon, delightfully</a></h4>
+        <span>Published on April 11, 2015</span>
       </div><!-- /.list-item -->
     
       <div class="list-item">
-        <h4><a href="/fancy-background/" title="Fancy Background">Fancy Background</a></h4>
-        <span>Published on February 23, 2015</span>
+        <h4><a href="/on-advanced-task-killer/" title="On Advanced Task Killer">On Advanced Task Killer</a></h4>
+        <span>Published on March 01, 2015</span>
       </div><!-- /.list-item -->
     
   </div><!-- /.read-more-list -->

@@ -4,13 +4,321 @@
 <generator uri="https://github.com/mojombo/jekyll">Jekyll</generator>
 <link rel="self" type="application/atom+xml" href="/feed.xml" />
 <link rel="alternate" type="text/html" href="" />
-<updated>2015-04-16T01:39:33-04:00</updated>
+<updated>2015-06-03T02:11:07-04:00</updated>
 <id>/</id>
 <author>
   <name>Tadej Slamic</name>
   <uri>/</uri>
   
 </author>
+
+
+<entry>
+  <title type="html"><![CDATA[Sync folders with Python]]></title>
+ <link rel="alternate" type="text/html" href="/sync-folders-with-python/" />
+  <id>/sync-folders-with-python</id>
+  <published>2015-05-30T00:00:00-04:00</published>
+  <updated>2015-05-30T00:00:00-04:00</updated>
+  <author>
+    <name>Tadej Slamic</name>
+    <uri></uri>
+    <email></email>
+  </author>
+  <content type="html">
+    &lt;p&gt;Manually comparing and synchronizing two folders can be tedious. Add long, confusing and very similar filenames and it’s no fun at all.&lt;/p&gt;
+
+&lt;figure class=&quot;center-align&quot;&gt;
+	&lt;img src=&quot;http://throb.pagesperso-orange.fr/prg/Xojo/SyncTwoFolders_1024.png&quot; title=&quot;sync-folders&quot; width=&quot;300&quot; height=&quot;300&quot; /&gt;
+	&lt;figcaption&gt;Source: throb.pagesperso-orange.fr&lt;/figcaption&gt;
+&lt;/figure&gt;
+
+&lt;p&gt;We recently faced a similar situation at work. Besides cryptic names, there was also a fair share of twisted logic governing the sync scenarios. We had to get our hands dirty, since the standard tools were useless.&lt;/p&gt;
+
+&lt;p&gt;Because we don’t have to do the sync often, and the folders have always been of reasonable size, automating the process seemed an overkill. However, as our products grow, so do the folders needing sync. We recently figured spending some time to create a script would be a good future investment.&lt;/p&gt;
+
+&lt;p&gt;This post builds upon ideas I came across writing the script, but were ultimately left out or done differently. It concludes with a simple tool capable of syncing two folders. The code was written using version 2.7.6.&lt;/p&gt;
+
+&lt;h3 id=&quot;backing-and-reverting&quot;&gt;Backing and reverting&lt;/h3&gt;
+
+&lt;p&gt;Let’s assume nothing is under version control. It would be cool if our script would have a revert mechanism of sorts, in case something funky happens during sync. To keep it simple, maybe a directory snapshot is enough:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;backup&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;directory&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;tag&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;ensure_dir_exists&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;directory&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;not&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;os&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;path&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;isdir&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;REPO&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;os&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;makedirs&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;REPO&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;assert&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;os&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;path&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;isdir&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;REPO&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;key&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;str&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;time&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;time&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;())&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;sha&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;hashlib&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sha1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;key&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;hexdigest&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;archive_path&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;os&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;path&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;join&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;REPO&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sha&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;assert&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;not&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;os&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;path&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;isfile&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;archive_path&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;shutil&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;make_archive&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;archive_path&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;zip&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;directory&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;backup_path&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;os&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;path&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;join&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;directory&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;BACKUP&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;with&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;open&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;backup_path&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;#39;w&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;as&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;b&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;b&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;write&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sha&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;assert&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;os&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;path&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;getsize&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;backup_path&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;BACKUP_FILE_LENGTH&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;tag&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;set_tag&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;directory&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;archive_path&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;.zip&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;tag&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;It seems dense, but it’s easy to explain. First, we create a repository folder or &lt;code&gt;REPO&lt;/code&gt;, if it doesn’t exist yet. It is where the backup snapshots live. We then save the archived directory under a unique name to &lt;code&gt;REPO&lt;/code&gt;. Tag is optional, but if given, we’ll be able to reference the archived file with it. The name is written into &lt;code&gt;backup_path&lt;/code&gt; and saved to &lt;code&gt;directory&lt;/code&gt;. Let’s call it the &lt;code&gt;BACKUP&lt;/code&gt; file. It’s there to help us revert:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;revert&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;directory&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;archive_path&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;ensure_dir_exists&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;directory&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;archive_path&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;is&lt;/span&gt; &lt;span class=&quot;bp&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;archive_name&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;get_archive_name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;directory&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;archive_path&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;os&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;path&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;join&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;REPO&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;archive_name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;not&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;os&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;path&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;isfile&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;archive_path&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;raise&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;CpException&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;Archive &amp;#39;&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%s&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39; missing.&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;archive_path&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;shutil&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;rmtree&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;directory&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;with&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;zipfile&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ZipFile&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;archive_path&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;as&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;zf&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;zf&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;extractall&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;directory&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;In order to revert, we need to know the archived file to revert to. This is written in the &lt;code&gt;BACKUP&lt;/code&gt; file which should be part of &lt;code&gt;directory&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;get_archive_name&lt;/code&gt; helps us extract it:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;get_archive_name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;directory&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;assert&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;os&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;path&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;isdir&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;directory&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;backup_path&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;os&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;path&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;join&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;directory&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;BACKUP&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;not&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;os&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;path&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;isfile&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;backup_path&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;raise&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;CpException&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;Backup file missing in &amp;#39;&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%s&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;.&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;directory&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;with&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;open&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;backup_path&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;as&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;b&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;archive_name&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;b&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;readline&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;not&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;re&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;compile&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ARCHIVE_NAME_REGEX&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;match&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;archive_name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;raise&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;CpException&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;Backup file in &amp;#39;&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%s&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39; corrupted.&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;directory&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;archive_name&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;.zip&amp;quot;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Note that any backed state is reachable by a sequence of reverts, as long as &lt;code&gt;REPO&lt;/code&gt; contains the appropriate archive:&lt;/p&gt;
+
+&lt;figure class=&quot;center-align&quot;&gt;
+	&lt;img src=&quot;http://i.imgur.com/mIISsct.png&quot; title=&quot;backup-revert&quot; /&gt;
+	&lt;figcaption&gt;Magenta arrows represent backups, green arrows reverts.&lt;/figcaption&gt;
+&lt;/figure&gt;
+
+&lt;p&gt;We should also be able to revert using tags. Here’s one way to do it:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;&lt;span class=&quot;n&quot;&gt;INSERT_TAG&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;INSERT OR REPLACE INTO tags VALUES (?,?,?)&amp;quot;&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;GET_TAG&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;SELECT dir,zip FROM tags WHERE tag=?&amp;quot;&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;CREATE_TAGS_TABLE&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;&amp;quot;&amp;quot;&lt;/span&gt;
+&lt;span class=&quot;s&quot;&gt;CREATE TABLE IF NOT EXISTS tags (&lt;/span&gt;
+&lt;span class=&quot;s&quot;&gt;    tag TEXT PRIMARY KEY,&lt;/span&gt;
+&lt;span class=&quot;s&quot;&gt;    dir TEXT,&lt;/span&gt;
+&lt;span class=&quot;s&quot;&gt;    zip TEXT&lt;/span&gt;
+&lt;span class=&quot;s&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;s&quot;&gt;&amp;quot;&amp;quot;&amp;quot;&lt;/span&gt;
+
+
+&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;set_tag&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;directory&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;archive_path&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;tag&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;assert&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;tag&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;and&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;os&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;path&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;isdir&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;directory&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;and&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;os&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;path&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;isfile&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;archive_path&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;with&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sqlite3&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;connect&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;TAGS&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;as&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;db&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;cursor&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;db&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;cursor&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;cursor&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;execute&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;CREATE_TAGS_TABLE&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;cursor&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;execute&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;INSERT_TAG&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;tag&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;directory&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;archive_path&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;db&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;commit&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+
+
+&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;revert_by_tag&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;tag&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;assert&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;tag&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;with&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sqlite3&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;connect&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;TAGS&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;as&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;db&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;cursor&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;db&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;cursor&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;cursor&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;execute&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;GET_TAG&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;tag&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,))&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;result&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;cursor&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;fetchone&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;not&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;result&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;raise&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;CpException&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;Tag &amp;#39;&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%s&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39; does not exist.&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;tag&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;directory&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;archive_path&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;result&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;revert&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;directory&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;archive_path&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;My initial thought was to serialize and de-serialize a dictionary, but performance would degrade quickly. Even with a bit of SQL, I’d argue the above is quite concise.&lt;/p&gt;
+
+&lt;p&gt;It’s also quite easy to show tag history of a directory:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;&lt;span class=&quot;n&quot;&gt;GET_DIR&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;SELECT tag,zip FROM tags WHERE dir=?&amp;quot;&lt;/span&gt;
+
+
+&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;show_tag_history&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;directory&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;with&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sqlite3&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;connect&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;TAGS&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;as&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;db&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;cursor&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;db&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;cursor&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;cursor&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;execute&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;GET_DIR&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;directory&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,))&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;result&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;cursor&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;fetchall&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;not&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;result&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;raise&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;CpException&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;Directory &amp;#39;&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%s&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39; has no backup history.&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;directory&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;item&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;result&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;tag&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;archive_path&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;item&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;os&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;path&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;isfile&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;archive_path&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;created&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;os&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;path&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;getctime&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;archive_path&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+            &lt;span class=&quot;k&quot;&gt;print&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;TAG=&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%s&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;, CREATED=&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%s&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;tag&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;time&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ctime&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;created&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;There are a few things to consider when reverting:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;we’re blindly extracting archives without prior inspection. It is possible that files are created outside of path, e.g. filenames starting with two dots. This could be a security hazard.&lt;/li&gt;
+  &lt;li&gt;someone could backup the root directory, then try to recover it and happily wipe out the hard drive, since we don’t worry about the directory we’re clearing.&lt;/li&gt;
+  &lt;li&gt;if the directory contains symbolic links, &lt;code&gt;shutil.rmtree(directory)&lt;/code&gt; will throw an &lt;code&gt;OSError&lt;/code&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;The issues are somewhat easily fixable and might be a good exercise to try out.&lt;/p&gt;
+
+&lt;h3 id=&quot;finding-and-applying-the-differences&quot;&gt;Finding and applying the differences&lt;/h3&gt;
+
+&lt;p&gt;Finding the differences between two directories couldn’t be simpler:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;find_diff&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;src&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dst&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;os&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;path&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;isdir&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;dst&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;diff&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;filecmp&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;dircmp&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;src&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dst&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;diff_list&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;diff&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;left_only&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;diff&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;diff_files&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;else&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;diff_list&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;f&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;f&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;os&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;listdir&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;src&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)]&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;ignore&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;BACKUP&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;SYNC&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;filter&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;lambda&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;l&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;l&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;not&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ignore&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;diff_list&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;If &lt;code&gt;dst&lt;/code&gt; does not exist, then the difference is the &lt;code&gt;src&lt;/code&gt; directory content. Otherwise, there’s a handy module we can use: &lt;code&gt;filecmp&lt;/code&gt;. It contains a function &lt;code&gt;dircmp&lt;/code&gt; that does exactly what we need - it finds all the differences between two folders.&lt;/p&gt;
+
+&lt;p&gt;We’re interested in files or folders only in &lt;code&gt;src&lt;/code&gt;, or common files that differ. We also don’t want to copy any of the config files, so we filter them out.&lt;/p&gt;
+
+&lt;p&gt;This is how to apply the differences:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;apply_diff&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;src&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dst&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;diff_list&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;auto_backup&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;True&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;backup_tag&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;diff_list&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;is&lt;/span&gt; &lt;span class=&quot;bp&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;diff_list&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;find_diff&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;src&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dst&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;diff_list&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;auto_backup&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;backup&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;dst&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;backup_tag&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;item&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;diff_list&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;src_item&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;os&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;path&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;join&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;src&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;item&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;dst_item&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;os&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;path&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;join&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;dst&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;item&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+            &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;os&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;path&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;isdir&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;src_item&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+                &lt;span class=&quot;n&quot;&gt;shutil&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;copytree&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;src_item&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dst_item&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+            &lt;span class=&quot;k&quot;&gt;else&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+                &lt;span class=&quot;n&quot;&gt;shutil&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;copy&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;src_item&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dst_item&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;The code speaks for itself. The point to note is the backup we perform before any copying is done. This enables us to revert if something goes sour.&lt;/p&gt;
+
+&lt;h3 id=&quot;syncing-the-same-folders-over-and-over-and-over&quot;&gt;Syncing the same folders over and over and over…&lt;/h3&gt;
+
+&lt;p&gt;Sometimes, you know beforehand the folders you need to sync. For example, you know that folder &lt;code&gt;A&lt;/code&gt; will always have to be synced with folders &lt;code&gt;B&lt;/code&gt; and  &lt;code&gt;C&lt;/code&gt;. This is where &lt;code&gt;SYNC&lt;/code&gt; file comes into play. It contains one or more source folders, each listed on a separate line.&lt;/p&gt;
+
+&lt;p&gt;In the example above, folder &lt;code&gt;A&lt;/code&gt; should contain the &lt;code&gt;SYNC&lt;/code&gt; file with the following content:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;/an/absolute/path/to/B
+/an/absolute/path/to/C&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Then, all we need to do is sync the directory containing the &lt;code&gt;SYNC&lt;/code&gt; file:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;sync&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;directory&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;backup_tag&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;ensure_dir_exists&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;directory&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;sync_path&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;os&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;path&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;join&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;directory&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;SYNC&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;not&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;os&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;path&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;isfile&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sync_path&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;raise&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;CpException&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;Sync file for &amp;#39;&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%s&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39; missing.&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;directory&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;with&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;open&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sync_path&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;as&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;s&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;src_list&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;s&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;read&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;splitlines&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;not&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;src_list&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;raise&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;CpException&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;Sync file is empty.&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;src&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;src_list&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;ensure_dir_exists&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;src&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;Invalid source dir: &amp;#39;&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%s&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;.&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;src&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;backup&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;directory&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;backup_tag&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;src&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;src_list&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;apply_diff&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;src&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;directory&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;auto_backup&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;False&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;backup_tag&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;backup_tag&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;As you can see, it’s as straightforward as opening the &lt;code&gt;SYNC&lt;/code&gt; file, reading the sources, and then applying the differences.&lt;/p&gt;
+
+&lt;p&gt;Of course, we should provide means to generate such file:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;generate_sync_file&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;directory&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sources&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;ensure_dir_exists&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;directory&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;absolute_paths&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;os&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;path&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;abspath&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;s&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;s&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sources&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;sync_file&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;os&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;path&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;join&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;directory&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;SYNC&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;with&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;open&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sync_file&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;w&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;as&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;cp&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;cp&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;writelines&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;absolute_paths&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;assert&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;os&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;path&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;getsize&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sync_file&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;adding-cli&quot;&gt;Adding CLI&lt;/h3&gt;
+
+&lt;p&gt;To wrap what we’ve done in a simple utility tool, we should create a command line interface, so the user can interact with it. &lt;code&gt;argparse&lt;/code&gt; module makes this simple. Before turning to code, here’s what the user should be able to do:&lt;/p&gt;
+
+&lt;h4 id=&quot;copy-different-files-from-one-directory-to-another&quot;&gt;1. Copy different files from one directory to another&lt;/h4&gt;
+
+&lt;p&gt;Example usage: &lt;code&gt;cp -t sample_tag /source/path/dir /destination/path/dir&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;The comand requires a &lt;code&gt;src&lt;/code&gt; directory and a &lt;code&gt;dst&lt;/code&gt; directory, where &lt;code&gt;dst&lt;/code&gt; will be synced with &lt;code&gt;src&lt;/code&gt;. Tag is optional.&lt;/p&gt;
+
+&lt;h4 id=&quot;revert-a-directory-or-tag&quot;&gt;2. Revert a directory or tag&lt;/h4&gt;
+
+&lt;p&gt;Example usage: &lt;code&gt;rv -t sample_tag&lt;/code&gt; or &lt;code&gt;rv -d /random/path/dir&lt;/code&gt;&lt;/p&gt;
+
+&lt;h4 id=&quot;sync-a-directory&quot;&gt;3. Sync a directory&lt;/h4&gt;
+
+&lt;p&gt;Example usage: &lt;code&gt;sync -t just_in_case /random/dir/path&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;/random/dir/path&lt;/code&gt; should contain the &lt;code&gt;SYNC&lt;/code&gt; file. Tag is optional.&lt;/p&gt;
+
+&lt;h4 id=&quot;create-a-sync-file&quot;&gt;4. Create a &lt;code&gt;SYNC&lt;/code&gt; file&lt;/h4&gt;
+
+&lt;p&gt;Example usage: &lt;code&gt;mksync dir/path/where/sync/is/created /fst/src /snd/src /trd/src&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;Create a &lt;code&gt;SYNC&lt;/code&gt; file in the first specified directory. Any directory listed afterwards is added to the source list.&lt;/p&gt;
+
+&lt;h4 id=&quot;show-tag-history&quot;&gt;5. Show tag history&lt;/h4&gt;
+
+&lt;p&gt;Example usage: &lt;code&gt;th /random/dir/path&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;It shows the available revert tags.&lt;/p&gt;
+
+&lt;p&gt;Here’s the above in code:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;diff_parser&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;():&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;parser&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;argparse&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ArgumentParser&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;description&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;Compare and copy missing files from one dir to another&amp;quot;&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+    &lt;span class=&quot;n&quot;&gt;subparsers&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;parser&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;add_subparsers&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;title&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;Options&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dest&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;opt&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;tag_parser&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;argparse&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ArgumentParser&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;add_help&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;False&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;tag_parser&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;add_argument&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;-t&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;--tag&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;help&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;Backup tag&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+    &lt;span class=&quot;n&quot;&gt;cp&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;subparsers&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;add_parser&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;cp&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;help&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;Copy from one dir to another&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                               &lt;span class=&quot;n&quot;&gt;parents&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;tag_parser&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;])&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;cp&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;add_argument&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;src&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;help&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;source dir&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;action&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ValidDirAction&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;cp&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;add_argument&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;dst&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;help&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;destination dir&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;action&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ValidDirAction&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+    &lt;span class=&quot;n&quot;&gt;rv&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;subparsers&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;add_parser&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;rv&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;help&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;Revert&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;rv&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;add_argument&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;-d&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;--dir&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;help&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;dir to revert&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;action&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ValidDirAction&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;rv&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;add_argument&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;-t&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;--tag&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;help&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;tag to revert&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+    &lt;span class=&quot;n&quot;&gt;sync&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;subparsers&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;add_parser&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;sync&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;help&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;Auto-sync&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;parents&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;tag_parser&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;])&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;sync&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;add_argument&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;dir&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;help&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;dir to sync&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;action&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ValidDirAction&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+    &lt;span class=&quot;n&quot;&gt;mksync&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;subparsers&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;add_parser&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;mksync&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;help&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;Generate auto-sync folder&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;mksync&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;add_argument&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;dir&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;help&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;dir to auto-sync&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;action&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ValidDirAction&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;mksync&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;add_argument&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;src&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;nargs&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;+&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;help&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;source dirs&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                        &lt;span class=&quot;n&quot;&gt;action&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ValidDirAction&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+    &lt;span class=&quot;n&quot;&gt;history&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;subparsers&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;add_parser&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;th&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;help&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;Tag history&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;history&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;add_argument&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;dir&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;help&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;dir to check&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;action&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ValidDirAction&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;parser&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Perhaps the only interesting thing in our parser is the custom action:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;&lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;ValidDirAction&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;argparse&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Action&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;__call__&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;parser&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;namespace&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;values&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;option_string&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;directories&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;values&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;isinstance&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;values&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;list&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;else&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;values&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;d&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;directories&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+            &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;not&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;os&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;path&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;isdir&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;d&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;and&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;os&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;access&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;d&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;os&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;W_OK&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)):&lt;/span&gt;
+                &lt;span class=&quot;k&quot;&gt;raise&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;argparse&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ArgumentError&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;Invalid dir: &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%s&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;d&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;nb&quot;&gt;setattr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;namespace&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;dest&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;values&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;It ensures that any path we provide as an argument is an existing directory we can write to.&lt;/p&gt;
+
+&lt;h3 id=&quot;fin&quot;&gt;Fin&lt;/h3&gt;
+
+&lt;p&gt;We can now sync two folders and revert if need be. The tool is very simple and only offers crude functionality, but it’s a good starting point to build upon. What always amazes me is the expressiveness of Python and what can be achieved with
+cca. 200 lines of code, half of which are paranoid asserts and param checks.&lt;/p&gt;
+
+&lt;p&gt;I’d also like to note that although I love Python, I don’t use it enough to consider myself a &lt;em&gt;pythonista&lt;/em&gt;. If you spot any piece of code that can be replaced with a more standarized idiom, please let me know!&lt;/p&gt;
+
+&lt;p&gt;As always, there’s a GitHub repo where you can find the complete script.&lt;/p&gt;
+
+    &lt;p&gt;&lt;a href=&quot;/sync-folders-with-python/&quot;&gt;Sync folders with Python&lt;/a&gt; was originally published by Tadej Slamic at &lt;a href=&quot;&quot;&gt;Tadej's Blog&lt;/a&gt; on May 30, 2015.&lt;/p&gt;
+  </content>
+</entry>
 
 
 <entry>
@@ -25,7 +333,7 @@
     <email></email>
   </author>
   <content type="html">
-    &lt;p&gt;There’s probably not a single Android developer in the wild that hasn’t heard about Material design yet. &lt;/p&gt;
+    &lt;p&gt;There’s probably not a single Android developer in the wild that hasn’t heard about Material design yet.&lt;/p&gt;
 
 &lt;p&gt;One of my favorite elements are subtle icon transitions, like the ones presented in &lt;a href=&quot;http://www.google.com/design/spec/animation/delightful-details.html&quot;&gt;delightful details&lt;/a&gt;.&lt;/p&gt;
 
@@ -35,17 +343,17 @@
 &lt;/video&gt;
 &lt;/div&gt;
 
-&lt;p&gt;Starting a redesign of my app, a menu to back-arrow icon - like the one in the top left corner - would come handy. I thought recreating it from scratch would be a great how-to exercise. &lt;/p&gt;
+&lt;p&gt;Starting a redesign of my app, a menu to back-arrow icon - like the one in the top left corner - would come handy. I thought recreating it from scratch would be a great how-to exercise.&lt;/p&gt;
 
 &lt;blockquote&gt;
   &lt;p&gt;TL;DR Here’s the &lt;a href=&quot;https://github.com/tslamic/DelightfulMenuDrawable&quot;&gt;GitHub repo&lt;/a&gt;.&lt;/p&gt;
 &lt;/blockquote&gt;
 
-&lt;p&gt;&lt;a name=&quot;sec_1&quot;&gt;&lt;/a&gt; &lt;/p&gt;
+&lt;p&gt;&lt;a name=&quot;sec_1&quot;&gt;&lt;/a&gt;&lt;/p&gt;
 
 &lt;h3 id=&quot;a-birds-eye-view&quot;&gt;A bird’s eye view&lt;/h3&gt;
 
-&lt;p&gt;Menu to back-arrow icon is a simple drawable with transition animation. Both &lt;em&gt;states&lt;/em&gt; consist of three sole lines. The easiest way to define the transition is to mark the points of interest: &lt;/p&gt;
+&lt;p&gt;Menu to back-arrow icon is a simple drawable with transition animation. Both &lt;em&gt;states&lt;/em&gt; consist of three sole lines. The easiest way to define the transition is to mark the points of interest:&lt;/p&gt;
 
 &lt;figure class=&quot;center-align&quot;&gt;
 	&lt;img src=&quot;http://i.imgur.com/VezpDYs.png&quot; title=&quot;mapping&quot; /&gt;
@@ -88,9 +396,9 @@
 
 &lt;h3 id=&quot;progress&quot;&gt;Progress&lt;/h3&gt;
 
-&lt;p&gt;To get a smooth transition from e.g. A to S, we have to know the inbetween point at each animation frame. But first, we have to decide how to track animation progress. &lt;/p&gt;
+&lt;p&gt;To get a smooth transition from e.g. A to S, we have to know the inbetween point at each animation frame. But first, we have to decide how to track animation progress.&lt;/p&gt;
 
-&lt;p&gt;Assuming we’ll use property animation, it’s on us to provide a property and set of values we want to animate between. &lt;/p&gt;
+&lt;p&gt;Assuming we’ll use property animation, it’s on us to provide a property and set of values we want to animate between.&lt;/p&gt;
 
 &lt;p&gt;Let &lt;em&gt;progress&lt;/em&gt; denote an arbitrary float value between 0.0 and 1.0, inclusive. This will be our property. We’ll start the animation by executing&lt;/p&gt;
 
@@ -98,11 +406,11 @@
 &lt;span class=&quot;n&quot;&gt;o&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;setDuration&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;animationDuration&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
 &lt;span class=&quot;n&quot;&gt;o&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;start&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;If progress is 0, we show the menu icon. Else if progress is 1, we show the back-arrow icon. &lt;/p&gt;
+&lt;p&gt;If progress is 0, we show the menu icon. Else if progress is 1, we show the back-arrow icon.&lt;/p&gt;
 
 &lt;p&gt;Progressing from 0 to 1 transforms a home icon to a back-arrow. Conversely, 1 to 0 goes from a back-arrow to home.&lt;/p&gt;
 
-&lt;p&gt;&lt;a name=&quot;sec_4&quot;&gt;&lt;/a&gt; &lt;/p&gt;
+&lt;p&gt;&lt;a name=&quot;sec_4&quot;&gt;&lt;/a&gt;&lt;/p&gt;
 
 &lt;h3 id=&quot;math&quot;&gt;Math&lt;/h3&gt;
 
@@ -113,7 +421,7 @@
 	&lt;figcaption&gt;Pic 1&lt;/figcaption&gt;
 &lt;/figure&gt;
 
-&lt;p&gt;P is the point at progress $0 &amp;lt; q &amp;lt; 1$, moving between A and S. We want to know $dx$ and $dy$. &lt;/p&gt;
+&lt;p&gt;P is the point at progress $0 &amp;lt; q &amp;lt; 1$, moving between A and S. We want to know $dx$ and $dy$.&lt;/p&gt;
 
 &lt;p&gt;Let’s find coordinates of S first, assuming A is the origin. 
 Clearly its $x$ coordinate is $m$. To determine $n$, a bigger picture helps:&lt;/p&gt;
@@ -130,25 +438,21 @@ Clearly its $x$ coordinate is $m$. To determine $n$, a bigger picture helps:&lt;
 &lt;p&gt;We can get $h$ from&lt;/p&gt;
 
 &lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
-
 \begin{align}
 \cos t &amp;= \frac{m}{h}\\
 \frac{\sqrt 2}{2} &amp;= \frac{m}{h}\\
 h &amp;= m\sqrt 2\\
-\end{align}
- %]]&gt;&lt;/script&gt;
+\end{align} %]]&gt;&lt;/script&gt;
 
-&lt;p&gt;Since $h$ is of the same length as the diagonal of a square with an edge $m$, we deduct $z=m$, thus $n = (m-g)$ and $S=(m, (m-g))$. &lt;/p&gt;
+&lt;p&gt;Since $h$ is of the same length as the diagonal of a square with an edge $m$, we deduct $z=m$, thus $n = (m-g)$ and $S=(m, (m-g))$.&lt;/p&gt;
 
 &lt;p&gt;Observe that in pic 1, at progress $p=0$, we must be at A. When $p=1$, we must be at S. It’s clear that at progress $q$&lt;/p&gt;
 
 &lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
-
 \begin{align}
 dx &amp;= qm \\
 dy &amp;= q(m-g)
-\end{align}
- %]]&gt;&lt;/script&gt;
+\end{align} %]]&gt;&lt;/script&gt;
 
 &lt;p&gt;Another movement we have to take care of is B to D:&lt;/p&gt;
 
@@ -159,9 +463,7 @@ dy &amp;= q(m-g)
 
 &lt;p&gt;Only $dg$ is changing. Applying similar logic as above, we know&lt;/p&gt;
 
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;
-dg = qg
-&lt;/script&gt;
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;dg = qg&lt;/script&gt;
 
 &lt;p&gt;Note that C-D line (or T-U) is a mirror line. As such, reflecting the $y$ coordinate gets us E-F line changes for free.&lt;/p&gt;
 
@@ -171,9 +473,9 @@ dg = qg
 
 &lt;h3 id=&quot;draw&quot;&gt;Draw&lt;/h3&gt;
 
-&lt;p&gt;As mentioned, both drawable states have only three simple lines. &lt;code&gt;Canvas&lt;/code&gt; has a convenient method &lt;code&gt;drawLine&lt;/code&gt;, which is all we need. &lt;/p&gt;
+&lt;p&gt;As mentioned, both drawable states have only three simple lines. &lt;code&gt;Canvas&lt;/code&gt; has a convenient method &lt;code&gt;drawLine&lt;/code&gt;, which is all we need.&lt;/p&gt;
 
-&lt;p&gt;To be able to draw, we need to calculate &lt;code&gt;dx&lt;/code&gt;,  &lt;code&gt;dy&lt;/code&gt; and &lt;code&gt;dv&lt;/code&gt; and know points A, B, C, D, E, F. &lt;/p&gt;
+&lt;p&gt;To be able to draw, we need to calculate &lt;code&gt;dx&lt;/code&gt;,  &lt;code&gt;dy&lt;/code&gt; and &lt;code&gt;dv&lt;/code&gt; and know points A, B, C, D, E, F.&lt;/p&gt;
 
 &lt;p&gt;First three change when progress changes, but others just need bounds. We can compute them in a helper method, which is only invoked when the bounds are set.&lt;/p&gt;
 
@@ -199,7 +501,7 @@ dg = qg
 	&lt;span class=&quot;n&quot;&gt;invalidateSelf&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;
 &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;In the code above, &lt;code&gt;mHalfLineLength&lt;/code&gt; denotes $m$, &lt;code&gt;mLineGap&lt;/code&gt; denotes $g$ and &lt;code&gt;strokeWidth&lt;/code&gt; is $w$. Other instance variables fully determine the points: &lt;/p&gt;
+&lt;p&gt;In the code above, &lt;code&gt;mHalfLineLength&lt;/code&gt; denotes $m$, &lt;code&gt;mLineGap&lt;/code&gt; denotes $g$ and &lt;code&gt;strokeWidth&lt;/code&gt; is $w$. Other instance variables fully determine the points:&lt;/p&gt;
 
 &lt;ul&gt;
   &lt;li&gt;A(&lt;code&gt;mStartX&lt;/code&gt;, &lt;code&gt;mTopY&lt;/code&gt;)&lt;/li&gt;
@@ -223,7 +525,7 @@ dg = qg
 	&lt;span class=&quot;n&quot;&gt;canvas&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;drawLine&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mStartX&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dx&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mBottomY&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dy&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mEndX&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mBottomY&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dg&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mPaint&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
 &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;Note that we apply the transformations computed in the &lt;a href=&quot;#sec_4&quot;&gt;math section&lt;/a&gt;. &lt;/p&gt;
+&lt;p&gt;Note that we apply the transformations computed in the &lt;a href=&quot;#sec_4&quot;&gt;math section&lt;/a&gt;.&lt;/p&gt;
 
 &lt;h3 id=&quot;demo&quot;&gt;Demo&lt;/h3&gt;
 
@@ -243,9 +545,9 @@ dg = qg
 
 &lt;p&gt;If progress is 1, the above widget reveals the pointy end of the arrow is not really pointy.&lt;/p&gt;
 
-&lt;p&gt;When drawing on a &lt;code&gt;Canvas&lt;/code&gt; instance, Android uses &lt;a href=&quot;https://code.google.com/p/skia/&quot;&gt;Skia&lt;/a&gt;, a 2D graphics library, to do the actual drawing. &lt;code&gt;Canvas.drawLine&lt;/code&gt; invokes a native method &lt;code&gt;SkCanvas::drawLine&lt;/code&gt;, which invokes &lt;code&gt;SkCanvas::onDrawPoints&lt;/code&gt;. Because our &lt;code&gt;mPaint&lt;/code&gt; instance is not complex (it has no path effects, for example), &lt;code&gt;SkPaint::doComputeFastBounds&lt;/code&gt; is called. &lt;/p&gt;
+&lt;p&gt;When drawing on a &lt;code&gt;Canvas&lt;/code&gt; instance, Android uses &lt;a href=&quot;https://code.google.com/p/skia/&quot;&gt;Skia&lt;/a&gt;, a 2D graphics library, to do the actual drawing. &lt;code&gt;Canvas.drawLine&lt;/code&gt; invokes a native method &lt;code&gt;SkCanvas::drawLine&lt;/code&gt;, which invokes &lt;code&gt;SkCanvas::onDrawPoints&lt;/code&gt;. Because our &lt;code&gt;mPaint&lt;/code&gt; instance is not complex (it has no path effects, for example), &lt;code&gt;SkPaint::doComputeFastBounds&lt;/code&gt; is called.&lt;/p&gt;
 
-&lt;p&gt;We care because in this case, if the &lt;code&gt;mPaint&lt;/code&gt; stroke width is $w$, the rendered point has a radius of $w/2$. &lt;/p&gt;
+&lt;p&gt;We care because in this case, if the &lt;code&gt;mPaint&lt;/code&gt; stroke width is $w$, the rendered point has a radius of $w/2$.&lt;/p&gt;
 
 &lt;p&gt;Here’s a zoomed in look at U, where B and F meet and progress is 1:&lt;/p&gt;
 
@@ -255,23 +557,19 @@ dg = qg
 	Line A-B (S-U) is colored purple. Line E-F (V-U) is colored green. Red square is the issue we&#39;re trying to resolve. &lt;/figcaption&gt;
 &lt;/figure&gt;
 
-&lt;p&gt;If we offset B and F by $(zx, -zy), (zx, zy)$ respectively, we cover the red square. &lt;/p&gt;
+&lt;p&gt;If we offset B and F by $(zx, -zy), (zx, zy)$ respectively, we cover the red square.&lt;/p&gt;
 
 &lt;p&gt;Because of the above analysis, we know $r=\frac{w}{2}$. Both lines come at a 45 degree angle, hence $k = 45\deg$ too. We can use trigonometric ratios again:&lt;/p&gt;
 
 &lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
-
 \begin{align}
 zx &amp;= h\cos k \\
 zy &amp;= h\sin k
-\end{align}
- %]]&gt;&lt;/script&gt;
+\end{align} %]]&gt;&lt;/script&gt;
 
 &lt;p&gt;Because $\cos 45 = \sin 45 = \frac{\sqrt 2}{2}$ and $h= \frac{w}{2}$, we get&lt;/p&gt;
 
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;
-zx = \frac{w}{2} \cdot \frac{\sqrt 2}{2} = zy = \frac{\sqrt 2}{4}w
-&lt;/script&gt;
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;zx = \frac{w}{2} \cdot \frac{\sqrt 2}{2} = zy = \frac{\sqrt 2}{4}w&lt;/script&gt;
 
 &lt;p&gt;Applying progress and updating the &lt;code&gt;draw&lt;/code&gt; method, we get&lt;/p&gt;
 
@@ -453,7 +751,7 @@ zx = \frac{w}{2} \cdot \frac{\sqrt 2}{2} = zy = \frac{\sqrt 2}{4}w
   &lt;p&gt;… in my experience what users really want is an unambiguous way to guarantee that an app will stop consuming resources (battery, CPU cycles, data transfer, etc). Many perceive that an exit button implements this requirement and ask for it to be added. Developers, looking to please their users, obligingly add one…&lt;/p&gt;
 &lt;/blockquote&gt;
 
-&lt;p&gt;With seamless state restoration, Android (and iOS) apps seem to run forever. They give no real &lt;em&gt;exit&lt;/em&gt; notion. Misunderstanding this non-desktop behaviour is, I’m guessing, why apps such as Advanced Task Killer (ATK henceforth) are well received. Few realize Android is clever enough to manage itself much better than we ever will, and there’s no need to interfere. In development world, manual or forced quitting is actually &lt;a href=&quot;http://stackoverflow.com/a/2034238/905349&quot;&gt;frowned upon&lt;/a&gt;, or, as Romain Guy &lt;a href=&quot;https://groups.google.com/d/msg/android-developers/G_D3pKnGLt0/0mFuZnjxjP4J&quot;&gt;explains:&lt;/a&gt; &lt;/p&gt;
+&lt;p&gt;With seamless state restoration, Android (and iOS) apps seem to run forever. They give no real &lt;em&gt;exit&lt;/em&gt; notion. Misunderstanding this non-desktop behaviour is, I’m guessing, why apps such as Advanced Task Killer (ATK henceforth) are well received. Few realize Android is clever enough to manage itself much better than we ever will, and there’s no need to interfere. In development world, manual or forced quitting is actually &lt;a href=&quot;http://stackoverflow.com/a/2034238/905349&quot;&gt;frowned upon&lt;/a&gt;, or, as Romain Guy &lt;a href=&quot;https://groups.google.com/d/msg/android-developers/G_D3pKnGLt0/0mFuZnjxjP4J&quot;&gt;explains:&lt;/a&gt;&lt;/p&gt;
 
 &lt;blockquote&gt;
   &lt;p&gt;… the system handles it automatically. That’s what the Activity lifecycle (especially onPause/onStop/onDestroy) is for. No matter what you do, do not put a “quit” or “exit” application button. It is useless with Android’s application model.&lt;/p&gt;
@@ -463,7 +761,7 @@ zx = \frac{w}{2} \cdot \frac{\sqrt 2}{2} = zy = \frac{\sqrt 2}{4}w
 
 &lt;p&gt;With this in mind, it’s fair to speculate ATK is redundant. To see it tick, the initial step is to observe its source. Reversing an apk is, with tools available online, a piece of cake. Given the app feel, I didn’t expect it to be obfuscated. To my surprise, it was. Browsing through, I had to admit defeat - no &lt;code&gt;killProcess&lt;/code&gt; invocation anywhere, which I was expecting. At least not explicitly, that is.&lt;/p&gt;
 
-&lt;p&gt;For fun (and no profit), let’s try to recreate the app. &lt;/p&gt;
+&lt;p&gt;For fun (and no profit), let’s try to recreate the app.&lt;/p&gt;
 
 &lt;p&gt;First, we need to get a list of all activities currently running. ATK can also extract running services. We’re going to ignore them, but you can try and add them yourself - it’s easy.&lt;/p&gt;
 
@@ -511,7 +809,7 @@ zx = \frac{w}{2} \cdot \frac{\sqrt 2}{2} = zy = \frac{\sqrt 2}{4}w
     &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;available&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
 &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;This is, believe it or not, the gist of ATK. The only thing missing is the ability to &lt;em&gt;kill&lt;/em&gt; a selected list item. ATK does it by invoking &lt;code&gt;activityManager.restartPackage(packageName)&lt;/code&gt;. Initially, &lt;a href=&quot;http://grepcode.com/file/repository.grepcode.com/java/ext/com.google.android/android/2.0_r1/android/app/ActivityManager.java#ActivityManager.restartPackage%28java.lang.String%29&quot;&gt;this method&lt;/a&gt; had the system perform a force stop of everything associated with the given application package (killed processes with same uid, stopped running services, removed activities, etc). Heavily abused by task killers, it caused all sorts of issues. Android engineers eventually had enough. They’ve changed its behaviour, leaving &lt;a href=&quot;https://android.googlesource.com/platform/frameworks/base.git/+/03abb8179f0d912e6dabfc0e2b0f129d85066d17&quot;&gt;this comment&lt;/a&gt;: &lt;/p&gt;
+&lt;p&gt;This is, believe it or not, the gist of ATK. The only thing missing is the ability to &lt;em&gt;kill&lt;/em&gt; a selected list item. ATK does it by invoking &lt;code&gt;activityManager.restartPackage(packageName)&lt;/code&gt;. Initially, &lt;a href=&quot;http://grepcode.com/file/repository.grepcode.com/java/ext/com.google.android/android/2.0_r1/android/app/ActivityManager.java#ActivityManager.restartPackage%28java.lang.String%29&quot;&gt;this method&lt;/a&gt; had the system perform a force stop of everything associated with the given application package (killed processes with same uid, stopped running services, removed activities, etc). Heavily abused by task killers, it caused all sorts of issues. Android engineers eventually had enough. They’ve changed its behaviour, leaving &lt;a href=&quot;https://android.googlesource.com/platform/frameworks/base.git/+/03abb8179f0d912e6dabfc0e2b0f129d85066d17&quot;&gt;this comment&lt;/a&gt;:&lt;/p&gt;
 
 &lt;blockquote&gt;
   &lt;p&gt;Kill the task killers. &lt;br /&gt;&lt;br /&gt; The &lt;code&gt;ActivityManager.restartPackage()&lt;/code&gt; API is now deprecated, and no longer
@@ -524,11 +822,11 @@ killer does, thus causing no permanent damage.  The old &lt;code&gt;restartPacka
 API is now a wrapper for calling this new API.&lt;/p&gt;
 &lt;/blockquote&gt;
 
-&lt;p&gt;From API level 8, calling &lt;code&gt;restartPackage&lt;/code&gt; is therefore the same as calling &lt;code&gt;killBackgroundProcesses&lt;/code&gt;. Following the source code from, let’s say, &lt;code&gt;ActivityThread.handleLowMemory()&lt;/code&gt; which is presumably called when memory becomes tight, we end up in the same method: &lt;code&gt;killPackageProcessesLocked&lt;/code&gt;. It’s safe to assume ATK provides the exact same functionality as the system. The only difference is that ATK explicitly selects a package to be killed, whereas the system pick is based on an algorithm. Since the system knows its internals, it’s much better at determining when and what to do when resource management is required. &lt;/p&gt;
+&lt;p&gt;From API level 8, calling &lt;code&gt;restartPackage&lt;/code&gt; is therefore the same as calling &lt;code&gt;killBackgroundProcesses&lt;/code&gt;. Following the source code from, let’s say, &lt;code&gt;ActivityThread.handleLowMemory()&lt;/code&gt; which is presumably called when memory becomes tight, we end up in the same method: &lt;code&gt;killPackageProcessesLocked&lt;/code&gt;. It’s safe to assume ATK provides the exact same functionality as the system. The only difference is that ATK explicitly selects a package to be killed, whereas the system pick is based on an algorithm. Since the system knows its internals, it’s much better at determining when and what to do when resource management is required.&lt;/p&gt;
 
 &lt;p&gt;With this in mind, one could argue ATK is harmless. The real problem is us, killing apps at random, without knowing what they do behind the scenes. We should stop interfeering and our system will run just fine.&lt;/p&gt;
 
-&lt;p&gt;To finish off the fake ATK, we: &lt;/p&gt;
+&lt;p&gt;To finish off the fake ATK, we:&lt;/p&gt;
 
 &lt;ul&gt;
   &lt;li&gt;show the &lt;code&gt;getAvailableLaunchersCurrentlyRunning()&lt;/code&gt; list in a &lt;code&gt;ListView&lt;/code&gt;&lt;/li&gt;
@@ -571,13 +869,13 @@ API is now a wrapper for calling this new API.&lt;/p&gt;
   &lt;/tbody&gt;
 &lt;/table&gt;
 
-&lt;p&gt;Android runs on a variety of devices, with different screen sizes and densities. Providing alternative resources is a standard practice. Let’s assume that in our case, the design team only gave us resources of &lt;code&gt;xxhdpi&lt;/code&gt; size. To make matters worse, an &lt;code&gt;OutOfMemoryError&lt;/code&gt; is thrown when we try to load any image into memory on our S3 mini. &lt;/p&gt;
+&lt;p&gt;Android runs on a variety of devices, with different screen sizes and densities. Providing alternative resources is a standard practice. Let’s assume that in our case, the design team only gave us resources of &lt;code&gt;xxhdpi&lt;/code&gt; size. To make matters worse, an &lt;code&gt;OutOfMemoryError&lt;/code&gt; is thrown when we try to load any image into memory on our S3 mini.&lt;/p&gt;
 
 &lt;blockquote&gt;
   &lt;p&gt;Given that you are working with limited memory, ideally you only want to load a lower resolution version in memory. The lower resolution version should match the size of the UI component that displays it. An image with a higher resolution does not provide any visible benefit, but still takes up precious memory and incurs additional performance overhead due to additional on the fly scaling.&lt;/p&gt;
 &lt;/blockquote&gt;
 
-&lt;p&gt;is what the &lt;a href=&quot;http://developer.android.com/training/displaying-bitmaps/load-bitmap.html&quot;&gt;docs&lt;/a&gt; say about efficient bitmap loading. Therefore, in order to load the background images into memory successfully, we have to subsample and, most likely, scale them. &lt;/p&gt;
+&lt;p&gt;is what the &lt;a href=&quot;http://developer.android.com/training/displaying-bitmaps/load-bitmap.html&quot;&gt;docs&lt;/a&gt; say about efficient bitmap loading. Therefore, in order to load the background images into memory successfully, we have to subsample and, most likely, scale them.&lt;/p&gt;
 
 &lt;p&gt;This real-world scenario is the motivation behind FancyBackground. FancyBackground animates through a set of resource Drawables. It ensures they are subsampled and cached, if need be, with all the heavy lifting done in the background. The usage is simple. To animate between &lt;code&gt;R.drawable.fst&lt;/code&gt;, &lt;code&gt;R.drawable.snd&lt;/code&gt; and &lt;code&gt;R.drawable.trd&lt;/code&gt;, showing each for 2.5 seconds, simply do:&lt;/p&gt;
 
@@ -588,7 +886,7 @@ API is now a wrapper for calling this new API.&lt;/p&gt;
                &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;interval&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2500&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
                &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;start&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;The code above gives us subsampling, caching and automatic transitions for free. &lt;/p&gt;
+&lt;p&gt;The code above gives us subsampling, caching and automatic transitions for free.&lt;/p&gt;
 
 &lt;p&gt;There are other options available, so let’s do a quick abstract:&lt;/p&gt;
 
@@ -635,10 +933,10 @@ API is now a wrapper for calling this new API.&lt;/p&gt;
   &lt;/tbody&gt;
 &lt;/table&gt;
 
-&lt;p&gt;&lt;code&gt;FancyListener&lt;/code&gt; can receive four events: &lt;/p&gt;
+&lt;p&gt;&lt;code&gt;FancyListener&lt;/code&gt; can receive four events:&lt;/p&gt;
 
 &lt;ul&gt;
-  &lt;li&gt;&lt;code&gt;onStarted&lt;/code&gt; when the FancyBackground is started &lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;onStarted&lt;/code&gt; when the FancyBackground is started&lt;/li&gt;
   &lt;li&gt;&lt;code&gt;onNew&lt;/code&gt; when a new image is set&lt;/li&gt;
   &lt;li&gt;&lt;code&gt;onLoopDone&lt;/code&gt; if looping is set to false and the first cycle is complete&lt;/li&gt;
   &lt;li&gt;&lt;code&gt;onStopped&lt;/code&gt; when the FancyBackground stops.&lt;/li&gt;
@@ -646,11 +944,11 @@ API is now a wrapper for calling this new API.&lt;/p&gt;
 
 &lt;p&gt;&lt;code&gt;FancyCache&lt;/code&gt; enables you to create your own bitmap cache. &lt;code&gt;FancyLruCache&lt;/code&gt; is the default, targeting ~25% of the available heap and evicting the least recently used bitmap if over capacity. Use &lt;code&gt;null&lt;/code&gt; to avoid caching.&lt;/p&gt;
 
-&lt;p&gt;To try it out, make sure to add the following to your dependency list: &lt;/p&gt;
+&lt;p&gt;To try it out, make sure to add the following to your dependency list:&lt;/p&gt;
 
 &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;compile &lt;span class=&quot;s1&quot;&gt;&amp;#39;com.github.tslamic.fancybackground:library:1.0&amp;#39;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;For an example, visit my &lt;a href=&quot;https://github.com/tslamic/FancyBackground&quot;&gt;Github profile&lt;/a&gt;. &lt;/p&gt;
+&lt;p&gt;For an example, visit my &lt;a href=&quot;https://github.com/tslamic/FancyBackground&quot;&gt;Github profile&lt;/a&gt;.&lt;/p&gt;
 
     &lt;p&gt;&lt;a href=&quot;/fancy-background/&quot;&gt;Fancy Background&lt;/a&gt; was originally published by Tadej Slamic at &lt;a href=&quot;&quot;&gt;Tadej's Blog&lt;/a&gt; on February 23, 2015.&lt;/p&gt;
   </content>
@@ -669,9 +967,9 @@ API is now a wrapper for calling this new API.&lt;/p&gt;
     <email></email>
   </author>
   <content type="html">
-    &lt;p&gt;As end users, we’re terrible. &lt;/p&gt;
+    &lt;p&gt;As end users, we’re terrible.&lt;/p&gt;
 
-&lt;p&gt;We’ll microwave a fork, pull doors with a big red sign saying push and sue a company for serving us a hot cup of coffee. We’ll grab a supposedly waterproof phone and toss it in a full tub. Then we’ll go online and laugh at the schmuck trying to drill through a wall he’s standing on. &lt;/p&gt;
+&lt;p&gt;We’ll microwave a fork, pull doors with a big red sign saying push and sue a company for serving us a hot cup of coffee. We’ll grab a supposedly waterproof phone and toss it in a full tub. Then we’ll go online and laugh at the schmuck trying to drill through a wall he’s standing on.&lt;/p&gt;
 
 &lt;center&gt;
   &lt;figure&gt;
@@ -680,19 +978,19 @@ API is now a wrapper for calling this new API.&lt;/p&gt;
   &lt;/figure&gt;
 &lt;/center&gt;
 
-&lt;p&gt;Creating software with good user experience is hard. Relying on intuition is naive, but expecting a product to be used in a predictable (or, y’know, logical) manner is just wrong. &lt;/p&gt;
+&lt;p&gt;Creating software with good user experience is hard. Relying on intuition is naive, but expecting a product to be used in a predictable (or, y’know, logical) manner is just wrong.&lt;/p&gt;
 
 &lt;p&gt;&lt;em&gt;Stress testing&lt;/em&gt; puts great emphasis on availability and error handling, under a load few consider normal. It indicates just how robust our product really is.&lt;/p&gt;
 
-&lt;p&gt;Android - or, more precisely, its debug bridge -  has a very handy tool called &lt;em&gt;the monkey&lt;/em&gt;. It’s purpose is to stress-test your app by generating pseudo-random user events in a repeatable manner. It’s as if a monkey was ordered to test your app. It’ll tap, swipe, click and drag no matter what’s on the screen. &lt;/p&gt;
+&lt;p&gt;Android - or, more precisely, its debug bridge -  has a very handy tool called &lt;em&gt;the monkey&lt;/em&gt;. It’s purpose is to stress-test your app by generating pseudo-random user events in a repeatable manner. It’s as if a monkey was ordered to test your app. It’ll tap, swipe, click and drag no matter what’s on the screen.&lt;/p&gt;
 
 &lt;p&gt;A typical command to start the monkey is:&lt;/p&gt;
 
 &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;adb shell monkey -p your.package.name 5000&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;where &lt;code&gt;-p&lt;/code&gt; denotes your package name. &lt;code&gt;5000&lt;/code&gt; is the amount of events generated. &lt;/p&gt;
+&lt;p&gt;where &lt;code&gt;-p&lt;/code&gt; denotes your package name. &lt;code&gt;5000&lt;/code&gt; is the amount of events generated.&lt;/p&gt;
 
-&lt;p&gt;Another useful option is the seed parameter. If you re-run the monkey with the same seed value, it will generate the exact same sequence of events. Just add the &lt;code&gt;-s &amp;lt;number&amp;gt;&lt;/code&gt; option to your command: &lt;/p&gt;
+&lt;p&gt;Another useful option is the seed parameter. If you re-run the monkey with the same seed value, it will generate the exact same sequence of events. Just add the &lt;code&gt;-s &amp;lt;number&amp;gt;&lt;/code&gt; option to your command:&lt;/p&gt;
 
 &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;adb shell monkey -p your.package.name -s &lt;span class=&quot;m&quot;&gt;12345&lt;/span&gt; 5000&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
@@ -711,9 +1009,9 @@ List of devices attached
 
 &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;adb -s 192.168.56.102:5555 shell monkey -p your.package.name -s &lt;span class=&quot;m&quot;&gt;12345&lt;/span&gt; 5000&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;This will run the monkey on a device or emulator with a serial number &lt;code&gt;192.168.56.102:5555&lt;/code&gt;. To run the monkey on all attached emulators and devices, you have to execute a separate command for each one. &lt;/p&gt;
+&lt;p&gt;This will run the monkey on a device or emulator with a serial number &lt;code&gt;192.168.56.102:5555&lt;/code&gt;. To run the monkey on all attached emulators and devices, you have to execute a separate command for each one.&lt;/p&gt;
 
-&lt;p&gt;Numerous other options are &lt;a href=&quot;http://developer.android.com/tools/help/monkey.html&quot;&gt;available&lt;/a&gt; to fine-tune the monkey. Perhaps &lt;code&gt;--hprof&lt;/code&gt; is an option worth mentioning. If set, it dumps the heap immediately before and after running. This can be quite useful for memory profiling. &lt;/p&gt;
+&lt;p&gt;Numerous other options are &lt;a href=&quot;http://developer.android.com/tools/help/monkey.html&quot;&gt;available&lt;/a&gt; to fine-tune the monkey. Perhaps &lt;code&gt;--hprof&lt;/code&gt; is an option worth mentioning. If set, it dumps the heap immediately before and after running. This can be quite useful for memory profiling.&lt;/p&gt;
 
 &lt;p&gt;However, according to this &lt;a href=&quot;http://stackoverflow.com/a/8433740/905349&quot;&gt;old post&lt;/a&gt;, the &lt;code&gt;--hprof&lt;/code&gt; option seems to be ignored. Moreover, the dumps are put in &lt;code&gt;data/misc&lt;/code&gt; folder. It may be impossible to extract them.&lt;/p&gt;
 
@@ -729,7 +1027,7 @@ List of devices attached
 
 &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;./monkey -p your.package.name -s &lt;span class=&quot;m&quot;&gt;12345&lt;/span&gt; -e 5000&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;runs the monkey on all attached devices with a seed number &lt;code&gt;12345&lt;/code&gt;, generating &lt;code&gt;5000&lt;/code&gt; random events. &lt;/p&gt;
+&lt;p&gt;runs the monkey on all attached devices with a seed number &lt;code&gt;12345&lt;/code&gt;, generating &lt;code&gt;5000&lt;/code&gt; random events.&lt;/p&gt;
 
 &lt;p&gt;To avoid using DDMS to do a heap dump, use &lt;code&gt;memdmp&lt;/code&gt;:&lt;/p&gt;
 
@@ -741,14 +1039,14 @@ List of devices attached
 
 &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;./dumpey -p your.package.name -bad heapdumps/&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;This extracts converted memory heap dumps, runs the monkey, and extracts converted memory heap dumps again. It does this on all attached devices or emulators. If, for example, you only have one device attached, &lt;code&gt;SH48HWM03500&lt;/code&gt;, then running &lt;code&gt;dumpey&lt;/code&gt; with the above command will generate two files in &lt;code&gt;heapdumps&lt;/code&gt; folder: &lt;/p&gt;
+&lt;p&gt;This extracts converted memory heap dumps, runs the monkey, and extracts converted memory heap dumps again. It does this on all attached devices or emulators. If, for example, you only have one device attached, &lt;code&gt;SH48HWM03500&lt;/code&gt;, then running &lt;code&gt;dumpey&lt;/code&gt; with the above command will generate two files in &lt;code&gt;heapdumps&lt;/code&gt; folder:&lt;/p&gt;
 
 &lt;ul&gt;
   &lt;li&gt;&lt;code&gt;SH48HWM03500-before.hprof&lt;/code&gt;&lt;/li&gt;
   &lt;li&gt;&lt;code&gt;SH48HWM03500-after.hprof&lt;/code&gt;&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;p&gt;As the names suggest, they are converted memory heap dumps from a specific device done before and after running the monkey. Again, all you have to do is open them in MAT. &lt;/p&gt;
+&lt;p&gt;As the names suggest, they are converted memory heap dumps from a specific device done before and after running the monkey. Again, all you have to do is open them in MAT.&lt;/p&gt;
 
 &lt;p&gt;To read more about Dumpey, visit the &lt;a href=&quot;https://github.com/tslamic/Dumpey&quot;&gt;Github repo&lt;/a&gt;. Happy stress testing!&lt;/p&gt;
 
@@ -773,7 +1071,7 @@ List of devices attached
 
 &lt;p&gt;I had a job waiting for me and all I had to do was to show up. Until then, I was sure the place I was living in is a slow-paced, boring and futureless town that will never become a city. I wanted to get out.&lt;/p&gt;
 
-&lt;p&gt;After buying the ticket, reality kicked in. I became sentimental and hesitant. I’m leaving my family. I’m leaving my friends. The place I grow up in, the forests, mountains and fresh air.  Mom’s dishes and nagging. Soccer after work and drinks in my favourite bar. The smell of freshly cut grass. The sun. Half an hour drive either to the snowy slopes or good enough beach. &lt;/p&gt;
+&lt;p&gt;After buying the ticket, reality kicked in. I became sentimental and hesitant. I’m leaving my family. I’m leaving my friends. The place I grow up in, the forests, mountains and fresh air.  Mom’s dishes and nagging. Soccer after work and drinks in my favourite bar. The smell of freshly cut grass. The sun. Half an hour drive either to the snowy slopes or good enough beach.&lt;/p&gt;
 
 &lt;p&gt;It sure isn’t the most opportunistic and ambitious little town. But it’s &lt;em&gt;home&lt;/em&gt;.&lt;/p&gt;
 
@@ -829,9 +1127,9 @@ List of devices attached
 
 &lt;span class=&quot;nt&quot;&gt;&amp;lt;/FrameLayout&amp;gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;But how to set the button width to 50% of its parent? I decided to create a custom &lt;code&gt;Button&lt;/code&gt;. &lt;/p&gt;
+&lt;p&gt;But how to set the button width to 50% of its parent? I decided to create a custom &lt;code&gt;Button&lt;/code&gt;.&lt;/p&gt;
 
-&lt;p&gt;When creating custom views, you usually want to override some &lt;a href=&quot;http://developer.android.com/reference/android/view/View.html&quot;&gt;standard methods&lt;/a&gt; the framework uses. There are two I could consider in this case: &lt;/p&gt;
+&lt;p&gt;When creating custom views, you usually want to override some &lt;a href=&quot;http://developer.android.com/reference/android/view/View.html&quot;&gt;standard methods&lt;/a&gt; the framework uses. There are two I could consider in this case:&lt;/p&gt;
 
 &lt;ul&gt;
   &lt;li&gt;&lt;code&gt;onMeasure&lt;/code&gt; determines the size requirements for this view and all of its children&lt;/li&gt;
@@ -879,13 +1177,13 @@ List of devices attached
   &lt;/figure&gt;
 &lt;/center&gt;
 
-&lt;p&gt;Darn &lt;code&gt;super.onMeasure&lt;/code&gt;! A closer look at the &lt;a href=&quot;http://grepcode.com/file/repository.grepcode.com/java/ext/com.google.android/android/4.4.2_r1/android/widget/Button.java/&quot;&gt;source code&lt;/a&gt; reveals a simple text like “Button” is drawn with the help of a &lt;code&gt;BoringLayout&lt;/code&gt;. The layout is also responsible for positioning the text based on the available height, width and gravity. &lt;/p&gt;
+&lt;p&gt;Darn &lt;code&gt;super.onMeasure&lt;/code&gt;! A closer look at the &lt;a href=&quot;http://grepcode.com/file/repository.grepcode.com/java/ext/com.google.android/android/4.4.2_r1/android/widget/Button.java/&quot;&gt;source code&lt;/a&gt; reveals a simple text like “Button” is drawn with the help of a &lt;code&gt;BoringLayout&lt;/code&gt;. The layout is also responsible for positioning the text based on the available height, width and gravity.&lt;/p&gt;
 
 &lt;p&gt;Since I only change the width after &lt;code&gt;super.onMeasure&lt;/code&gt;, it has no effect to the initially calculated dimensions and position.&lt;/p&gt;
 
-&lt;p&gt;Is there a way to halve the width before &lt;code&gt;super.onMeasure&lt;/code&gt;? Enter &lt;a href=&quot;http://developer.android.com/reference/android/view/View.MeasureSpec.html&quot;&gt;MeasureSpec&lt;/a&gt;. Scary documentation hides its simple nature: the three modes, &lt;code&gt;AT_MOST&lt;/code&gt;, &lt;code&gt;UNSPECIFIED&lt;/code&gt; and &lt;code&gt;EXACTLY&lt;/code&gt;, are a rough translation of the familiar &lt;code&gt;wrap_content&lt;/code&gt;, &lt;code&gt;match_parent&lt;/code&gt; and a specific size, e.g. &lt;code&gt;200dp&lt;/code&gt;. &lt;/p&gt;
+&lt;p&gt;Is there a way to halve the width before &lt;code&gt;super.onMeasure&lt;/code&gt;? Enter &lt;a href=&quot;http://developer.android.com/reference/android/view/View.MeasureSpec.html&quot;&gt;MeasureSpec&lt;/a&gt;. Scary documentation hides its simple nature: the three modes, &lt;code&gt;AT_MOST&lt;/code&gt;, &lt;code&gt;UNSPECIFIED&lt;/code&gt; and &lt;code&gt;EXACTLY&lt;/code&gt;, are a rough translation of the familiar &lt;code&gt;wrap_content&lt;/code&gt;, &lt;code&gt;match_parent&lt;/code&gt; and a specific size, e.g. &lt;code&gt;200dp&lt;/code&gt;.&lt;/p&gt;
 
-&lt;p&gt;Two encoded values of the &lt;code&gt;onMeasure&lt;/code&gt; method, &lt;code&gt;widthMeasureSpec&lt;/code&gt; and &lt;code&gt;heightMeasureSpec&lt;/code&gt; present the &lt;code&gt;MeasureSpec&lt;/code&gt; values from its parent View. This is handy, we can easily extract the parent width from it: &lt;/p&gt;
+&lt;p&gt;Two encoded values of the &lt;code&gt;onMeasure&lt;/code&gt; method, &lt;code&gt;widthMeasureSpec&lt;/code&gt; and &lt;code&gt;heightMeasureSpec&lt;/code&gt; present the &lt;code&gt;MeasureSpec&lt;/code&gt; values from its parent View. This is handy, we can easily extract the parent width from it:&lt;/p&gt;
 
 &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-java&quot; data-lang=&quot;java&quot;&gt;&lt;span class=&quot;kd&quot;&gt;final&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;parentWidth&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;MeasureSpec&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;getSize&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;widthMeasureSpec&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
@@ -901,7 +1199,7 @@ List of devices attached
   &lt;span class=&quot;kd&quot;&gt;super&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;onMeasure&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;newMeasureSpec&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;hMeasureSpec&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
 &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;Mission accomplished! &lt;/p&gt;
+&lt;p&gt;Mission accomplished!&lt;/p&gt;
 
 &lt;p&gt;Of course, Carlos did things a bit differently. To see his solution, go and buy his book.&lt;/p&gt;
 
@@ -1145,7 +1443,7 @@ a combination of 8 bits &lt;em&gt;glued together&lt;/em&gt;:&lt;/p&gt;
 For an arbitrary n-bit binary number, to get its opposite representation, first invert the number, then add 1.
 &lt;/blockquote&gt;
 
-&lt;p&gt;This simple algorithm forms Two’s Complement, the most commonly used signed number representation system in use today. &lt;/p&gt;
+&lt;p&gt;This simple algorithm forms Two’s Complement, the most commonly used signed number representation system in use today.&lt;/p&gt;
 
 &lt;p&gt;Let’s do an example: find the opposite value of the binary number &lt;code&gt;00001010&lt;/code&gt;:&lt;/p&gt;
 &lt;pre&gt;
@@ -1175,19 +1473,19 @@ For an arbitrary n-bit binary number, to get its opposite representation, first 
 
 &lt;h3 id=&quot;sign&quot;&gt;Sign&lt;/h3&gt;
 
-&lt;p&gt;In Two’s Complement, the most significant bit represents the sign. &lt;code&gt;0&lt;/code&gt; means the number will be positive, &lt;code&gt;1&lt;/code&gt; negative. The implication is that with &lt;em&gt;n&lt;/em&gt; bits, you can only use &lt;em&gt;(n-1)&lt;/em&gt; bits to represent the number, as one bit is reserved to denote the sign. &lt;/p&gt;
+&lt;p&gt;In Two’s Complement, the most significant bit represents the sign. &lt;code&gt;0&lt;/code&gt; means the number will be positive, &lt;code&gt;1&lt;/code&gt; negative. The implication is that with &lt;em&gt;n&lt;/em&gt; bits, you can only use &lt;em&gt;(n-1)&lt;/em&gt; bits to represent the number, as one bit is reserved to denote the sign.&lt;/p&gt;
 
-&lt;p&gt;You may think of &lt;code&gt;01001010&lt;/code&gt; as a compound value consisting of &lt;code&gt;0&lt;/code&gt; (sign) and &lt;code&gt;1001010&lt;/code&gt; (actual binary number). &lt;/p&gt;
+&lt;p&gt;You may think of &lt;code&gt;01001010&lt;/code&gt; as a compound value consisting of &lt;code&gt;0&lt;/code&gt; (sign) and &lt;code&gt;1001010&lt;/code&gt; (actual binary number).&lt;/p&gt;
 
 &lt;h3 id=&quot;but-i-cant-think-in-binary&quot;&gt;But I can’t think in binary&lt;/h3&gt;
 
-&lt;p&gt;Converting a binary value &lt;code&gt;01001010&lt;/code&gt; to decimal is simple. Ignoring the most significant bit, we get &lt;/p&gt;
+&lt;p&gt;Converting a binary value &lt;code&gt;01001010&lt;/code&gt; to decimal is simple. Ignoring the most significant bit, we get&lt;/p&gt;
 
-&lt;script type=&quot;math/tex; mode=display&quot;&gt; 0 * 2^{0} + 1 * 2^{1} + 0 * 2^{2} + 1 * 2^{3} + 1 * 2^{6} = 138 &lt;/script&gt;
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;0 * 2^{0} + 1 * 2^{1} + 0 * 2^{2} + 1 * 2^{3} + 1 * 2^{6} = 138&lt;/script&gt;
 
-&lt;p&gt;What about &lt;code&gt;10001010&lt;/code&gt;? &lt;/p&gt;
+&lt;p&gt;What about &lt;code&gt;10001010&lt;/code&gt;?&lt;/p&gt;
 
-&lt;p&gt;This is a negative value, since the most significant bit is &lt;code&gt;1&lt;/code&gt;. To get the actual value, we can apply Two’s Complement algorithm, ignoring the first bit: &lt;/p&gt;
+&lt;p&gt;This is a negative value, since the most significant bit is &lt;code&gt;1&lt;/code&gt;. To get the actual value, we can apply Two’s Complement algorithm, ignoring the first bit:&lt;/p&gt;
 
 &lt;pre&gt;
 ~ 0001010 // invert value
@@ -1196,9 +1494,9 @@ For an arbitrary n-bit binary number, to get its opposite representation, first 
 = 1110110 // final result
 &lt;/pre&gt;
 
-&lt;p&gt;Then, &lt;/p&gt;
+&lt;p&gt;Then,&lt;/p&gt;
 
-&lt;script type=&quot;math/tex; mode=display&quot;&gt; 0 * 2^{0} + 1 * 2^{1} + 1 * 2^{3} + 0 * 2^{4} + 1 * 2^{5} + 1 * 2^{6} + 1 * 2^{7} = 118 &lt;/script&gt;
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;0 * 2^{0} + 1 * 2^{1} + 1 * 2^{3} + 0 * 2^{4} + 1 * 2^{5} + 1 * 2^{6} + 1 * 2^{7} = 118&lt;/script&gt;
 
 &lt;p&gt;Because the most significant bit is &lt;code&gt;1&lt;/code&gt;, the decimal number we calculated is negative. Therefore, &lt;code&gt;10001010 == -118&lt;/code&gt;.&lt;/p&gt;
 
@@ -1426,7 +1724,7 @@ For an arbitrary n-bit binary number, to get its opposite representation, first 
 = 1000 ... 00 // final result
 &lt;/pre&gt;
 
-&lt;p&gt;Yes, it does. But what are this values? &lt;/p&gt;
+&lt;p&gt;Yes, it does. But what are this values?&lt;/p&gt;
 
 &lt;center&gt;
 &lt;table style=&quot;width:500px; text-align:center&quot;&gt;
@@ -1469,7 +1767,7 @@ For an arbitrary n-bit binary number, to get its opposite representation, first 
 &lt;/table&gt;
 &lt;/center&gt;
 
-&lt;p&gt;The values are lower bounds. We’ve shown that in Two’s Complement, the opposite value of a lower bound is still the lower bound. &lt;/p&gt;
+&lt;p&gt;The values are lower bounds. We’ve shown that in Two’s Complement, the opposite value of a lower bound is still the lower bound.&lt;/p&gt;
 
 &lt;p&gt;This is relevant because &lt;code&gt;-2147483648 == Integer.MIN_VALUE&lt;/code&gt;, a lower bound for &lt;code&gt;int&lt;/code&gt; type in Java. We know now the opposite value of a lower bound is still the lower bound, which explains why &lt;code&gt;Math.abs(-2147483648) != 2147483648&lt;/code&gt;.&lt;/p&gt;
 
@@ -1490,9 +1788,9 @@ For an arbitrary n-bit binary number, to get its opposite representation, first 
     <email></email>
   </author>
   <content type="html">
-    &lt;p&gt;Today, I stumbled upon &lt;a href=&quot;http://docs.oracle.com/javase/tutorial/java/nutsandbolts/operators.html&quot;&gt;Java Tutorial Operators&lt;/a&gt; page. &lt;/p&gt;
+    &lt;p&gt;Today, I stumbled upon &lt;a href=&quot;http://docs.oracle.com/javase/tutorial/java/nutsandbolts/operators.html&quot;&gt;Java Tutorial Operators&lt;/a&gt; page.&lt;/p&gt;
 
-&lt;p&gt;I glanced the list, wondering if I know what each operator does. As you might have guessed from the title, I failed. Luckily, I failed at only two operators. &lt;/p&gt;
+&lt;p&gt;I glanced the list, wondering if I know what each operator does. As you might have guessed from the title, I failed. Luckily, I failed at only two operators.&lt;/p&gt;
 
 &lt;h3 id=&quot;the-modulo-operator-&quot;&gt;The modulo operator %&lt;/h3&gt;
 
@@ -1512,7 +1810,7 @@ For an arbitrary n-bit binary number, to get its opposite representation, first 
   &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;value&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
 &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;It works wonderful with a positive argument. But since the definition of an odd number is quite natural for any negative integer too, does &lt;code&gt;isOdd(-1)&lt;/code&gt; produce a correct result? &lt;/p&gt;
+&lt;p&gt;It works wonderful with a positive argument. But since the definition of an odd number is quite natural for any negative integer too, does &lt;code&gt;isOdd(-1)&lt;/code&gt; produce a correct result?&lt;/p&gt;
 
 &lt;p&gt;Java uses the dividend when determining the sign of a modulo operation. Therefore, if the argument we pass to &lt;code&gt;isOdd&lt;/code&gt; is negative, the modulo operation yields a negative result. In our case &lt;code&gt;-1 % 2 == -1&lt;/code&gt;, and &lt;code&gt;isOdd(-1) == false&lt;/code&gt;. The result is not what one would expect.&lt;/p&gt;
 
@@ -1527,7 +1825,7 @@ For an arbitrary n-bit binary number, to get its opposite representation, first 
 
 &lt;h3 id=&quot;the-unsigned-right-shift-&quot;&gt;The unsigned right shift &lt;code&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/code&gt;&lt;/h3&gt;
 
-&lt;p&gt;The second operator I was having trouble with was &lt;code&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/code&gt;. I couldn’t tell the difference with &lt;code&gt;&amp;gt;&amp;gt;&lt;/code&gt; operator, so I had to check the definition: &lt;code&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/code&gt;is an &lt;em&gt;unsigned&lt;/em&gt; right shift whereas &lt;code&gt;&amp;gt;&amp;gt;&lt;/code&gt; is &lt;em&gt;signed&lt;/em&gt;. &lt;/p&gt;
+&lt;p&gt;The second operator I was having trouble with was &lt;code&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/code&gt;. I couldn’t tell the difference with &lt;code&gt;&amp;gt;&amp;gt;&lt;/code&gt; operator, so I had to check the definition: &lt;code&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/code&gt;is an &lt;em&gt;unsigned&lt;/em&gt; right shift whereas &lt;code&gt;&amp;gt;&amp;gt;&lt;/code&gt; is &lt;em&gt;signed&lt;/em&gt;.&lt;/p&gt;
 
 &lt;p&gt;Confused? Read on.&lt;/p&gt;
 
