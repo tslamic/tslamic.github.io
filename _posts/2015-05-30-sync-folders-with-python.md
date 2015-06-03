@@ -317,4 +317,4 @@ cca. 200 lines of code, half of which are paranoid asserts and param checks.
 
 I'd also like to note that although I love Python, I don't use it enough to consider myself a _pythonista_. If you spot any piece of code that can be replaced with a more standarized idiom, please let me know!
 
-As always, there's a GitHub repo where you can find the complete script.
+As always, there's a [GitHub repo](https://github.com/tslamic/cptool) where you can find the complete script.
