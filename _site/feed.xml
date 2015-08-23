@@ -4,13 +4,225 @@
 <generator uri="https://github.com/mojombo/jekyll">Jekyll</generator>
 <link rel="self" type="application/atom+xml" href="/feed.xml" />
 <link rel="alternate" type="text/html" href="" />
-<updated>2015-06-03T02:22:17-04:00</updated>
+<updated>2015-08-23T14:11:11-04:00</updated>
 <id>/</id>
 <author>
   <name>Tadej Slamic</name>
   <uri>/</uri>
   
 </author>
+
+
+<entry>
+  <title type="html"><![CDATA[Creating AndroidDeviceNames]]></title>
+ <link rel="alternate" type="text/html" href="/creating-android-device-names/" />
+  <id>/creating-android-device-names</id>
+  <published>2015-08-22T00:00:00-04:00</published>
+  <updated>2015-08-22T00:00:00-04:00</updated>
+  <author>
+    <name>Tadej Slamic</name>
+    <uri></uri>
+    <email></email>
+  </author>
+  <content type="html">
+    &lt;p&gt;A few days ago, I open sourced &lt;a href=&quot;https://github.com/tslamic/AndroidDeviceNames&quot;&gt;AndroidDeviceNames&lt;/a&gt;, a tiny Android library that transforms the device model into a user-friendly name.&lt;/p&gt;
+
+&lt;p&gt;For example, &lt;code&gt;SM-N910W8&lt;/code&gt; becomes &lt;code&gt;Samsung Galaxy Note 4&lt;/code&gt; with a simple method call:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-java&quot; data-lang=&quot;java&quot;&gt;&lt;span class=&quot;n&quot;&gt;DeviceNames&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;getDeviceName&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;SM-N910W8&amp;quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;Unknown Device&amp;quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Currently, the library recognises about 400 devices. In case the device is not on the list, the above example returns &lt;code&gt;Unknown Device&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;The idea for the library came while working on a side project where I need to show the device name to the user. Obviously, showing &lt;code&gt;SM-N910W8&lt;/code&gt; is subpar. Searching for a solution, all I could find online was a somewhat obsolete &lt;a href=&quot;https://github.com/meetup/android-device-names&quot;&gt;project&lt;/a&gt; with a single &lt;code&gt;.properties&lt;/code&gt; file containing &lt;code&gt;model = name&lt;/code&gt; pairs. I guess the idea is to load the file into a &lt;a href=&quot;http://docs.oracle.com/javase/7/docs/api/java/util/Properties.html&quot;&gt;Properties&lt;/a&gt; object.&lt;/p&gt;
+
+&lt;p&gt;I don’t particularly like this. My side project manipulates bitmaps regularly and I’d like to avoid any unnecessary memory overhead. Since &lt;code&gt;Properties&lt;/code&gt; extends &lt;code&gt;Hashtable&lt;/code&gt;, overhead is expected. Here’s the &lt;a href=&quot;https://gist.github.com/tslamic/df10d6c6fb7f654e02bc#file-devicenamesproperties-java&quot;&gt;hprof dump&lt;/a&gt;:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/tAqPrLO.png&quot; alt=&quot;props_hprof_dump&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;It finds the model name in &lt;code&gt;~O(1)&lt;/code&gt; time but takes a whopping &lt;code&gt;59 kB&lt;/code&gt; of memory to do it. In grand scheme of things, this is no problem for Android, but it can be improved. For instance, we could read the file, line by line and:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;discard the pair and continue, if it’s not what we’re looking for, or&lt;/li&gt;
+  &lt;li&gt;save it to a database, or&lt;/li&gt;
+  &lt;li&gt;remember the pair in a data structure with hopefully less memory overhead than &lt;code&gt;Properties&lt;/code&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;Option 1. will only allocate a constant chunk of memory, i.e. the buffer size, but there’s a high penalty to pay if we plan to search often and with different models, as we have to read the file over and over.&lt;/p&gt;
+
+&lt;p&gt;Option 2. is good, but messy. I’d have to be smart about database opening and closing, there’s suddenly more code involved, I might clutter my API, etc. Hopefully I can avoid it.&lt;/p&gt;
+
+&lt;p&gt;Could &lt;code&gt;Map&lt;/code&gt;, &lt;code&gt;ArrayMap&lt;/code&gt; or &lt;code&gt;String[]&lt;/code&gt; perform better than &lt;code&gt;Properties&lt;/code&gt;? &lt;a href=&quot;http://i.imgur.com/bEL3AAh.png&quot;&gt;Investigating&lt;/a&gt; option 3. produces the following:&lt;/p&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th style=&quot;text-align: right&quot;&gt;Data Structure&lt;/th&gt;
+      &lt;th style=&quot;text-align: center&quot;&gt;Retained Heap (kB)&lt;/th&gt;
+      &lt;th style=&quot;text-align: left&quot;&gt;Search time&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;&lt;a href=&quot;https://gist.github.com/tslamic/df10d6c6fb7f654e02bc#file-devicenamesmap-java&quot;&gt;&lt;code&gt;Map&lt;/code&gt;&lt;/a&gt;&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;62&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;&lt;code&gt;~O(1)&lt;/code&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;&lt;a href=&quot;https://gist.github.com/tslamic/df10d6c6fb7f654e02bc#file-devicenamesarraymap-java&quot;&gt;&lt;code&gt;ArrayMap&lt;/code&gt;&lt;/a&gt;&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;53&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;&lt;code&gt;O(log)&lt;/code&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;&lt;a href=&quot;https://gist.github.com/tslamic/df10d6c6fb7f654e02bc#file-devicenamesarray-java&quot;&gt;&lt;code&gt;String[]&lt;/code&gt;&lt;/a&gt;&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;51&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;&lt;code&gt;O(n)&lt;/code&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;&lt;a href=&quot;https://gist.github.com/tslamic/df10d6c6fb7f654e02bc#file-devicenamestwoarrays-java&quot;&gt;&lt;code&gt;String[], String[]&lt;/code&gt;&lt;/a&gt;&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;51&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;&lt;code&gt;O(n)&lt;/code&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;Besides a nice insight in memory vs. time tradeoff, there’s still quite a bit of memory involved. It does seem an &lt;code&gt;ArrayMap&lt;/code&gt;  represents the middle ground between memory and performance, but &lt;a href=&quot;https://www.youtube.com/watch?v=ORgucLTtTDI&quot;&gt;watch this&lt;/a&gt; before jumping to conclusions.&lt;/p&gt;
+
+&lt;p&gt;Can things be improved if we don’t need to be as flexible? For example, if the &lt;code&gt;model-name&lt;/code&gt; pairs are embedded in a class as constants and reading a file is not required? Well, it makes &lt;a href=&quot;http://i.imgur.com/XC2olUn.png&quot;&gt;quite an impact&lt;/a&gt;:&lt;/p&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th style=&quot;text-align: right&quot;&gt;Data Structure&lt;/th&gt;
+      &lt;th style=&quot;text-align: center&quot;&gt;Retained Heap (kB)&lt;/th&gt;
+      &lt;th style=&quot;text-align: left&quot;&gt;Search time&lt;/th&gt;
+      &lt;th style=&quot;text-align: left&quot;&gt;Factor&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;&lt;code&gt;Map&lt;/code&gt;&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;14&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;&lt;code&gt;~O(1)&lt;/code&gt;&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;4&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;&lt;code&gt;ArrayMap&lt;/code&gt;&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;5&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;&lt;code&gt;O(log)&lt;/code&gt;&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;10&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;&lt;code&gt;String[]&lt;/code&gt;&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;3&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;&lt;code&gt;O(n)&lt;/code&gt;&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;17&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;&lt;code&gt;String[]&lt;/code&gt;,&lt;code&gt;String[]&lt;/code&gt;&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;3&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;&lt;code&gt;O(n)&lt;/code&gt;&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;17&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;If our goal is to save memory, we should definitely avoid reading files. The factor column shows that, for example, &lt;code&gt;String[]&lt;/code&gt; implementation with constants consumes 17x less memory than its file-reading counterpart.&lt;/p&gt;
+
+&lt;p&gt;So how do I effectively move the &lt;code&gt;model-name&lt;/code&gt; pairs from a file to Java constants, because I’m sure as hell not writing them by hand?&lt;/p&gt;
+
+&lt;p&gt;It took me a few minutes to write a simple Python script that reads the &lt;code&gt;model-name&lt;/code&gt; file and creates a populated Java data structure for me to copy and paste. Sure, more involved than plain Java, but straightforward.&lt;/p&gt;
+
+&lt;p&gt;Sacrificing a bit of flexibility for a memory efficient implementation, I could stop here. But would it be possible to eliminate memory overhead completely? This was more of an exploration question, born &lt;em&gt;not out of necessity&lt;/em&gt;, but rather curiosity.&lt;/p&gt;
+
+&lt;p&gt;I’d have to find a way to eliminate the data structure holding the &lt;code&gt;model-name&lt;/code&gt; pairs. A naive but workable approach could be the following:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-java&quot; data-lang=&quot;java&quot;&gt;&lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;ASUS_Transformer_Pad_TF700T&amp;quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;equals&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;model&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;))&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;ASUS Transformer Pad TF700T&amp;quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;else&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;ASUS_T00J&amp;quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;equals&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;model&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;))&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;Asus ZenFone 5&amp;quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;else&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;ADR6350&amp;quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;equals&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;model&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;))&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;HTC Droid Incredible 2&amp;quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;// etc.&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Ugly, but with no memory overhead and an &lt;em&gt;okay&lt;/em&gt; search performance of &lt;code&gt;O(n)&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;I have to be careful though. When a &lt;code&gt;.class&lt;/code&gt; file is loaded, it resides in the &lt;a href=&quot;https://docs.oracle.com/javase/specs/jvms/se7/html/jvms-2.html#jvms-2.5&quot;&gt;method area&lt;/a&gt; of a JVM. The method area is logically part of the heap, so it’s futile trying to avoid overhead if the bytecode occupies the same amount of heap (or more) than a data structure would.&lt;/p&gt;
+
+&lt;p&gt;A neat way to look at bytecode is &lt;a href=&quot;http://docs.oracle.com/javase/7/docs/technotes/tools/windows/javap.html&quot;&gt;&lt;code&gt;javap&lt;/code&gt;&lt;/a&gt;. For example, on &lt;code&gt;Java(TM) SE Runtime Environment (build 1.7.0_79-b15)&lt;/code&gt;, compiling&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-java&quot; data-lang=&quot;java&quot;&gt;&lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Hello&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;static&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;main&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;String&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;[]&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;args&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;System&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;out&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;println&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;Hello World&amp;quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;then invoking &lt;code&gt;javap -c Hello&lt;/code&gt; produces&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-java&quot; data-lang=&quot;java&quot;&gt;&lt;span class=&quot;n&quot;&gt;Compiled&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;from&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;Hello.java&amp;quot;&lt;/span&gt;
+&lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Hello&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;Hello&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;
+    &lt;span class=&quot;nl&quot;&gt;Code:&lt;/span&gt;
+       &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;aload_0&lt;/span&gt;       
+       &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;invokespecial&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;#&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt; 
+       &lt;span class=&quot;mi&quot;&gt;4&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt;        
+
+  &lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;static&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;main&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;java&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;lang&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;String&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;[]);&lt;/span&gt;
+    &lt;span class=&quot;nl&quot;&gt;Code:&lt;/span&gt;
+       &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;getstatic&lt;/span&gt;     &lt;span class=&quot;err&quot;&gt;#&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;                 
+       &lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ldc&lt;/span&gt;           &lt;span class=&quot;err&quot;&gt;#&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;
+       &lt;span class=&quot;mi&quot;&gt;5&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;invokevirtual&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;#&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;4&lt;/span&gt;
+       &lt;span class=&quot;mi&quot;&gt;8&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt;        
+&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Each bytecode instruction consists of 1 byte, plus a fixed number of operand bytes. &lt;code&gt;-c&lt;/code&gt; flag ensures the output includes byte offsets for each instruction. Therefore, the method size is roughly the same as the last byte offset. Above, &lt;code&gt;main&lt;/code&gt; method size is 8 bytes, as this is the offset at the last instruction: &lt;code&gt;8: return&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Extending the Python script, I now generate a simple Java method, &lt;code&gt;getDeviceName&lt;/code&gt;, which includes the &lt;code&gt;if-else&lt;/code&gt; comparisons. I need to ensure that:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;the generated method size &lt;code&gt;mG&lt;/code&gt; is smaller then the method size &lt;code&gt;mD&lt;/code&gt; querying a data structure plus the total data structure memory, &lt;code&gt;sD&lt;/code&gt;.&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;mG&lt;/code&gt; size is less than &lt;a href=&quot;http://docs.oracle.com/javase/specs/jvms/se7/html/jvms-4.html#jvms-4.9.1&quot;&gt;65536 bytes&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Benchmarking against the least consuming data structure, &lt;code&gt;String[]&lt;/code&gt; gives&lt;/p&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th style=&quot;text-align: right&quot;&gt;File&lt;/th&gt;
+      &lt;th style=&quot;text-align: center&quot;&gt;Bytecode&lt;/th&gt;
+      &lt;th style=&quot;text-align: center&quot;&gt;Bytecode Size&lt;/th&gt;
+      &lt;th style=&quot;text-align: center&quot;&gt;Memory&lt;/th&gt;
+      &lt;th style=&quot;text-align: center&quot;&gt;Total&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;&lt;code&gt;String[]&lt;/code&gt;&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;&lt;a href=&quot;https://gist.github.com/tslamic/df10d6c6fb7f654e02bc#file-devicenamesarraynofile-bytecode&quot;&gt;bytecode&lt;/a&gt;&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;75 + 6233&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;3416&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;9724&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: right&quot;&gt;&lt;code&gt;Generated&lt;/code&gt;&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;&lt;a href=&quot;https://gist.github.com/tslamic/df10d6c6fb7f654e02bc#file-devicenames-bytecode&quot;&gt;bytecode&lt;/a&gt;&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;5691&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;0&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;5691&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;The generated file is a clear winner and passes the two requirements with flying colors. The only thing left to worry about is the search time. Being &lt;code&gt;O(n)&lt;/code&gt;, it might prove to be unsatisfactory.&lt;/p&gt;
+
+&lt;p&gt;A quick and simple optimization we can do right away is simple branching: taking the first model letter and compare it only against the models with the same starting letter. We’re still stuck in &lt;code&gt;O(n)&lt;/code&gt;, but for example, instead of 361 comparisons to get to &lt;code&gt;SPH-D600&lt;/code&gt;, we now only do 61, which is about 6 times less.&lt;/p&gt;
+
+&lt;p&gt;Empirically, I’d like to see the worst case run below 16 milliseconds. And playing around with &lt;em&gt;Traceview&lt;/em&gt;, the average running time is well below 5 milliseconds, which makes me at ease using the generated &lt;code&gt;.java&lt;/code&gt; file in my side project.&lt;/p&gt;
+
+
+    &lt;p&gt;&lt;a href=&quot;/creating-android-device-names/&quot;&gt;Creating AndroidDeviceNames&lt;/a&gt; was originally published by Tadej Slamic at &lt;a href=&quot;&quot;&gt;Tadej's Blog&lt;/a&gt; on August 22, 2015.&lt;/p&gt;
+  </content>
+</entry>
 
 
 <entry>
