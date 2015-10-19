@@ -13,7 +13,7 @@ Hi,
 my name is Tadej. I come from Slovenia, a small but beautiful country 
 in southern central Europe, bordering to Italy, Austria, Hungary and Croatia. Above you can see [Vipava Valley](http://en.wikipedia.org/wiki/Vipava_Valley) and my home town, [Ajdovscina](http://en.wikipedia.org/wiki/Ajdov%C5%A1%C4%8Dina).
 
-I'm 26 and I earn my living by writing code. I'm knees deep in mobile development and while my flagship is Android, I'm constantly flirting with iOS too. 
+I'm 27 and I earn my living by writing code. I'm knees deep in mobile development and while my flagship is Android, I'm constantly flirting with iOS too. 
 
 I currently live in Dublin, where I work for the biggest poker company in the world. Our apps attract
 thousands of people every day. This means we're constantly on our toes, juggling between new features, 
