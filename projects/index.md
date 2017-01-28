@@ -2,6 +2,8 @@
 layout: post-index
 title: Side Projects
 comments: false
+image:
+  feature: software.jpg
 ---
 
 <article>
@@ -13,7 +15,7 @@ comments: false
 
 	<h2 class="entry-title"><a href="https://github.com/tslamic/FancyBackground">FancyBackground</a></h2>
     <div class="entry-content">
-    	FancyBackground is an Android library designed to animate a set of resource Drawables.
+    	FancyBackground is an Android library designed to animate a set of resource drawables.
     </div>
 
 	<h2 class="entry-title"><a href="https://github.com/tslamic/Dumpey">Dumpey</a></h2>
@@ -21,16 +23,9 @@ comments: false
     	Dumpey is an Android Debug Bridge utility tool.
     </div>
 
-    <h2 class="entry-title"><a href="https://play.google.com/store/apps/details?id=io.github.tslamic.xkcdportal">XkcdPortal</a></h2>
+    <h2 class="entry-title"><a href="https://play.google.com/store/apps/developer?id=tslamic">Apps on Google Play</a></h2>
     <div class="entry-content">
-    	<a href="https://play.google.com/store/apps/details?id=io.github.tslamic.xkcdportal">
-  		<img alt="Android app on Google Play" src="https://developer.android.com/images/brand/en_app_rgb_wo_45.png" /></a>
-    </div>
-
-	<h2 class="entry-title"><a href="https://play.google.com/store/apps/details?id=com.tslamic.luas">Luas</a></h2>
-    <div class="entry-content">
-    	<a href="https://play.google.com/store/apps/details?id=com.tslamic.luas">
-    	<img alt="Android app on Google Play" src="https://developer.android.com/images/brand/en_app_rgb_wo_45.png" /></a>
+        Some of the apps I've published.
     </div>
 
 </article>

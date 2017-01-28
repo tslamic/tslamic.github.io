@@ -46,9 +46,7 @@ static boolean isOdd(final int value) {
 
 ### The unsigned right shift `>>>`
 
-The second operator I was having trouble with was `>>>`. I couldn't tell the difference with `>>` operator, so I had to check the definition: `>>>`is an _unsigned_ right shift whereas `>>` is _signed_. 
-
-Confused? Read on.
+The second operator I was having trouble with was `>>>`. I couldn't tell the difference with `>>` operator, so I had to check the definition: `>>>`is an _unsigned_ right shift whereas `>>` is _signed_. Confused? Read on.
 
 <center>
 <figure >
