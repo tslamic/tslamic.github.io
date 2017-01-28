@@ -4,9 +4,7 @@ title: Leaving London
 description: "Packing my bags, leaving London behind. Next destination: Dublin. Here's why."
 tags: [London, Dublin, travel]
 image:
-  feature: wajdusna.jpg
-  credit: Hostel Ajdovscina
-  creditlink: http://www.hostel-ajdovscina.si/
+  feature: london.jpg
 ---
 
 About a year ago, I bought a one way ticket to London.

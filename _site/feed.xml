@@ -4,7 +4,7 @@
 <generator uri="https://github.com/mojombo/jekyll">Jekyll</generator>
 <link rel="self" type="application/atom+xml" href="/feed.xml" />
 <link rel="alternate" type="text/html" href="" />
-<updated>2015-08-23T14:11:11-04:00</updated>
+<updated>2017-01-28T18:51:05-05:00</updated>
 <id>/</id>
 <author>
   <name>Tadej Slamic</name>
@@ -1585,13 +1585,6 @@ List of devices attached
 
 &lt;p&gt;If I ask you what the result of &lt;code&gt;Math.abs(-10)&lt;/code&gt; is, would you guess it’s &lt;code&gt;10&lt;/code&gt;? How about &lt;code&gt;Math.abs(-2147483648)&lt;/code&gt;? If you think the answer is &lt;code&gt;2147483648&lt;/code&gt;, you’re wrong.&lt;/p&gt;
 
-&lt;center&gt;
-&lt;figure&gt;
-&lt;img src=&quot;http://karengately.files.wordpress.com/2011/10/gasp.jpg&quot; /&gt;
-&lt;figcaption&gt;What!?&lt;/figcaption&gt;
-&lt;/figure&gt;
-&lt;/center&gt;
-
 &lt;h3 id=&quot;how-it-all-starts&quot;&gt;How it all starts&lt;/h3&gt;
 
 &lt;p&gt;A bit can hold only one of two values, say &lt;code&gt;0&lt;/code&gt; and &lt;code&gt;1&lt;/code&gt;. An 8-bit value, for example, is 
@@ -1601,7 +1594,7 @@ a combination of 8 bits &lt;em&gt;glued together&lt;/em&gt;:&lt;/p&gt;
 002: [0] [0] [0] [0] [0] [0] [0] [1]
 003: [0] [0] [0] [0] [0] [0] [1] [0]
 004: [0] [0] [0] [0] [0] [0] [1] [1]
-// ...
+...
 256: [1] [1] [1] [1] [1] [1] [1] [1]
 &lt;/pre&gt;
 
@@ -1614,31 +1607,29 @@ a combination of 8 bits &lt;em&gt;glued together&lt;/em&gt;:&lt;/p&gt;
 002: [0] [0] [0] [0] [0] [0] [0] [1] = 1
 003: [0] [0] [0] [0] [0] [0] [1] [0] = 2
 004: [0] [0] [0] [0] [0] [0] [1] [1] = 3
-// ...
+...
 256: [1] [1] [1] [1] [1] [1] [1] [1] = 255
 &lt;/pre&gt;
 
-&lt;p&gt;Notice what &lt;em&gt;unsigned&lt;/em&gt; means - the values we’ve calculated are all non-negative. Also, we’re only able to represent integers from 0 to 255.&lt;/p&gt;
+&lt;p&gt;Notice what &lt;em&gt;unsigned&lt;/em&gt; means - the values we’ve calculated are all missing a sign, so we naturally assume they’re non-negative. Also, we’re only able to represent integers from 0 to 255.&lt;/p&gt;
 
-&lt;p&gt;Let’s think of a way to make our system &lt;em&gt;signed&lt;/em&gt; - let’s incorporate negative numbers.&lt;/p&gt;
-
-&lt;p&gt;We want more or less even number of both, positive and negative numbers, so let’s make a wild guess and choose the first bit to represent the sign: &lt;code&gt;0&lt;/code&gt; means the number will be positive, &lt;code&gt;1&lt;/code&gt; negative:&lt;/p&gt;
+&lt;p&gt;To add negative numbers and make our system &lt;em&gt;signed&lt;/em&gt;, let’s make a wild guess and choose the first bit to represent the sign: &lt;code&gt;0&lt;/code&gt; means the number will be positive, &lt;code&gt;1&lt;/code&gt; negative:&lt;/p&gt;
 &lt;pre&gt;
 [0] [0] [0] [0] [0] [0] [0] [0] = +0
 [0] [0] [0] [0] [0] [0] [0] [1] = +1
 [0] [0] [0] [0] [0] [0] [1] [0] = +2
-// ...
+...
 [0] [1] [1] [1] [1] [1] [1] [1] = +127
 &lt;/pre&gt;
 &lt;pre&gt;
 [1] [0] [0] [0] [0] [0] [0] [0] = -0
 [1] [0] [0] [0] [0] [0] [0] [1] = -1
 [1] [0] [0] [0] [0] [0] [1] [0] = -2
-// ...
+...
 [1] [1] [1] [1] [1] [1] [1] [1] = -127
 &lt;/pre&gt;
 
-&lt;p&gt;Voila! Our very first 8-bit signed integer system. Being very intuitive, this is a well known system called &lt;em&gt;signed magnitude&lt;/em&gt;. It was used by some ancient computers.&lt;/p&gt;
+&lt;p&gt;Voila! Our very first 8-bit signed integer system. Being very intuitive, this is a well known system called &lt;em&gt;signed magnitude&lt;/em&gt;, used by some ancient computers, such as IBM 7090.&lt;/p&gt;
 
 &lt;center&gt;
   &lt;figure&gt;
@@ -1649,7 +1640,7 @@ a combination of 8 bits &lt;em&gt;glued together&lt;/em&gt;:&lt;/p&gt;
 
 &lt;h3 id=&quot;enter-twos-complement&quot;&gt;Enter Two’s Complement&lt;/h3&gt;
 
-&lt;p&gt;Through time, people had come up with a clever way of storing integers, so that common math problems are simple to implement and there are no multiple zero representations.&lt;/p&gt;
+&lt;p&gt;Through time, people had come up with clever ways of storing integers, so that common math problems are simple to implement, efficient, and have no duplicate values.&lt;/p&gt;
 
 &lt;blockquote&gt;
 For an arbitrary n-bit binary number, to get its opposite representation, first invert the number, then add 1.
@@ -1659,56 +1650,48 @@ For an arbitrary n-bit binary number, to get its opposite representation, first 
 
 &lt;p&gt;Let’s do an example: find the opposite value of the binary number &lt;code&gt;00001010&lt;/code&gt;:&lt;/p&gt;
 &lt;pre&gt;
-~ 00001010 // invert value
-= 11110101 // result of inverted value
-+ 00000001 // add 1
-= 11110110 // final result
+inverted(00001010) = 11110101
+    add1(11110101) = 11110110
 &lt;/pre&gt;
 
 &lt;p&gt;Let’s check what the opposite number of &lt;code&gt;11110110&lt;/code&gt; is - if the algorithm is well-defined, the result should be &lt;code&gt;00001010&lt;/code&gt;:&lt;/p&gt;
 &lt;pre&gt;
-~ 11110110 // invert value
-= 00001001 // result of inverted value
-+ 00000001 // add 1
-= 00001010 // final result
+inverted(11110110) = 00001001
+    add1(00001001) = 00001010
 &lt;/pre&gt;
 
 &lt;p&gt;Now for a more juicy example. What’s the opposite binary number of &lt;code&gt;00000000&lt;/code&gt;?&lt;/p&gt;
 &lt;pre&gt;
-~  00000000 // invert value
-=  11111111 // result of inverted value
-+  00000001 // add 1
-= 100000000 // final result
+inverted(00000000) =  11111111
+    add1(11111111) = 100000000
 &lt;/pre&gt;
 
 &lt;p&gt;The result is a 9-bit number in an 8-bit number system. This is called an &lt;em&gt;overflow&lt;/em&gt; since the value is, well, overflowing the 8-bit size restriction. The overflow is usually discarded, leaving us with the first eight bits from the right, &lt;code&gt;00000000&lt;/code&gt;. We just showed that there is exactly one representation of &lt;code&gt;0&lt;/code&gt;.&lt;/p&gt;
 
 &lt;h3 id=&quot;sign&quot;&gt;Sign&lt;/h3&gt;
 
-&lt;p&gt;In Two’s Complement, the most significant bit represents the sign. &lt;code&gt;0&lt;/code&gt; means the number will be positive, &lt;code&gt;1&lt;/code&gt; negative. The implication is that with &lt;em&gt;n&lt;/em&gt; bits, you can only use &lt;em&gt;(n-1)&lt;/em&gt; bits to represent the number, as one bit is reserved to denote the sign.&lt;/p&gt;
+&lt;p&gt;In Two’s Complement, the most significant bit represents the sign. &lt;code&gt;0&lt;/code&gt; means the number will be positive, &lt;code&gt;1&lt;/code&gt; negative. This means that with &lt;em&gt;n&lt;/em&gt; bits, you can only use &lt;em&gt;(n-1)&lt;/em&gt; bits to represent the number, as one bit is reserved to denote the sign.&lt;/p&gt;
 
-&lt;p&gt;You may think of &lt;code&gt;01001010&lt;/code&gt; as a compound value consisting of &lt;code&gt;0&lt;/code&gt; (sign) and &lt;code&gt;1001010&lt;/code&gt; (actual binary number).&lt;/p&gt;
+&lt;p&gt;You may think of, e.g., &lt;code&gt;01001010&lt;/code&gt; as a compound value consisting of &lt;code&gt;0&lt;/code&gt; (sign) and &lt;code&gt;1001010&lt;/code&gt; (actual binary number).&lt;/p&gt;
 
 &lt;h3 id=&quot;but-i-cant-think-in-binary&quot;&gt;But I can’t think in binary&lt;/h3&gt;
 
 &lt;p&gt;Converting a binary value &lt;code&gt;01001010&lt;/code&gt; to decimal is simple. Ignoring the most significant bit, we get&lt;/p&gt;
 
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;0 * 2^{0} + 1 * 2^{1} + 0 * 2^{2} + 1 * 2^{3} + 1 * 2^{6} = 138&lt;/script&gt;
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;0 \times 2^{0} + 1 \times 2^{1} + 0 \times 2^{2} + 1 \times 2^{3} + 1 \times 2^{6} = 138&lt;/script&gt;
 
 &lt;p&gt;What about &lt;code&gt;10001010&lt;/code&gt;?&lt;/p&gt;
 
 &lt;p&gt;This is a negative value, since the most significant bit is &lt;code&gt;1&lt;/code&gt;. To get the actual value, we can apply Two’s Complement algorithm, ignoring the first bit:&lt;/p&gt;
 
 &lt;pre&gt;
-~ 0001010 // invert value
-= 1110101 // result of inverted value
-+ 0000001 // add 1
-= 1110110 // final result
+inverted(0001010) =  1110101
+    add1(1110101) = 1110110
 &lt;/pre&gt;
 
 &lt;p&gt;Then,&lt;/p&gt;
 
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;0 * 2^{0} + 1 * 2^{1} + 1 * 2^{3} + 0 * 2^{4} + 1 * 2^{5} + 1 * 2^{6} + 1 * 2^{7} = 118&lt;/script&gt;
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;0 \times 2^{0} + 1 \times 2^{1} + 1 \times 2^{3} + 0 \times 2^{4} + 1 \times 2^{5} + 1 \times 2^{6} + 1 \times 2^{7} = 118&lt;/script&gt;
 
 &lt;p&gt;Because the most significant bit is &lt;code&gt;1&lt;/code&gt;, the decimal number we calculated is negative. Therefore, &lt;code&gt;10001010 == -118&lt;/code&gt;.&lt;/p&gt;
 
@@ -1768,7 +1751,7 @@ For an arbitrary n-bit binary number, to get its opposite representation, first 
 &lt;/table&gt;
 &lt;/center&gt;
 
-&lt;p&gt;Since one bit represents the sign, there are only two bits available for binary numbers. The upper bound seems to be 3 or \(2^{2} - 1\). The lower bound is -4 or \(-2^{2}\)&lt;/p&gt;
+&lt;p&gt;Since one bit represents the sign, there are only two bits available for binary numbers. The upper bound seems to be 3 \ = (2^{2} - 1\). The lower bound is -4 \ = (-2^{2}\)&lt;/p&gt;
 
 &lt;p&gt;Let’s do the same thing for 4-bit numbers:&lt;/p&gt;
 
@@ -1862,7 +1845,7 @@ For an arbitrary n-bit binary number, to get its opposite representation, first 
 &lt;/table&gt;
 &lt;/center&gt;
 
-&lt;p&gt;Again, one bit represents the sign, so there are three bits available for binary numbers. The upper bound seems to be 7 or \(2 ^ {3} - 1\). The lower bound is -8 or \(-2^{3}\)&lt;/p&gt;
+&lt;p&gt;Again, one bit represents the sign, so there are three bits available for binary numbers. The upper bound seems to be 7 \ = (2 ^ {3} - 1\). The lower bound is -8 \ = (-2^{3}\)&lt;/p&gt;
 
 &lt;p&gt;Notice the bounds pattern for number of bits:&lt;/p&gt;
 
@@ -1912,31 +1895,18 @@ For an arbitrary n-bit binary number, to get its opposite representation, first 
 &lt;p&gt;Let’s look at one more example. What is the opposite value of binary number &lt;code&gt;100&lt;/code&gt;?&lt;/p&gt;
 
 &lt;pre&gt;
-~ 100 // invert value
-= 011 // result of inverted value
-+ 001 // add 1
-= 100 // final result
+inverted(100) = 011
+    add1(011) = 100
 &lt;/pre&gt;
 
 &lt;p&gt;The opposite value of &lt;code&gt;100&lt;/code&gt; is the exact same value. Weird. Let’s do one more. What’s the opposite value of &lt;code&gt;1000&lt;/code&gt;?&lt;/p&gt;
 
 &lt;pre&gt;
-~ 1000 // invert value
-= 0111 // result of inverted value
-+ 0001 // add 1
-= 1000 // final result
+inverted(1000) = 0111
+    add1(0111) = 1000
 &lt;/pre&gt;
 
-&lt;p&gt;Again, the opposite value remains the same. Does this hold for any &lt;em&gt;n-bit&lt;/em&gt; value, too?&lt;/p&gt;
-
-&lt;pre&gt;
-~ 1000 ... 00 // invert value
-= 0111 ... 11 // result of inverted value
-+ 0000 ... 01 // add 1
-= 1000 ... 00 // final result
-&lt;/pre&gt;
-
-&lt;p&gt;Yes, it does. But what are this values?&lt;/p&gt;
+&lt;p&gt;Applying inductive reasoning, this holds for any &lt;em&gt;n-bit&lt;/em&gt; number. But what exactly are this values?&lt;/p&gt;
 
 &lt;center&gt;
 &lt;table style=&quot;width:500px; text-align:center&quot;&gt;
@@ -1981,7 +1951,7 @@ For an arbitrary n-bit binary number, to get its opposite representation, first 
 
 &lt;p&gt;The values are lower bounds. We’ve shown that in Two’s Complement, the opposite value of a lower bound is still the lower bound.&lt;/p&gt;
 
-&lt;p&gt;This is relevant because &lt;code&gt;-2147483648 == Integer.MIN_VALUE&lt;/code&gt;, a lower bound for &lt;code&gt;int&lt;/code&gt; type in Java. We know now the opposite value of a lower bound is still the lower bound, which explains why &lt;code&gt;Math.abs(-2147483648) != 2147483648&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;This is relevant because &lt;code&gt;-2147483648 == Integer.MIN_VALUE&lt;/code&gt;, a lower bound for &lt;code&gt;int&lt;/code&gt; type in Java. Hence, &lt;code&gt;Math.abs(-2147483648) == -2147483648&lt;/code&gt;.&lt;/p&gt;
 
     &lt;p&gt;&lt;a href=&quot;/twos-complement-and-absolute-values/&quot;&gt;Two&#39;s Complement And Absolute Values&lt;/a&gt; was originally published by Tadej Slamic at &lt;a href=&quot;&quot;&gt;Tadej's Blog&lt;/a&gt; on July 21, 2013.&lt;/p&gt;
   </content>
@@ -2037,9 +2007,7 @@ For an arbitrary n-bit binary number, to get its opposite representation, first 
 
 &lt;h3 id=&quot;the-unsigned-right-shift-&quot;&gt;The unsigned right shift &lt;code&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/code&gt;&lt;/h3&gt;
 
-&lt;p&gt;The second operator I was having trouble with was &lt;code&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/code&gt;. I couldn’t tell the difference with &lt;code&gt;&amp;gt;&amp;gt;&lt;/code&gt; operator, so I had to check the definition: &lt;code&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/code&gt;is an &lt;em&gt;unsigned&lt;/em&gt; right shift whereas &lt;code&gt;&amp;gt;&amp;gt;&lt;/code&gt; is &lt;em&gt;signed&lt;/em&gt;.&lt;/p&gt;
-
-&lt;p&gt;Confused? Read on.&lt;/p&gt;
+&lt;p&gt;The second operator I was having trouble with was &lt;code&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/code&gt;. I couldn’t tell the difference with &lt;code&gt;&amp;gt;&amp;gt;&lt;/code&gt; operator, so I had to check the definition: &lt;code&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/code&gt;is an &lt;em&gt;unsigned&lt;/em&gt; right shift whereas &lt;code&gt;&amp;gt;&amp;gt;&lt;/code&gt; is &lt;em&gt;signed&lt;/em&gt;. Confused? Read on.&lt;/p&gt;
 
 &lt;center&gt;
 &lt;figure&gt;
