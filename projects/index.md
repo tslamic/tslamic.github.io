@@ -1,12 +1,15 @@
 ---
 layout: post-index
-title: Side Projects
+title: Projects
 comments: false
 image:
   feature: software.jpg
 ---
-
 <article>
+    <h2 class="entry-title"><a href="https://github.com/tslamic/premiumer">Premiumer</a></h2>
+    <div class="entry-content">
+        Premiumer makes removing ads with a single in-app purchase as easy as pie.
+    </div>
 
     <h2 class="entry-title"><a href="https://github.com/tslamic/AndroidDeviceNames">AndroidDeviceNames</a></h2>
     <div class="entry-content">
@@ -27,5 +30,4 @@ image:
     <div class="entry-content">
         Some of the apps I've published.
     </div>
-
 </article>
