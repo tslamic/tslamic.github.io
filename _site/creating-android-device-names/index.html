@@ -130,7 +130,7 @@
 
 <p>For example, <code>SM-N910W8</code> becomes <code>Samsung Galaxy Note 4</code> with a simple method call:</p>
 
-<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="n">DeviceNames</span><span class="o">.</span><span class="na">getDeviceName</span><span class="o">(</span><span class="s">&quot;SM-N910W8&quot;</span><span class="o">,</span> <span class="s">&quot;Unknown Device&quot;</span><span class="o">);</span></code></pre></div>
+<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="n">DeviceNames</span><span class="o">.</span><span class="na">getDeviceName</span><span class="o">(</span><span class="s">"SM-N910W8"</span><span class="o">,</span> <span class="s">"Unknown Device"</span><span class="o">);</span></code></pre></div>
 
 <p>Currently, the library recognises about 400 devices. In case the device is not on the list, the above example returns <code>Unknown Device</code>.</p>
 
@@ -237,12 +237,12 @@
 
 <p>I’d have to find a way to eliminate the data structure holding the <code>model-name</code> pairs. A naive but workable approach could be the following:</p>
 
-<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="k">if</span> <span class="o">(</span><span class="s">&quot;ASUS_Transformer_Pad_TF700T&quot;</span><span class="o">.</span><span class="na">equals</span><span class="o">(</span><span class="n">model</span><span class="o">))</span> <span class="o">{</span>
-    <span class="k">return</span> <span class="s">&quot;ASUS Transformer Pad TF700T&quot;</span><span class="o">;</span>
-<span class="o">}</span> <span class="k">else</span> <span class="nf">if</span> <span class="o">(</span><span class="s">&quot;ASUS_T00J&quot;</span><span class="o">.</span><span class="na">equals</span><span class="o">(</span><span class="n">model</span><span class="o">))</span> <span class="o">{</span>
-    <span class="k">return</span> <span class="s">&quot;Asus ZenFone 5&quot;</span><span class="o">;</span>
-<span class="o">}</span> <span class="k">else</span> <span class="nf">if</span> <span class="o">(</span><span class="s">&quot;ADR6350&quot;</span><span class="o">.</span><span class="na">equals</span><span class="o">(</span><span class="n">model</span><span class="o">))</span> <span class="o">{</span>
-    <span class="k">return</span> <span class="s">&quot;HTC Droid Incredible 2&quot;</span><span class="o">;</span>
+<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="k">if</span> <span class="o">(</span><span class="s">"ASUS_Transformer_Pad_TF700T"</span><span class="o">.</span><span class="na">equals</span><span class="o">(</span><span class="n">model</span><span class="o">))</span> <span class="o">{</span>
+    <span class="k">return</span> <span class="s">"ASUS Transformer Pad TF700T"</span><span class="o">;</span>
+<span class="o">}</span> <span class="k">else</span> <span class="k">if</span> <span class="o">(</span><span class="s">"ASUS_T00J"</span><span class="o">.</span><span class="na">equals</span><span class="o">(</span><span class="n">model</span><span class="o">))</span> <span class="o">{</span>
+    <span class="k">return</span> <span class="s">"Asus ZenFone 5"</span><span class="o">;</span>
+<span class="o">}</span> <span class="k">else</span> <span class="k">if</span> <span class="o">(</span><span class="s">"ADR6350"</span><span class="o">.</span><span class="na">equals</span><span class="o">(</span><span class="n">model</span><span class="o">))</span> <span class="o">{</span>
+    <span class="k">return</span> <span class="s">"HTC Droid Incredible 2"</span><span class="o">;</span>
 <span class="o">}</span> <span class="c1">// etc.</span></code></pre></div>
 
 <p>Ugly, but with no memory overhead and an <em>okay</em> search performance of <code>O(n)</code>.</p>
@@ -253,13 +253,13 @@
 
 <div class="highlight"><pre><code class="language-java" data-lang="java"><span class="kd">public</span> <span class="kd">class</span> <span class="nc">Hello</span> <span class="o">{</span>
     <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="n">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
-        <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">&quot;Hello World&quot;</span><span class="o">);</span>
+        <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"Hello World"</span><span class="o">);</span>
     <span class="o">}</span>
 <span class="o">}</span></code></pre></div>
 
 <p>then invoking <code>javap -c Hello</code> produces</p>
 
-<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="n">Compiled</span> <span class="n">from</span> <span class="s">&quot;Hello.java&quot;</span>
+<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="n">Compiled</span> <span class="n">from</span> <span class="s">"Hello.java"</span>
 <span class="kd">public</span> <span class="kd">class</span> <span class="nc">Hello</span> <span class="o">{</span>
   <span class="kd">public</span> <span class="nf">Hello</span><span class="o">();</span>
     <span class="nl">Code:</span>

@@ -163,8 +163,8 @@
 
 <p>Constructing an <code>Animation</code> is simple:</p>
 
-<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="n">Animation</span> <span class="n">fadeOut</span> <span class="o">=</span> <span class="k">new</span> <span class="nf">AlphaAnimation</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class="mi">0</span><span class="o">);</span>
-<span class="n">fadeOut</span><span class="o">.</span><span class="na">setInterpolator</span><span class="o">(</span><span class="k">new</span> <span class="nf">AccelerateInterpolator</span><span class="o">());</span>
+<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="n">Animation</span> <span class="n">fadeOut</span> <span class="o">=</span> <span class="k">new</span> <span class="n">AlphaAnimation</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class="mi">0</span><span class="o">);</span>
+<span class="n">fadeOut</span><span class="o">.</span><span class="na">setInterpolator</span><span class="o">(</span><span class="k">new</span> <span class="n">AccelerateInterpolator</span><span class="o">());</span>
 <span class="n">fadeOut</span><span class="o">.</span><span class="na">setDuration</span><span class="o">(</span><span class="mi">1000</span><span class="o">);</span></code></pre></div>
 
 <p>Remember the simple transformations we’re able to do: position, size, rotation and transparency? Android provides an implementation for each one, respectively:</p>
@@ -182,12 +182,12 @@
 
 <p>Animations can be defined by either code or XML. Android designates a special folder where XML files should live: <code>res/anim</code>. Let’s create a file called <code>res/anim/fade_out.xml</code>:</p>
 
-<div class="highlight"><pre><code class="language-xml" data-lang="xml"><span class="cp">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span>
-<span class="nt">&lt;alpha</span> <span class="na">xmlns:android=</span><span class="s">&quot;http://schemas.android.com/apk/res/android&quot;</span>
-    <span class="na">android:interpolator=</span><span class="s">&quot;@interpolator/accelerate_quad&quot;</span> 
-    <span class="na">android:fromAlpha=</span><span class="s">&quot;1.0&quot;</span>
-    <span class="na">android:toAlpha=</span><span class="s">&quot;0.0&quot;</span>
-    <span class="na">android:duration=</span><span class="s">&quot;1000&quot;</span><span class="nt">/&gt;</span></code></pre></div>
+<div class="highlight"><pre><code class="language-xml" data-lang="xml"><span class="cp">&lt;?xml version="1.0" encoding="utf-8"?&gt;</span>
+<span class="nt">&lt;alpha</span> <span class="na">xmlns:android=</span><span class="s">"http://schemas.android.com/apk/res/android"</span>
+    <span class="na">android:interpolator=</span><span class="s">"@interpolator/accelerate_quad"</span> 
+    <span class="na">android:fromAlpha=</span><span class="s">"1.0"</span>
+    <span class="na">android:toAlpha=</span><span class="s">"0.0"</span>
+    <span class="na">android:duration=</span><span class="s">"1000"</span><span class="nt">/&gt;</span></code></pre></div>
 
 <p>To use it, `AnimationUtils class provides a method that constructs the Animation:</p>
 
@@ -198,10 +198,10 @@
 
 <div class="highlight"><pre><code class="language-java" data-lang="java"><span class="c1">// suppose fade is defined as in the code example above</span>
 
-<span class="n">Animation</span> <span class="n">shrink</span> <span class="o">=</span> <span class="k">new</span> <span class="nf">ScaleAnimation</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="mi">1</span><span class="o">,</span> <span class="mi">0</span><span class="o">);</span>
+<span class="n">Animation</span> <span class="n">shrink</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ScaleAnimation</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="mi">1</span><span class="o">,</span> <span class="mi">0</span><span class="o">);</span>
 <span class="n">shrink</span><span class="o">.</span><span class="na">setDuration</span><span class="o">(</span><span class="mi">1000</span><span class="o">);</span>
 
-<span class="kd">final</span> <span class="n">AnimationSet</span> <span class="n">set</span> <span class="o">=</span> <span class="k">new</span> <span class="nf">AnimationSet</span><span class="o">(</span><span class="kc">false</span><span class="o">);</span>
+<span class="kd">final</span> <span class="n">AnimationSet</span> <span class="n">set</span> <span class="o">=</span> <span class="k">new</span> <span class="n">AnimationSet</span><span class="o">(</span><span class="kc">false</span><span class="o">);</span>
 <span class="n">set</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">fade</span><span class="o">);</span>
 <span class="n">set</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">shrink</span><span class="o">);</span>
 
@@ -214,26 +214,26 @@
 
 <p>Converting everything to XML yields:</p>
 
-<div class="highlight"><pre><code class="language-xml" data-lang="xml"><span class="cp">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span>
-<span class="nt">&lt;set</span> <span class="na">xmlns:android=</span><span class="s">&quot;http://schemas.android.com/apk/res/android&quot;</span><span class="nt">&gt;</span>
+<div class="highlight"><pre><code class="language-xml" data-lang="xml"><span class="cp">&lt;?xml version="1.0" encoding="utf-8"?&gt;</span>
+<span class="nt">&lt;set</span> <span class="na">xmlns:android=</span><span class="s">"http://schemas.android.com/apk/res/android"</span><span class="nt">&gt;</span>
   <span class="nt">&lt;alpha</span>
-    <span class="na">android:fromAlpha=</span><span class="s">&quot;1.0&quot;</span>
-    <span class="na">android:toAlpha=</span><span class="s">&quot;0.0&quot;</span>
-    <span class="na">android:interpolator=</span><span class="s">&quot;@android:interpolator/accelerate_quad&quot;</span>
-    <span class="na">android:duration=</span><span class="s">&quot;1000&quot;</span><span class="nt">/&gt;</span>
+    <span class="na">android:fromAlpha=</span><span class="s">"1.0"</span>
+    <span class="na">android:toAlpha=</span><span class="s">"0.0"</span>
+    <span class="na">android:interpolator=</span><span class="s">"@android:interpolator/accelerate_quad"</span>
+    <span class="na">android:duration=</span><span class="s">"1000"</span><span class="nt">/&gt;</span>
 
   <span class="nt">&lt;scale</span>
-    <span class="na">android:fromXScale=</span><span class="s">&quot;1.0&quot;</span>
-    <span class="na">android:toXScale=</span><span class="s">&quot;0.0&quot;</span>
-    <span class="na">android:fromYScale=</span><span class="s">&quot;1.0&quot;</span>
-    <span class="na">android:toYScale=</span><span class="s">&quot;0.0&quot;</span>
-    <span class="na">android:duration=</span><span class="s">&quot;1000&quot;</span>
-    <span class="na">android:startOffset=</span><span class="s">&quot;1000&quot;</span><span class="nt">/&gt;</span>
+    <span class="na">android:fromXScale=</span><span class="s">"1.0"</span>
+    <span class="na">android:toXScale=</span><span class="s">"0.0"</span>
+    <span class="na">android:fromYScale=</span><span class="s">"1.0"</span>
+    <span class="na">android:toYScale=</span><span class="s">"0.0"</span>
+    <span class="na">android:duration=</span><span class="s">"1000"</span>
+    <span class="na">android:startOffset=</span><span class="s">"1000"</span><span class="nt">/&gt;</span>
 <span class="nt">&lt;/set&gt;</span></code></pre></div>
 
 <p>To conclude this rudimentary introduction to view animation, an interface is worth mentioning: <code>AnimationListener</code>. Suppose we wish to hide our view after an animation completes or just listen to animation events. All we have to do is:</p>
 
-<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="n">Animation</span> <span class="n">fadeOut</span> <span class="o">=</span> <span class="k">new</span> <span class="nf">AlphaAnimation</span><span class="o">(</span><span class="mi">1</span><span class="n">f</span><span class="o">,</span> <span class="mi">0</span><span class="n">f</span><span class="o">);</span>
+<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="n">Animation</span> <span class="n">fadeOut</span> <span class="o">=</span> <span class="k">new</span> <span class="n">AlphaAnimation</span><span class="o">(</span><span class="mi">1</span><span class="n">f</span><span class="o">,</span> <span class="mi">0</span><span class="n">f</span><span class="o">);</span>
 <span class="n">fadeOut</span><span class="o">.</span><span class="na">setDuration</span><span class="o">(</span><span class="mi">1000</span><span class="o">);</span>
 
 <span class="n">fadeOut</span><span class="o">.</span><span class="na">setAnimationListener</span><span class="o">(</span><span class="k">new</span> <span class="n">Animation</span><span class="o">.</span><span class="na">AnimationListener</span><span class="o">()</span> <span class="o">{</span>

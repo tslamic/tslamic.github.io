@@ -141,9 +141,9 @@
 
 <p>Missing this fact could lead to some fun late night debugging sessions. Consider the following example:</p>
 
-<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="cm">/*</span>
-<span class="cm"> * Returns true if value is odd, false otherwise.</span>
-<span class="cm"> */</span>
+<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="cm">/*
+ * Returns true if value is odd, false otherwise.
+ */</span>
 <span class="kd">static</span> <span class="kt">boolean</span> <span class="nf">isOdd</span><span class="o">(</span><span class="kd">final</span> <span class="kt">int</span> <span class="n">value</span><span class="o">)</span> <span class="o">{</span>
   <span class="k">return</span> <span class="o">(</span><span class="n">value</span> <span class="o">%</span> <span class="mi">2</span><span class="o">)</span> <span class="o">==</span> <span class="mi">1</span><span class="o">;</span>
 <span class="o">}</span></code></pre></div>
@@ -154,9 +154,9 @@
 
 <p>A quick fix could apply absolute value to a dividend. A better solution, albeit a bit cryptic, would be to just check the last bit of a number and avoid the modulo operator altogether:</p>
 
-<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="cm">/*</span>
-<span class="cm"> * Returns true if value is odd, false otherwise.</span>
-<span class="cm"> */</span>
+<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="cm">/*
+ * Returns true if value is odd, false otherwise.
+ */</span>
 <span class="kd">static</span> <span class="kt">boolean</span> <span class="nf">isOdd</span><span class="o">(</span><span class="kd">final</span> <span class="kt">int</span> <span class="n">value</span><span class="o">)</span> <span class="o">{</span>
   <span class="k">return</span> <span class="o">(</span><span class="n">value</span> <span class="o">&amp;</span> <span class="mi">1</span><span class="o">)</span> <span class="o">==</span> <span class="mi">1</span><span class="o">;</span>
 <span class="o">}</span></code></pre></div>

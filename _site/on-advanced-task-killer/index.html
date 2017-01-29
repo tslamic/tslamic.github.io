@@ -150,21 +150,21 @@
 
 <p>First, we need to get a list of all activities currently running. ATK can also extract running services. We’re going to ignore them, but you can try and add them yourself - it’s easy.</p>
 
-<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="cm">/*</span>
-<span class="cm"> * Returns the list of all available launcher Activities.</span>
-<span class="cm"> */</span>
+<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="cm">/*
+ * Returns the list of all available launcher Activities.
+ */</span>
 <span class="kd">private</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">ResolveInfo</span><span class="o">&gt;</span> <span class="nf">getAvailableActivityLaunchers</span><span class="o">()</span> <span class="o">{</span>
     <span class="kd">final</span> <span class="n">PackageManager</span> <span class="n">manager</span> <span class="o">=</span> <span class="n">getPackageManager</span><span class="o">();</span>
-    <span class="kd">final</span> <span class="n">Intent</span> <span class="n">intent</span> <span class="o">=</span> <span class="k">new</span> <span class="nf">Intent</span><span class="o">(</span><span class="n">Intent</span><span class="o">.</span><span class="na">ACTION_MAIN</span><span class="o">,</span> <span class="kc">null</span><span class="o">);</span>
+    <span class="kd">final</span> <span class="n">Intent</span> <span class="n">intent</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Intent</span><span class="o">(</span><span class="n">Intent</span><span class="o">.</span><span class="na">ACTION_MAIN</span><span class="o">,</span> <span class="kc">null</span><span class="o">);</span>
     <span class="n">intent</span><span class="o">.</span><span class="na">addCategory</span><span class="o">(</span><span class="n">Intent</span><span class="o">.</span><span class="na">CATEGORY_LAUNCHER</span><span class="o">);</span>
     <span class="k">return</span> <span class="n">manager</span><span class="o">.</span><span class="na">queryIntentActivities</span><span class="o">(</span><span class="n">intent</span><span class="o">,</span> <span class="mi">0</span><span class="o">);</span>
 <span class="o">}</span></code></pre></div>
 
 <p>Next, we want to filter out the activities currently running, but ignore the ones associated with the system:</p>
 
-<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="cm">/*</span>
-<span class="cm"> * Create a mapping from a process name to its ResolveInfo.</span>
-<span class="cm"> */</span>
+<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="cm">/*
+ * Create a mapping from a process name to its ResolveInfo.
+ */</span>
 <span class="kd">private</span> <span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="n">ResolveInfo</span><span class="o">&gt;</span> <span class="nf">getAvailableActivityLaunchersMap</span><span class="o">()</span> <span class="o">{</span>
     <span class="kd">final</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">ResolveInfo</span><span class="o">&gt;</span> <span class="n">list</span> <span class="o">=</span> <span class="n">getAvailableActivityLaunchers</span><span class="o">();</span>
     <span class="kd">final</span> <span class="n">HashMap</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="n">ResolveInfo</span><span class="o">&gt;</span> <span class="n">map</span> <span class="o">=</span> <span class="k">new</span> <span class="n">HashMap</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="n">ResolveInfo</span><span class="o">&gt;(</span><span class="n">list</span><span class="o">.</span><span class="na">size</span><span class="o">());</span>
@@ -174,9 +174,9 @@
     <span class="k">return</span> <span class="n">map</span><span class="o">;</span>
 <span class="o">}</span>
 
-<span class="cm">/*</span>
-<span class="cm"> * Return a filtered list of currently running Activities.</span>
-<span class="cm"> */</span>
+<span class="cm">/*
+ * Return a filtered list of currently running Activities.
+ */</span>
 <span class="kd">private</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">ResolveInfo</span><span class="o">&gt;</span> <span class="nf">getAvailableLaunchersCurrentlyRunning</span><span class="o">()</span> <span class="o">{</span>
     <span class="kd">final</span> <span class="n">ActivityManager</span> <span class="n">manager</span> <span class="o">=</span> <span class="n">getActivityManager</span><span class="o">(</span><span class="k">this</span><span class="o">);</span>
     <span class="kd">final</span> <span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="n">ResolveInfo</span><span class="o">&gt;</span> <span class="n">map</span> <span class="o">=</span> <span class="n">getAvailableActivityLaunchersMap</span><span class="o">();</span>

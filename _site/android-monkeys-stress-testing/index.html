@@ -145,13 +145,13 @@
 
 <p>A typical command to start the monkey is:</p>
 
-<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">$ </span>adb shell monkey -p your.package.name 5000</code></pre></div>
+<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="gp">$ </span>adb shell monkey -p your.package.name 5000</code></pre></div>
 
 <p>where <code>-p</code> denotes your package name. <code>5000</code> is the amount of events generated.</p>
 
 <p>Another useful option is the seed parameter. If you re-run the monkey with the same seed value, it will generate the exact same sequence of events. Just add the <code>-s &lt;number&gt;</code> option to your command:</p>
 
-<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">$ </span>adb shell monkey -p your.package.name -s <span class="m">12345</span> 5000</code></pre></div>
+<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="gp">$ </span>adb shell monkey -p your.package.name -s 12345 5000</code></pre></div>
 
 <p>This is handy when you encounter crashes while using the monkey. Apply the fix, re-run the monkey with the same seed value and validate.</p>
 
@@ -166,7 +166,7 @@ List of devices attached
 
 <p>Executing any adb shell command results in <code>error: more than one device and emulator</code>. You need to explicitly tell the adb which device or emulator one to use, by using <code>-s &lt;serialNumber&gt;</code> option:</p>
 
-<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">$ </span>adb -s 192.168.56.102:5555 shell monkey -p your.package.name -s <span class="m">12345</span> 5000</code></pre></div>
+<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="gp">$ </span>adb -s 192.168.56.102:5555 shell monkey -p your.package.name -s 12345 5000</code></pre></div>
 
 <p>This will run the monkey on a device or emulator with a serial number <code>192.168.56.102:5555</code>. To run the monkey on all attached emulators and devices, you have to execute a separate command for each one.</p>
 
@@ -184,19 +184,19 @@ List of devices attached
 
 <p>Using Dumpey is easy. For example</p>
 
-<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">$ </span>./monkey -p your.package.name -s <span class="m">12345</span> -e 5000</code></pre></div>
+<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="gp">$ </span>./monkey -p your.package.name -s 12345 -e 5000</code></pre></div>
 
 <p>runs the monkey on all attached devices with a seed number <code>12345</code>, generating <code>5000</code> random events.</p>
 
 <p>To avoid using DDMS to do a heap dump, use <code>memdmp</code>:</p>
 
-<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">$ </span>./memdmp -s SH48HWM03500 -p your.package.name -f heapdumps/my_heap_dump.hprof</code></pre></div>
+<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="gp">$ </span>./memdmp -s SH48HWM03500 -p your.package.name -f heapdumps/my_heap_dump.hprof</code></pre></div>
 
 <p>This will extract a converted memory heap dump to <code>heapdumps/my_heap_dump.hprof</code> file. All you have to do is open it with MAT.</p>
 
 <p>Combine memory dumps and monkey with <code>dumpey</code>:</p>
 
-<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">$ </span>./dumpey -p your.package.name -bad heapdumps/</code></pre></div>
+<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="gp">$ </span>./dumpey -p your.package.name -bad heapdumps/</code></pre></div>
 
 <p>This extracts converted memory heap dumps, runs the monkey, and extracts converted memory heap dumps again. It does this on all attached devices or emulators. If, for example, you only have one device attached, <code>SH48HWM03500</code>, then running <code>dumpey</code> with the above command will generate two files in <code>heapdumps</code> folder:</p>
 

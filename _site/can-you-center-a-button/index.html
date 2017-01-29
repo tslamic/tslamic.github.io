@@ -137,15 +137,15 @@
 
 <p>It’s easy to center a generic button. Using <code>FrameLayout</code>, one could simply set the appropriate layout gravity:</p>
 
-<div class="highlight"><pre><code class="language-xml" data-lang="xml"><span class="cp">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span>
-<span class="nt">&lt;FrameLayout</span> <span class="na">xmlns:android=</span><span class="s">&quot;default_schema&quot;</span>
-             <span class="na">android:layout_width=</span><span class="s">&quot;match_parent&quot;</span>
-             <span class="na">android:layout_height=</span><span class="s">&quot;match_parent&quot;</span><span class="nt">&gt;</span>
+<div class="highlight"><pre><code class="language-xml" data-lang="xml"><span class="cp">&lt;?xml version="1.0" encoding="utf-8"?&gt;</span>
+<span class="nt">&lt;FrameLayout</span> <span class="na">xmlns:android=</span><span class="s">"default_schema"</span>
+             <span class="na">android:layout_width=</span><span class="s">"match_parent"</span>
+             <span class="na">android:layout_height=</span><span class="s">"match_parent"</span><span class="nt">&gt;</span>
 
-    <span class="nt">&lt;Button</span> <span class="na">android:layout_width=</span><span class="s">&quot;wrap_content&quot;</span>
-            <span class="na">android:layout_height=</span><span class="s">&quot;wrap_content&quot;</span>
-            <span class="na">android:layout_gravity=</span><span class="s">&quot;center&quot;</span>
-            <span class="na">android:text=</span><span class="s">&quot;Button&quot;</span><span class="nt">/&gt;</span>
+    <span class="nt">&lt;Button</span> <span class="na">android:layout_width=</span><span class="s">"wrap_content"</span>
+            <span class="na">android:layout_height=</span><span class="s">"wrap_content"</span>
+            <span class="na">android:layout_gravity=</span><span class="s">"center"</span>
+            <span class="na">android:text=</span><span class="s">"Button"</span><span class="nt">/&gt;</span>
 
 <span class="nt">&lt;/FrameLayout&gt;</span></code></pre></div>
 
@@ -178,15 +178,15 @@
 
 <p>The custom <code>onMeasure</code> is straightforward: after invoking <code>super</code>, which provides initial measurements, we get the parent width, halve it and apply the result. Then, we tell the XML layout to use it:</p>
 
-<div class="highlight"><pre><code class="language-xml" data-lang="xml"><span class="cp">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span>
-<span class="nt">&lt;FrameLayout</span> <span class="na">xmlns:android=</span><span class="s">&quot;default_schema&quot;</span>
-             <span class="na">android:layout_width=</span><span class="s">&quot;match_parent&quot;</span>
-             <span class="na">android:layout_height=</span><span class="s">&quot;match_parent&quot;</span><span class="nt">&gt;</span>
+<div class="highlight"><pre><code class="language-xml" data-lang="xml"><span class="cp">&lt;?xml version="1.0" encoding="utf-8"?&gt;</span>
+<span class="nt">&lt;FrameLayout</span> <span class="na">xmlns:android=</span><span class="s">"default_schema"</span>
+             <span class="na">android:layout_width=</span><span class="s">"match_parent"</span>
+             <span class="na">android:layout_height=</span><span class="s">"match_parent"</span><span class="nt">&gt;</span>
 
-    <span class="nt">&lt;path.to.CenteredButton</span> <span class="na">android:layout_width=</span><span class="s">&quot;wrap_content&quot;</span>
-                            <span class="na">android:layout_height=</span><span class="s">&quot;wrap_content&quot;</span>
-                            <span class="na">android:layout_gravity=</span><span class="s">&quot;center&quot;</span>
-                            <span class="na">android:text=</span><span class="s">&quot;Button&quot;</span><span class="nt">/&gt;</span>
+    <span class="nt">&lt;path.to.CenteredButton</span> <span class="na">android:layout_width=</span><span class="s">"wrap_content"</span>
+                            <span class="na">android:layout_height=</span><span class="s">"wrap_content"</span>
+                            <span class="na">android:layout_gravity=</span><span class="s">"center"</span>
+                            <span class="na">android:text=</span><span class="s">"Button"</span><span class="nt">/&gt;</span>
 
 <span class="nt">&lt;/FrameLayout&gt;</span></code></pre></div>
 
