@@ -126,406 +126,396 @@
       </div><!-- /.header-title-wrap -->
     </header>
     <div class="entry-content">
-      <p>There&#39;s probably not a single Android developer in the wild that hasn&#39;t heard about Material design yet. </p>
+      <p>There’s probably not a single Android developer in the wild that hasn’t heard about Material design yet.</p>
 
 <p>One of my favorite elements are subtle icon transitions, like the ones presented in <a href="http://www.google.com/design/spec/animation/delightful-details.html">delightful details</a>.</p>
 
 <div class="center-align">
-<video width="320" height="240" loop="true" autoplay="autoplay" controls>
-<source src="//material-design.storage.googleapis.com/publish/v_2/material_ext_publish/0B2wX4iIvu8L6ZHZfV1NfRHdCZHM/animation-delightfuldetails-030401_Status_Change_xhdpi_003.webm" type="video/webm">
+<video width="320" height="240" loop="true" autoplay="autoplay" controls="">
+<source src="//material-design.storage.googleapis.com/publish/v_2/material_ext_publish/0B2wX4iIvu8L6ZHZfV1NfRHdCZHM/animation-delightfuldetails-030401_Status_Change_xhdpi_003.webm" type="video/webm" />
 </video>
 </div>
 
-<p>Starting a redesign of my app, a menu to back-arrow icon - like the one in the top left corner - would come handy. I thought recreating it from scratch would be a great how-to exercise. </p>
+<p>Starting a redesign of my app, a menu to back-arrow icon - like the one in the top left corner - would come handy. I thought recreating it from scratch would be a great how-to exercise.</p>
 
 <blockquote>
-<p>TL;DR Here&#39;s the <a href="https://github.com/tslamic/DelightfulMenuDrawable">GitHub repo</a>.</p>
+  <p>TL;DR Here’s the <a href="https://github.com/tslamic/DelightfulMenuDrawable">GitHub repo</a>.</p>
 </blockquote>
 
-<p><a name="sec_1"/> </p>
+<p><a name="sec_1"></a></p>
 
-<h3>A bird&#39;s eye view</h3>
+<h3 id="a-birds-eye-view">A bird’s eye view</h3>
 
-<p>Menu to back-arrow icon is a simple drawable with transition animation. Both <em>states</em> consist of three sole lines. The easiest way to define the transition is to mark the points of interest: </p>
+<p>Menu to back-arrow icon is a simple drawable with transition animation. Both <em>states</em> consist of three sole lines. The easiest way to define the transition is to mark the points of interest:</p>
 
 <figure class="center-align">
-    <img src="http://i.imgur.com/VezpDYs.png" title="mapping" />
-    <figcaption>Points will help us define the transition.</figcaption>
+	<img src="http://i.imgur.com/VezpDYs.png" title="mapping" />
+	<figcaption>Points will help us define the transition.</figcaption>
 </figure>
 
 <p>Intuitively, the mapping is:</p>
 
 <ul>
-<li><strong>A to S</strong></li>
-<li><strong>B to U</strong></li>
-<li>C to T</li>
-<li>D to U</li>
-<li><strong>E to V</strong></li>
-<li><strong>F to U</strong></li>
+  <li><strong>A to S</strong></li>
+  <li><strong>B to U</strong></li>
+  <li>C to T</li>
+  <li>D to U</li>
+  <li><strong>E to V</strong></li>
+  <li><strong>F to U</strong></li>
 </ul>
 
-<p>Points C and D are roughly equal to T and U, so we&#39;ll only focus on the bold ones.</p>
+<p>Points C and D are roughly equal to T and U, so we’ll only focus on the bold ones.</p>
 
-<h3>Measures</h3>
+<h3 id="measures">Measures</h3>
 
 <p>To extract the width and height of lines in both states, we inspect them in its final form and determine relative lengths compared to the drawable bounds:</p>
 
 <figure class="center-align">
-    <img src="http://i.imgur.com/6tgjmsm.png" title="measures" />
-    <figcaption>Measuring agains the bounds.</figcaption>
+	<img src="http://i.imgur.com/6tgjmsm.png" title="measures" />
+	<figcaption>Measuring agains the bounds.</figcaption>
 </figure>
 
 <p>At <em>hdpi</em> density, the estimates are:</p>
 
 <ul>
-<li>$l$ = 60% of bounds.width</li>
-<li>$g$ = 15% of bounds.height</li>
-<li>$w$ = 5% of bounds.height</li>
-<li>$m$ = l/2</li>
-<li>$t$ =  45 deg</li>
+  <li>$l$ = 60% of bounds.width</li>
+  <li>$g$ = 15% of bounds.height</li>
+  <li>$w$ = 5% of bounds.height</li>
+  <li>$m$ = l/2</li>
+  <li>$t$ =  45 deg</li>
 </ul>
 
 <p>Rememeber the variable names, as they will be used throughout this post.</p>
 
-<h3>Progress</h3>
+<h3 id="progress">Progress</h3>
 
-<p>To get a smooth transition from e.g. A to S, we have to know the inbetween point at each animation frame. But first, we have to decide how to track animation progress. </p>
+<p>To get a smooth transition from e.g. A to S, we have to know the inbetween point at each animation frame. But first, we have to decide how to track animation progress.</p>
 
-<p>Assuming we&#39;ll use property animation, it&#39;s on us to provide a property and set of values we want to animate between. </p>
+<p>Assuming we’ll use property animation, it’s on us to provide a property and set of values we want to animate between.</p>
 
-<p>Let <em>progress</em> denote an arbitrary float value between 0.0 and 1.0, inclusive. This will be our property. We&#39;ll start the animation by executing</p>
+<p>Let <em>progress</em> denote an arbitrary float value between 0.0 and 1.0, inclusive. This will be our property. We’ll start the animation by executing</p>
 
 <div class="highlight"><pre><code class="language-java" data-lang="java"><span class="n">ObjectAnimator</span> <span class="n">o</span> <span class="o">=</span> <span class="n">ObjectAnimator</span><span class="o">.</span><span class="na">ofFloat</span><span class="o">(</span><span class="n">drawable</span><span class="o">,</span> <span class="s">"progress"</span><span class="o">,</span> <span class="mi">0</span><span class="n">f</span><span class="o">,</span> <span class="mi">1</span><span class="n">f</span><span class="o">);</span>
 <span class="n">o</span><span class="o">.</span><span class="na">setDuration</span><span class="o">(</span><span class="n">animationDuration</span><span class="o">)</span>
 <span class="n">o</span><span class="o">.</span><span class="na">start</span><span class="o">();</span></code></pre></div>
 
+<p>If progress is 0, we show the menu icon. Else if progress is 1, we show the back-arrow icon.</p>
 
-If progress is 0, we show the menu icon. Else if progress is 1, we show the back-arrow icon. 
+<p>Progressing from 0 to 1 transforms a home icon to a back-arrow. Conversely, 1 to 0 goes from a back-arrow to home.</p>
 
-Progressing from 0 to 1 transforms a home icon to a back-arrow. Conversely, 1 to 0 goes from a back-arrow to home.
+<p><a name="sec_4"></a></p>
 
-<a name="sec_4"/> 
+<h3 id="math">Math</h3>
 
-### Math
-
-Remember, the points we refer to are all defined in the <a href="#sec_1">upper section</a>.
-
-<figure class="center-align">
-    <img src="http://i.imgur.com/3n4SaAz.png" title="A to S"/>
-    <figcaption>Pic 1</figcaption>
-</figure>
-
-P is the point at progress $0 < q < 1$, moving between A and S. We want to know $dx$ and $dy$. 
-
-Let's find coordinates of S first, assuming A is the origin. 
-Clearly its $x$ coordinate is $m$. To determine $n$, a bigger picture helps:
+<p>Remember, the points we refer to are all defined in the <a href="#sec_1">upper section</a>.</p>
 
 <figure class="center-align">
-    <img src="http://i.imgur.com/Zq5PZ5D.png" title="Bigger A to S" />
-    <figcaption>Pic 2</figcaption>
+	<img src="http://i.imgur.com/3n4SaAz.png" title="A to S" />
+	<figcaption>Pic 1</figcaption>
 </figure>
 
-Assume $z = g + n$ and $h$ the length between S and D. Recall $t = 45 \deg$. Using trigonometric ratios, we know
+<p>P is the point at progress $0 &lt; q &lt; 1$, moving between A and S. We want to know $dx$ and $dy$.</p>
 
-$$\sin t = \frac{z}{h}$$
+<p>Let’s find coordinates of S first, assuming A is the origin. 
+Clearly its $x$ coordinate is $m$. To determine $n$, a bigger picture helps:</p>
 
-We can get $h$ from
+<figure class="center-align">
+	<img src="http://i.imgur.com/Zq5PZ5D.png" title="Bigger A to S" />
+	<figcaption>Pic 2</figcaption>
+</figure>
 
-$$
+<p>Assume $z = g + n$ and $h$ the length between S and D. Recall $t = 45 \deg$. Using trigonometric ratios, we know</p>
+
+<script type="math/tex; mode=display">\sin t = \frac{z}{h}</script>
+
+<p>We can get $h$ from</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
 \begin{align}
 \cos t &= \frac{m}{h}\\
 \frac{\sqrt 2}{2} &= \frac{m}{h}\\
 h &= m\sqrt 2\\
-\end{align}
-$$
+\end{align} %]]></script>
 
-Since $h$ is of the same length as the diagonal of a square with an edge $m$, we deduct $z=m$, thus $n = (m-g)$ and $S=(m, (m-g))$. 
+<p>Since $h$ is of the same length as the diagonal of a square with an edge $m$, we deduct $z=m$, thus $n = (m-g)$ and $S=(m, (m-g))$.</p>
 
-Observe that in pic 1, at progress $p=0$, we must be at A. When $p=1$, we must be at S. It's clear that at progress $q$
+<p>Observe that in pic 1, at progress $p=0$, we must be at A. When $p=1$, we must be at S. It’s clear that at progress $q$</p>
 
-$$
+<script type="math/tex; mode=display">% <![CDATA[
 \begin{align}
 dx &= qm \\
 dy &= q(m-g)
-\end{align}
-$$
+\end{align} %]]></script>
 
-Another movement we have to take care of is B to D:
+<p>Another movement we have to take care of is B to D:</p>
 
 <figure class="center-align">
-    <img src="http://i.imgur.com/TheualZ.png" title="B to D" />
-    <figcaption>Pic 3</figcaption>
+	<img src="http://i.imgur.com/TheualZ.png" title="B to D" />
+	<figcaption>Pic 3</figcaption>
 </figure>
 
-Only $dg$ is changing. Applying similar logic as above, we know
+<p>Only $dg$ is changing. Applying similar logic as above, we know</p>
 
-$$
-dg = qg
-$$
+<script type="math/tex; mode=display">dg = qg</script>
 
-Note that C-D line (or T-U) is a mirror line. As such, reflecting the $y$ coordinate gets us E-F line changes for free.
+<p>Note that C-D line (or T-U) is a mirror line. As such, reflecting the $y$ coordinate gets us E-F line changes for free.</p>
 
-> To read more about the approach we've taken, visit the [linear interpolation][2] wiki page.
+<blockquote>
+  <p>To read more about the approach we’ve taken, visit the <a href="http://en.wikipedia.org/wiki/Linear_interpolation">linear interpolation</a> wiki page.</p>
+</blockquote>
 
-### Draw
+<h3 id="draw">Draw</h3>
 
-As mentioned, both drawable states have only three simple lines. `Canvas` has a convenient method `drawLine`, which is all we need. 
+<p>As mentioned, both drawable states have only three simple lines. <code>Canvas</code> has a convenient method <code>drawLine</code>, which is all we need.</p>
 
-To be able to draw, we need to calculate `dx`,  `dy` and `dv` and know points A, B, C, D, E, F. 
+<p>To be able to draw, we need to calculate <code>dx</code>,  <code>dy</code> and <code>dv</code> and know points A, B, C, D, E, F.</p>
 
-First three change when progress changes, but others just need bounds. We can compute them in a helper method, which is only invoked when the bounds are set.
-
+<p>First three change when progress changes, but others just need bounds. We can compute them in a helper method, which is only invoked when the bounds are set.</p>
 
 <div class="highlight"><pre><code class="language-java" data-lang="java"><span class="kd">private</span> <span class="kt">void</span> <span class="nf">measure</span><span class="o">()</span> <span class="o">{</span>
-    <span class="kd">final</span> <span class="n">Rect</span> <span class="n">bounds</span> <span class="o">=</span> <span class="n">getBounds</span><span class="o">();</span>
-    <span class="kd">final</span> <span class="kt">float</span> <span class="n">w</span> <span class="o">=</span> <span class="n">bounds</span><span class="o">.</span><span class="na">width</span><span class="o">();</span>
-    <span class="kd">final</span> <span class="kt">float</span> <span class="n">h</span> <span class="o">=</span> <span class="n">bounds</span><span class="o">.</span><span class="na">height</span><span class="o">();</span>
+	<span class="kd">final</span> <span class="n">Rect</span> <span class="n">bounds</span> <span class="o">=</span> <span class="n">getBounds</span><span class="o">();</span>
+	<span class="kd">final</span> <span class="kt">float</span> <span class="n">w</span> <span class="o">=</span> <span class="n">bounds</span><span class="o">.</span><span class="na">width</span><span class="o">();</span>
+	<span class="kd">final</span> <span class="kt">float</span> <span class="n">h</span> <span class="o">=</span> <span class="n">bounds</span><span class="o">.</span><span class="na">height</span><span class="o">();</span>
 
-    <span class="kd">final</span> <span class="kt">float</span> <span class="n">lineLength</span> <span class="o">=</span> <span class="n">LINE_LENGTH</span> <span class="o">*</span> <span class="n">w</span><span class="o">;</span>
-    <span class="n">mHalfLineLength</span> <span class="o">=</span> <span class="n">lineLength</span> <span class="o">/</span> <span class="mi">2</span><span class="o">;</span>
+	<span class="kd">final</span> <span class="kt">float</span> <span class="n">lineLength</span> <span class="o">=</span> <span class="n">LINE_LENGTH</span> <span class="o">*</span> <span class="n">w</span><span class="o">;</span>
+	<span class="n">mHalfLineLength</span> <span class="o">=</span> <span class="n">lineLength</span> <span class="o">/</span> <span class="mi">2</span><span class="o">;</span>
 
-    <span class="n">mLineGap</span> <span class="o">=</span> <span class="n">LINE_GAP</span> <span class="o">*</span> <span class="n">h</span><span class="o">;</span>
+	<span class="n">mLineGap</span> <span class="o">=</span> <span class="n">LINE_GAP</span> <span class="o">*</span> <span class="n">h</span><span class="o">;</span>
 
-    <span class="kd">final</span> <span class="kt">float</span> <span class="n">strokeWidth</span> <span class="o">=</span> <span class="n">LINE_WIDTH</span> <span class="o">*</span> <span class="n">h</span><span class="o">;</span>
-    <span class="n">mPaint</span><span class="o">.</span><span class="na">setStrokeWidth</span><span class="o">(</span><span class="n">strokeWidth</span><span class="o">);</span>
+	<span class="kd">final</span> <span class="kt">float</span> <span class="n">strokeWidth</span> <span class="o">=</span> <span class="n">LINE_WIDTH</span> <span class="o">*</span> <span class="n">h</span><span class="o">;</span>
+	<span class="n">mPaint</span><span class="o">.</span><span class="na">setStrokeWidth</span><span class="o">(</span><span class="n">strokeWidth</span><span class="o">);</span>
 
-    <span class="n">mCenterY</span> <span class="o">=</span> <span class="n">w</span> <span class="o">/</span> <span class="mi">2</span><span class="o">;</span>
-    <span class="n">mStartX</span> <span class="o">=</span> <span class="n">bounds</span><span class="o">.</span><span class="na">left</span> <span class="o">+</span> <span class="o">(</span><span class="n">w</span> <span class="o">-</span> <span class="n">lineLength</span><span class="o">)</span> <span class="o">/</span> <span class="mi">2</span><span class="o">;</span>
-    <span class="n">mEndX</span> <span class="o">=</span> <span class="n">mStartX</span> <span class="o">+</span> <span class="n">lineLength</span><span class="o">;</span>
-    <span class="n">mTopY</span> <span class="o">=</span> <span class="n">mCenterY</span> <span class="o">-</span> <span class="n">mLineGap</span><span class="o">;</span>
-    <span class="n">mBottomY</span> <span class="o">=</span> <span class="n">mCenterY</span> <span class="o">+</span> <span class="n">mLineGap</span><span class="o">;</span>
+	<span class="n">mCenterY</span> <span class="o">=</span> <span class="n">w</span> <span class="o">/</span> <span class="mi">2</span><span class="o">;</span>
+	<span class="n">mStartX</span> <span class="o">=</span> <span class="n">bounds</span><span class="o">.</span><span class="na">left</span> <span class="o">+</span> <span class="o">(</span><span class="n">w</span> <span class="o">-</span> <span class="n">lineLength</span><span class="o">)</span> <span class="o">/</span> <span class="mi">2</span><span class="o">;</span>
+	<span class="n">mEndX</span> <span class="o">=</span> <span class="n">mStartX</span> <span class="o">+</span> <span class="n">lineLength</span><span class="o">;</span>
+	<span class="n">mTopY</span> <span class="o">=</span> <span class="n">mCenterY</span> <span class="o">-</span> <span class="n">mLineGap</span><span class="o">;</span>
+	<span class="n">mBottomY</span> <span class="o">=</span> <span class="n">mCenterY</span> <span class="o">+</span> <span class="n">mLineGap</span><span class="o">;</span>
 
-    <span class="n">invalidateSelf</span><span class="o">();</span>
+	<span class="n">invalidateSelf</span><span class="o">();</span>
 <span class="o">}</span></code></pre></div>
 
+<p>In the code above, <code>mHalfLineLength</code> denotes $m$, <code>mLineGap</code> denotes $g$ and <code>strokeWidth</code> is $w$. Other instance variables fully determine the points:</p>
 
-In the code above, `mHalfLineLength` denotes $m$, `mLineGap` denotes $g$ and `strokeWidth` is $w$. Other instance variables fully determine the points: 
+<ul>
+  <li>A(<code>mStartX</code>, <code>mTopY</code>)</li>
+  <li>B(<code>mEndX</code>, <code>mTopY</code>)</li>
+  <li>C(<code>mStartX</code>, <code>mCenterY</code>)</li>
+  <li>D(<code>mEndX</code>, <code>mCenterY</code>)</li>
+  <li>E(<code>mStartX</code>, <code>mBottomY</code>)</li>
+  <li>F(<code>mEndX</code>, <code>mBottomY</code>)</li>
+</ul>
 
-- A(`mStartX`, `mTopY`)
-- B(`mEndX`, `mTopY`)
-- C(`mStartX`, `mCenterY`)
-- D(`mEndX`, `mCenterY`)
-- E(`mStartX`, `mBottomY`)
-- F(`mEndX`, `mBottomY`)
-
-Each time progress is updated, we invalidate the drawable. Consequently, `draw` method is invoked
-
+<p>Each time progress is updated, we invalidate the drawable. Consequently, <code>draw</code> method is invoked</p>
 
 <div class="highlight"><pre><code class="language-java" data-lang="java"><span class="nd">@Override</span>
 <span class="kd">public</span> <span class="kt">void</span> <span class="nf">draw</span><span class="o">(</span><span class="n">Canvas</span> <span class="n">canvas</span><span class="o">)</span> <span class="o">{</span>
-    <span class="kd">final</span> <span class="kt">float</span> <span class="n">dx</span> <span class="o">=</span> <span class="n">mProgress</span> <span class="o">*</span> <span class="n">mHalfLineLength</span><span class="o">;</span>
-    <span class="kd">final</span> <span class="kt">float</span> <span class="n">dy</span> <span class="o">=</span> <span class="n">mProgress</span> <span class="o">*</span> <span class="o">(</span><span class="n">mHalfLineLength</span> <span class="o">-</span> <span class="n">mLineGap</span><span class="o">);</span>
-    <span class="kd">final</span> <span class="kt">float</span> <span class="n">dg</span> <span class="o">=</span> <span class="n">mProgress</span> <span class="o">*</span> <span class="n">mLineGap</span><span class="o">;</span>
+	<span class="kd">final</span> <span class="kt">float</span> <span class="n">dx</span> <span class="o">=</span> <span class="n">mProgress</span> <span class="o">*</span> <span class="n">mHalfLineLength</span><span class="o">;</span>
+	<span class="kd">final</span> <span class="kt">float</span> <span class="n">dy</span> <span class="o">=</span> <span class="n">mProgress</span> <span class="o">*</span> <span class="o">(</span><span class="n">mHalfLineLength</span> <span class="o">-</span> <span class="n">mLineGap</span><span class="o">);</span>
+	<span class="kd">final</span> <span class="kt">float</span> <span class="n">dg</span> <span class="o">=</span> <span class="n">mProgress</span> <span class="o">*</span> <span class="n">mLineGap</span><span class="o">;</span>
 
-    <span class="n">canvas</span><span class="o">.</span><span class="na">drawLine</span><span class="o">(</span><span class="n">mStartX</span> <span class="o">+</span> <span class="n">dx</span><span class="o">,</span> <span class="n">mTopY</span> <span class="o">-</span> <span class="n">dy</span><span class="o">,</span> <span class="n">mEndX</span><span class="o">,</span> <span class="n">mTopY</span> <span class="o">+</span> <span class="n">dg</span><span class="o">,</span> <span class="n">mPaint</span><span class="o">);</span>
-    <span class="n">canvas</span><span class="o">.</span><span class="na">drawLine</span><span class="o">(</span><span class="n">mStartX</span><span class="o">,</span> <span class="n">mCenterY</span><span class="o">,</span> <span class="n">mEndX</span><span class="o">,</span> <span class="n">mCenterY</span><span class="o">,</span> <span class="n">mPaint</span><span class="o">);</span>
-    <span class="n">canvas</span><span class="o">.</span><span class="na">drawLine</span><span class="o">(</span><span class="n">mStartX</span> <span class="o">+</span> <span class="n">dx</span><span class="o">,</span> <span class="n">mBottomY</span> <span class="o">+</span> <span class="n">dy</span><span class="o">,</span> <span class="n">mEndX</span><span class="o">,</span> <span class="n">mBottomY</span> <span class="o">-</span> <span class="n">dg</span><span class="o">,</span> <span class="n">mPaint</span><span class="o">);</span>
+	<span class="n">canvas</span><span class="o">.</span><span class="na">drawLine</span><span class="o">(</span><span class="n">mStartX</span> <span class="o">+</span> <span class="n">dx</span><span class="o">,</span> <span class="n">mTopY</span> <span class="o">-</span> <span class="n">dy</span><span class="o">,</span> <span class="n">mEndX</span><span class="o">,</span> <span class="n">mTopY</span> <span class="o">+</span> <span class="n">dg</span><span class="o">,</span> <span class="n">mPaint</span><span class="o">);</span>
+	<span class="n">canvas</span><span class="o">.</span><span class="na">drawLine</span><span class="o">(</span><span class="n">mStartX</span><span class="o">,</span> <span class="n">mCenterY</span><span class="o">,</span> <span class="n">mEndX</span><span class="o">,</span> <span class="n">mCenterY</span><span class="o">,</span> <span class="n">mPaint</span><span class="o">);</span>
+	<span class="n">canvas</span><span class="o">.</span><span class="na">drawLine</span><span class="o">(</span><span class="n">mStartX</span> <span class="o">+</span> <span class="n">dx</span><span class="o">,</span> <span class="n">mBottomY</span> <span class="o">+</span> <span class="n">dy</span><span class="o">,</span> <span class="n">mEndX</span><span class="o">,</span> <span class="n">mBottomY</span> <span class="o">-</span> <span class="n">dg</span><span class="o">,</span> <span class="n">mPaint</span><span class="o">);</span>
 <span class="o">}</span></code></pre></div>
 
+<p>Note that we apply the transformations computed in the <a href="#sec_4">math section</a>.</p>
 
-Note that we apply the transformations computed in the <a href="#sec_4">math section</a>. 
+<h3 id="demo">Demo</h3>
 
-### Demo
-
-Because I'm nice, I've wrapped everything we've done so far in a widget for you to try out:
+<p>Because I’m nice, I’ve wrapped everything we’ve done so far in a widget for you to try out:</p>
 
 <div class="center-align">
-    <div>
-        <canvas id="canvas" width="300" height="300" style="border:1px solid #000000;" />
-    </div>
-    <div>0.0
-        <input id="slider" type="range" min="0.0" max="1.0" step="0.01" value="0.0" width="300" />1.0
-        <p id="prog"></p>
-    </div>
+	<div>
+	    <canvas id="canvas" width="300" height="300" style="border:1px solid #000000;" />
+	</div>
+	<div>0.0
+	    <input id="slider" type="range" min="0.0" max="1.0" step="0.01" value="0.0" width="300" />1.0
+	    <p id="prog"></p>
+	</div>
 </div>
 
-<h3>Class 4 Strategic Theatre Emergency</h3>
+<h3 id="class-4-strategic-theatre-emergency">Class 4 Strategic Theatre Emergency</h3>
 
 <p>If progress is 1, the above widget reveals the pointy end of the arrow is not really pointy.</p>
 
-<p>When drawing on a <code>Canvas</code> instance, Android uses <a href="https://code.google.com/p/skia/">Skia</a>, a 2D graphics library, to do the actual drawing. <code>Canvas.drawLine</code> invokes a native method <code>SkCanvas::drawLine</code>, which invokes <code>SkCanvas::onDrawPoints</code>. Because our <code>mPaint</code> instance is not complex (it has no path effects, for example), <code>SkPaint::doComputeFastBounds</code> is called. </p>
+<p>When drawing on a <code>Canvas</code> instance, Android uses <a href="https://code.google.com/p/skia/">Skia</a>, a 2D graphics library, to do the actual drawing. <code>Canvas.drawLine</code> invokes a native method <code>SkCanvas::drawLine</code>, which invokes <code>SkCanvas::onDrawPoints</code>. Because our <code>mPaint</code> instance is not complex (it has no path effects, for example), <code>SkPaint::doComputeFastBounds</code> is called.</p>
 
-<p>We care because in this case, if the <code>mPaint</code> stroke width is $w$, the rendered point has a radius of $w/2$. </p>
+<p>We care because in this case, if the <code>mPaint</code> stroke width is $w$, the rendered point has a radius of $w/2$.</p>
 
-<p>Here&#39;s a zoomed in look at U, where B and F meet and progress is 1:</p>
+<p>Here’s a zoomed in look at U, where B and F meet and progress is 1:</p>
 
 <figure class="center-align">
-    <img src="http://i.imgur.com/4pGRr4J.png" title="source: imgur.com" />
-    <figcaption>
-    Line A-B (S-U) is colored purple. Line E-F (V-U) is colored green. Red square is the issue we're trying to resolve. </figcaption>
+	<img src="http://i.imgur.com/4pGRr4J.png" title="source: imgur.com" />
+	<figcaption>
+	Line A-B (S-U) is colored purple. Line E-F (V-U) is colored green. Red square is the issue we're trying to resolve. </figcaption>
 </figure>
 
-<p>If we offset B and F by $(zx, -zy), (zx, zy)$ respectively, we cover the red square. </p>
+<p>If we offset B and F by $(zx, -zy), (zx, zy)$ respectively, we cover the red square.</p>
 
 <p>Because of the above analysis, we know $r=\frac{w}{2}$. Both lines come at a 45 degree angle, hence $k = 45\deg$ too. We can use trigonometric ratios again:</p>
 
-<p>$$
+<script type="math/tex; mode=display">% <![CDATA[
 \begin{align}
-zx &amp;= h\cos k \
-zy &amp;= h\sin k
-\end{align}
-$$</p>
+zx &= h\cos k \\
+zy &= h\sin k
+\end{align} %]]></script>
 
 <p>Because $\cos 45 = \sin 45 = \frac{\sqrt 2}{2}$ and $h= \frac{w}{2}$, we get</p>
 
-<p>$$
-zx = \frac{w}{2} \cdot \frac{\sqrt 2}{2} = zy = \frac{\sqrt 2}{4}w
-$$</p>
+<script type="math/tex; mode=display">zx = \frac{w}{2} \cdot \frac{\sqrt 2}{2} = zy = \frac{\sqrt 2}{4}w</script>
 
 <p>Applying progress and updating the <code>draw</code> method, we get</p>
 
 <div class="highlight"><pre><code class="language-java" data-lang="java"><span class="nd">@Override</span>
 <span class="kd">public</span> <span class="kt">void</span> <span class="nf">draw</span><span class="o">(</span><span class="n">Canvas</span> <span class="n">canvas</span><span class="o">)</span> <span class="o">{</span>
-    <span class="kd">final</span> <span class="kt">float</span> <span class="n">dx</span> <span class="o">=</span> <span class="n">mProgress</span> <span class="o">*</span> <span class="n">mHalfLineLength</span><span class="o">;</span>
-    <span class="kd">final</span> <span class="kt">float</span> <span class="n">dy</span> <span class="o">=</span> <span class="n">mProgress</span> <span class="o">*</span> <span class="o">(</span><span class="n">mHalfLineLength</span> <span class="o">-</span> <span class="n">mLineGap</span><span class="o">);</span>
-    <span class="kd">final</span> <span class="kt">float</span> <span class="n">dv</span> <span class="o">=</span> <span class="n">mProgress</span> <span class="o">*</span> <span class="n">mLineGap</span><span class="o">;</span>
+	<span class="kd">final</span> <span class="kt">float</span> <span class="n">dx</span> <span class="o">=</span> <span class="n">mProgress</span> <span class="o">*</span> <span class="n">mHalfLineLength</span><span class="o">;</span>
+	<span class="kd">final</span> <span class="kt">float</span> <span class="n">dy</span> <span class="o">=</span> <span class="n">mProgress</span> <span class="o">*</span> <span class="o">(</span><span class="n">mHalfLineLength</span> <span class="o">-</span> <span class="n">mLineGap</span><span class="o">);</span>
+	<span class="kd">final</span> <span class="kt">float</span> <span class="n">dv</span> <span class="o">=</span> <span class="n">mProgress</span> <span class="o">*</span> <span class="n">mLineGap</span><span class="o">;</span>
 
-    <span class="c1">// zx/zy computation can be easily moved to the measure method</span>
-    <span class="kd">final</span> <span class="kt">float</span> <span class="n">dz</span> <span class="o">=</span> <span class="n">mProgress</span> <span class="o">*</span> <span class="o">((</span><span class="n">Math</span><span class="o">.</span><span class="na">sqrt</span><span class="o">(</span><span class="mi">2</span><span class="o">)/</span><span class="mi">4</span><span class="o">)*</span><span class="n">mPaint</span><span class="o">.</span><span class="na">getStrokeWidth</span><span class="o">());</span>
+	<span class="c1">// zx/zy computation can be easily moved to the measure method</span>
+	<span class="kd">final</span> <span class="kt">float</span> <span class="n">dz</span> <span class="o">=</span> <span class="n">mProgress</span> <span class="o">*</span> <span class="o">((</span><span class="n">Math</span><span class="o">.</span><span class="na">sqrt</span><span class="o">(</span><span class="mi">2</span><span class="o">)/</span><span class="mi">4</span><span class="o">)*</span><span class="n">mPaint</span><span class="o">.</span><span class="na">getStrokeWidth</span><span class="o">());</span>
 
-    <span class="n">canvas</span><span class="o">.</span><span class="na">drawLine</span><span class="o">(</span><span class="n">mStartX</span> <span class="o">+</span> <span class="n">dx</span><span class="o">,</span> <span class="n">mTopY</span> <span class="o">-</span> <span class="n">dy</span><span class="o">,</span> <span class="n">mEndX</span> <span class="o">+</span> <span class="n">dz</span><span class="o">,</span> <span class="n">mTopY</span> <span class="o">+</span> <span class="n">dv</span> <span class="o">+</span> <span class="n">dz</span><span class="o">,</span> <span class="n">mPaint</span><span class="o">);</span>
-    <span class="n">canvas</span><span class="o">.</span><span class="na">drawLine</span><span class="o">(</span><span class="n">mStartX</span><span class="o">,</span> <span class="n">mCenterY</span><span class="o">,</span> <span class="n">mEndX</span><span class="o">,</span> <span class="n">mCenterY</span><span class="o">,</span> <span class="n">mPaint</span><span class="o">);</span>
-    <span class="n">canvas</span><span class="o">.</span><span class="na">drawLine</span><span class="o">(</span><span class="n">mStartX</span> <span class="o">+</span> <span class="n">dx</span><span class="o">,</span> <span class="n">mBottomY</span> <span class="o">+</span> <span class="n">dy</span><span class="o">,</span> <span class="n">mEndX</span> <span class="o">+</span> <span class="n">dz</span><span class="o">,</span> <span class="n">mBottomY</span> <span class="o">-</span> <span class="n">dv</span> <span class="o">-</span> <span class="n">dz</span><span class="o">,</span> <span class="n">mPaint</span><span class="o">);</span>
+	<span class="n">canvas</span><span class="o">.</span><span class="na">drawLine</span><span class="o">(</span><span class="n">mStartX</span> <span class="o">+</span> <span class="n">dx</span><span class="o">,</span> <span class="n">mTopY</span> <span class="o">-</span> <span class="n">dy</span><span class="o">,</span> <span class="n">mEndX</span> <span class="o">+</span> <span class="n">dz</span><span class="o">,</span> <span class="n">mTopY</span> <span class="o">+</span> <span class="n">dv</span> <span class="o">+</span> <span class="n">dz</span><span class="o">,</span> <span class="n">mPaint</span><span class="o">);</span>
+	<span class="n">canvas</span><span class="o">.</span><span class="na">drawLine</span><span class="o">(</span><span class="n">mStartX</span><span class="o">,</span> <span class="n">mCenterY</span><span class="o">,</span> <span class="n">mEndX</span><span class="o">,</span> <span class="n">mCenterY</span><span class="o">,</span> <span class="n">mPaint</span><span class="o">);</span>
+	<span class="n">canvas</span><span class="o">.</span><span class="na">drawLine</span><span class="o">(</span><span class="n">mStartX</span> <span class="o">+</span> <span class="n">dx</span><span class="o">,</span> <span class="n">mBottomY</span> <span class="o">+</span> <span class="n">dy</span><span class="o">,</span> <span class="n">mEndX</span> <span class="o">+</span> <span class="n">dz</span><span class="o">,</span> <span class="n">mBottomY</span> <span class="o">-</span> <span class="n">dv</span> <span class="o">-</span> <span class="n">dz</span><span class="o">,</span> <span class="n">mPaint</span><span class="o">);</span>
 <span class="o">}</span></code></pre></div>
 
+<h3 id="again-demo">Again, demo</h3>
 
-
-### Again, demo
-
-Confirm the fix in previous section resolves the issue:
+<p>Confirm the fix in previous section resolves the issue:</p>
 
 <div class="center-align">
-    <div>
-        <canvas id="canvas2" width="300" height="300" style="border:1px solid #000000;" />
-    </div>
-    <div>0.0
-        <input id="slider2" type="range" min="0.0" max="1.0" step="0.01" value="0.0" width="300" />1.0
-        <p id="prog2"></p>
-    </div>
+	<div>
+	    <canvas id="canvas2" width="300" height="300" style="border:1px solid #000000;" />
+	</div>
+	<div>0.0
+	    <input id="slider2" type="range" min="0.0" max="1.0" step="0.01" value="0.0" width="300" />1.0
+	    <p id="prog2"></p>
+	</div>
 </div>
 
-<h3>A final touch</h3>
+<h3 id="a-final-touch">A final touch</h3>
 
 <p>To finish off, we have to add rotation. The one in <a href="http://www.google.com/design/spec/animation/delightful-details.html">delightful details</a> goes from:</p>
 
 <ul>
-<li>0 to 180, if progress goes from 0 to 1</li>
-<li>-180 to 0, if progress goes from 1 to 0</li>
+  <li>0 to 180, if progress goes from 0 to 1</li>
+  <li>-180 to 0, if progress goes from 1 to 0</li>
 </ul>
 
 <p>Because, at this point, you are a master of linear interpolation, the updated <code>draw</code> method makes sense</p>
 
 <div class="highlight"><pre><code class="language-java" data-lang="java"><span class="nd">@Override</span>
 <span class="kd">public</span> <span class="kt">void</span> <span class="nf">draw</span><span class="o">(</span><span class="n">Canvas</span> <span class="n">canvas</span><span class="o">)</span> <span class="o">{</span>
-    <span class="kd">final</span> <span class="kt">float</span> <span class="n">dx</span> <span class="o">=</span> <span class="n">mProgress</span> <span class="o">*</span> <span class="n">mHalfLineLength</span><span class="o">;</span>
-    <span class="kd">final</span> <span class="kt">float</span> <span class="n">dy</span> <span class="o">=</span> <span class="n">mProgress</span> <span class="o">*</span> <span class="o">(</span><span class="n">mHalfLineLength</span> <span class="o">-</span> <span class="n">mLineGap</span><span class="o">);</span>
-    <span class="kd">final</span> <span class="kt">float</span> <span class="n">dg</span> <span class="o">=</span> <span class="n">mProgress</span> <span class="o">*</span> <span class="n">mLineGap</span><span class="o">;</span>
+	<span class="kd">final</span> <span class="kt">float</span> <span class="n">dx</span> <span class="o">=</span> <span class="n">mProgress</span> <span class="o">*</span> <span class="n">mHalfLineLength</span><span class="o">;</span>
+	<span class="kd">final</span> <span class="kt">float</span> <span class="n">dy</span> <span class="o">=</span> <span class="n">mProgress</span> <span class="o">*</span> <span class="o">(</span><span class="n">mHalfLineLength</span> <span class="o">-</span> <span class="n">mLineGap</span><span class="o">);</span>
+	<span class="kd">final</span> <span class="kt">float</span> <span class="n">dg</span> <span class="o">=</span> <span class="n">mProgress</span> <span class="o">*</span> <span class="n">mLineGap</span><span class="o">;</span>
 
-    <span class="c1">// dx/dy computation was moved to measure method</span>
-    <span class="kd">final</span> <span class="kt">float</span> <span class="n">dz</span> <span class="o">=</span> <span class="n">mProgress</span> <span class="o">*</span> <span class="n">mArrowFactor</span><span class="o">;</span>
+	<span class="c1">// dx/dy computation was moved to measure method</span>
+	<span class="kd">final</span> <span class="kt">float</span> <span class="n">dz</span> <span class="o">=</span> <span class="n">mProgress</span> <span class="o">*</span> <span class="n">mArrowFactor</span><span class="o">;</span>
 
-    <span class="c1">// mIsBack is true if the icon is currently showing the back arrow</span>
-    <span class="kd">final</span> <span class="kt">float</span> <span class="n">rotationTarget</span> <span class="o">=</span> <span class="n">mIsBack</span> <span class="o">?</span> <span class="o">-</span><span class="mi">180</span> <span class="o">:</span> <span class="mi">180</span><span class="o">;</span>
-    <span class="kd">final</span> <span class="kt">float</span> <span class="n">rotation</span> <span class="o">=</span> <span class="n">mProgress</span> <span class="o">*</span> <span class="n">rotationTarget</span><span class="o">;</span>
-    <span class="kd">final</span> <span class="kt">float</span> <span class="n">pivotX</span> <span class="o">=</span> <span class="n">getBounds</span><span class="o">.</span><span class="na">centerX</span><span class="o">();</span>
-    <span class="kd">final</span> <span class="kt">float</span> <span class="n">pivotY</span> <span class="o">=</span> <span class="n">getBounds</span><span class="o">().</span><span class="na">centerY</span><span class="o">();</span>
+	<span class="c1">// mIsBack is true if the icon is currently showing the back arrow</span>
+	<span class="kd">final</span> <span class="kt">float</span> <span class="n">rotationTarget</span> <span class="o">=</span> <span class="n">mIsBack</span> <span class="o">?</span> <span class="o">-</span><span class="mi">180</span> <span class="o">:</span> <span class="mi">180</span><span class="o">;</span>
+	<span class="kd">final</span> <span class="kt">float</span> <span class="n">rotation</span> <span class="o">=</span> <span class="n">mProgress</span> <span class="o">*</span> <span class="n">rotationTarget</span><span class="o">;</span>
+	<span class="kd">final</span> <span class="kt">float</span> <span class="n">pivotX</span> <span class="o">=</span> <span class="n">getBounds</span><span class="o">.</span><span class="na">centerX</span><span class="o">();</span>
+	<span class="kd">final</span> <span class="kt">float</span> <span class="n">pivotY</span> <span class="o">=</span> <span class="n">getBounds</span><span class="o">().</span><span class="na">centerY</span><span class="o">();</span>
 
-    <span class="n">canvas</span><span class="o">.</span><span class="na">save</span><span class="o">();</span>
-    <span class="n">canvas</span><span class="o">.</span><span class="na">rotate</span><span class="o">(</span><span class="n">rotation</span><span class="o">,</span> <span class="n">pivotX</span><span class="o">,</span> <span class="n">pivotY</span><span class="o">);</span>
-    <span class="n">canvas</span><span class="o">.</span><span class="na">drawLine</span><span class="o">(</span><span class="n">mStartX</span> <span class="o">+</span> <span class="n">dx</span><span class="o">,</span> <span class="n">mTopY</span> <span class="o">-</span> <span class="n">dy</span><span class="o">,</span> <span class="n">mEndX</span> <span class="o">+</span> <span class="n">dz</span><span class="o">,</span> <span class="n">mTopY</span> <span class="o">+</span> <span class="n">dg</span> <span class="o">+</span> <span class="n">dz</span><span class="o">,</span> <span class="n">mPaint</span><span class="o">);</span>
-    <span class="n">canvas</span><span class="o">.</span><span class="na">drawLine</span><span class="o">(</span><span class="n">mStartX</span><span class="o">,</span> <span class="n">mCenterY</span><span class="o">,</span> <span class="n">mEndX</span><span class="o">,</span> <span class="n">mCenterY</span><span class="o">,</span> <span class="n">mPaint</span><span class="o">);</span>
-    <span class="n">canvas</span><span class="o">.</span><span class="na">drawLine</span><span class="o">(</span><span class="n">mStartX</span> <span class="o">+</span> <span class="n">dx</span><span class="o">,</span> <span class="n">mBottomY</span> <span class="o">+</span> <span class="n">dy</span><span class="o">,</span> <span class="n">mEndX</span> <span class="o">+</span> <span class="n">dz</span><span class="o">,</span> <span class="n">mBottomY</span> <span class="o">-</span> <span class="n">dg</span> <span class="o">-</span> <span class="n">dz</span><span class="o">,</span> <span class="n">mPaint</span><span class="o">);</span>
-    <span class="n">canvas</span><span class="o">.</span><span class="na">restore</span><span class="o">();</span>
+	<span class="n">canvas</span><span class="o">.</span><span class="na">save</span><span class="o">();</span>
+	<span class="n">canvas</span><span class="o">.</span><span class="na">rotate</span><span class="o">(</span><span class="n">rotation</span><span class="o">,</span> <span class="n">pivotX</span><span class="o">,</span> <span class="n">pivotY</span><span class="o">);</span>
+	<span class="n">canvas</span><span class="o">.</span><span class="na">drawLine</span><span class="o">(</span><span class="n">mStartX</span> <span class="o">+</span> <span class="n">dx</span><span class="o">,</span> <span class="n">mTopY</span> <span class="o">-</span> <span class="n">dy</span><span class="o">,</span> <span class="n">mEndX</span> <span class="o">+</span> <span class="n">dz</span><span class="o">,</span> <span class="n">mTopY</span> <span class="o">+</span> <span class="n">dg</span> <span class="o">+</span> <span class="n">dz</span><span class="o">,</span> <span class="n">mPaint</span><span class="o">);</span>
+	<span class="n">canvas</span><span class="o">.</span><span class="na">drawLine</span><span class="o">(</span><span class="n">mStartX</span><span class="o">,</span> <span class="n">mCenterY</span><span class="o">,</span> <span class="n">mEndX</span><span class="o">,</span> <span class="n">mCenterY</span><span class="o">,</span> <span class="n">mPaint</span><span class="o">);</span>
+	<span class="n">canvas</span><span class="o">.</span><span class="na">drawLine</span><span class="o">(</span><span class="n">mStartX</span> <span class="o">+</span> <span class="n">dx</span><span class="o">,</span> <span class="n">mBottomY</span> <span class="o">+</span> <span class="n">dy</span><span class="o">,</span> <span class="n">mEndX</span> <span class="o">+</span> <span class="n">dz</span><span class="o">,</span> <span class="n">mBottomY</span> <span class="o">-</span> <span class="n">dg</span> <span class="o">-</span> <span class="n">dz</span><span class="o">,</span> <span class="n">mPaint</span><span class="o">);</span>
+	<span class="n">canvas</span><span class="o">.</span><span class="na">restore</span><span class="o">();</span>
 <span class="o">}</span></code></pre></div>
 
-<h3>Parting words</h3>
+<h3 id="parting-words">Parting words</h3>
 
-<p>Good on ya for making it this far. I hope math section was clear enough, and the widgets helped. I&#39;m sure some parts can be improved, so I&#39;ll be grateful for any feedback I get. The full implementation is <a href="https://github.com/tslamic/DelightfulMenuDrawable">available on GitHub</a>.</p>
+<p>Good on ya for making it this far. I hope math section was clear enough, and the widgets helped. I’m sure some parts can be improved, so I’ll be grateful for any feedback I get. The full implementation is <a href="https://github.com/tslamic/DelightfulMenuDrawable">available on GitHub</a>.</p>
 
 <script type="text/x-mathjax-config">
-    MathJax.Hub.Config({
-        tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}
-    });
+	MathJax.Hub.Config({
+		tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}
+	});
 </script>
 
-<script type="text/javascript"
-    src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+<script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
 
-    var DelightfulDrawable = {};
+	var DelightfulDrawable = {};
 
-    DelightfulDrawable.newInstance = function (canvasId, sliderId, progressId, isPointy) {
+	DelightfulDrawable.newInstance = function (canvasId, sliderId, progressId, isPointy) {
 
-        // Elements
-        var canvas = document.getElementById(canvasId);
-        var slider = document.getElementById(sliderId);
-        var progress = document.getElementById(progressId);
-        var context = canvas.getContext("2d");
+	    // Elements
+	    var canvas = document.getElementById(canvasId);
+	    var slider = document.getElementById(sliderId);
+	    var progress = document.getElementById(progressId);
+	    var context = canvas.getContext("2d");
 
-        // Event handler
-        slider.addEventListener("input", function () {
-            update(slider.value);
-        }, false);
+	    // Event handler
+	    slider.addEventListener("input", function () {
+	    	update(slider.value);
+	    }, false);
 
-        // Bounds
-        var width = canvas.width;
-        var height = canvas.height;
+	    // Bounds
+	    var width = canvas.width;
+	    var height = canvas.height;
 
-        // Measure
-        var l = 0.60 * width;
-        var g = 0.15 * height;
-        var w = 0.05 * height;
-        var m = l / 2;
+	    // Measure
+	    var l = 0.60 * width;
+	    var g = 0.15 * height;
+	    var w = 0.05 * height;
+	    var m = l / 2;
 
-        // Helpers
-        var centerY = height / 2;
-        var startX = (width - l) / 2;
-        var endX = startX + l;
-        var topY = centerY - g;
-        var bottomY = centerY + g;
-        var pointyFactor = isPointy ? (.3536 * w) : 0;
+	    // Helpers
+	    var centerY = height / 2;
+	    var startX = (width - l) / 2;
+	    var endX = startX + l;
+	    var topY = centerY - g;
+	    var bottomY = centerY + g;
+	    var pointyFactor = isPointy ? (.3536 * w) : 0;
 
-        // Show UI
-        context.lineWidth = w;
-        update(0.0);
+	    // Show UI
+	    context.lineWidth = w;
+	    update(0.0);
 
-        function update(prog) {
-            progress.innerHTML = "Current progress: " + parseFloat(prog).toFixed(2);
-            draw(context, prog);
-        }
+	    function update(prog) {
+	    	progress.innerHTML = "Current progress: " + parseFloat(prog).toFixed(2);
+	    	draw(context, prog);
+	    }
 
-        function draw(canv, prog) {
-            var dx = prog * m;
-            var dy = prog * (m - g);
-            var dg = prog * g;
-            var dz = prog * pointyFactor;
+	    function draw(canv, prog) {
+	    	var dx = prog * m;
+	    	var dy = prog * (m - g);
+	    	var dg = prog * g;
+	    	var dz = prog * pointyFactor;
 
-            // Reset canvas
-            canv.clearRect(0, 0, width, height);
-            canv.beginPath();
+	        // Reset canvas
+	        canv.clearRect(0, 0, width, height);
+	        canv.beginPath();
 
-            // Top line
-            canv.moveTo(startX + dx, topY - dy);
-            canv.lineTo(endX + dz, topY + dg + dz);
+	        // Top line
+	        canv.moveTo(startX + dx, topY - dy);
+	        canv.lineTo(endX + dz, topY + dg + dz);
 
-            // Middle line
-            canv.moveTo(startX, centerY);
-            canv.lineTo(endX, centerY);
+	        // Middle line
+	        canv.moveTo(startX, centerY);
+	        canv.lineTo(endX, centerY);
 
-            // Bottom line
-            canv.moveTo(startX + dx, bottomY + dy);
-            canv.lineTo(endX + dz, bottomY - dg - dz);
+	        // Bottom line
+	        canv.moveTo(startX + dx, bottomY + dy);
+	        canv.lineTo(endX + dz, bottomY - dg - dz);
 
-            // Draw
-            canv.closePath();
-            canv.stroke();
-        }
+	        // Draw
+	        canv.closePath();
+	        canv.stroke();
+	    }
 
-    };
+	};
 
-    DelightfulDrawable.newInstance("canvas", "slider", "prog", false);
-    DelightfulDrawable.newInstance("canvas2", "slider2", "prog2", true);
+	DelightfulDrawable.newInstance("canvas", "slider", "prog", false);
+	DelightfulDrawable.newInstance("canvas2", "slider2", "prog2", true);
 
 </script>
+
 
       <footer class="entry-meta">
         <span class="entry-tags"><a href="/tags/#android" title="Pages tagged android" class="tag"><span class="term">android</span></a><a href="/tags/#ui" title="Pages tagged ui" class="tag"><span class="term">ui</span></a><a href="/tags/#drawable" title="Pages tagged drawable" class="tag"><span class="term">drawable</span></a></span>

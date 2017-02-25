@@ -133,22 +133,22 @@
 <p>Firstly, an important question. Why would anyone want to <em>kill</em> an app? I agree with <a href="http://blog.radioactiveyak.com/2010/05/when-to-include-exit-button-in-android.html">Reto Meier</a>:</p>
 
 <blockquote>
-<p>… in my experience what users really want is an unambiguous way to guarantee that an app will stop consuming resources (battery, CPU cycles, data transfer, etc). Many perceive that an exit button implements this requirement and ask for it to be added. Developers, looking to please their users, obligingly add one…</p>
+  <p>… in my experience what users really want is an unambiguous way to guarantee that an app will stop consuming resources (battery, CPU cycles, data transfer, etc). Many perceive that an exit button implements this requirement and ask for it to be added. Developers, looking to please their users, obligingly add one…</p>
 </blockquote>
 
-<p>With seamless state restoration, Android (and iOS) apps seem to run forever. They give no real <em>exit</em> notion. Misunderstanding this non-desktop behaviour is, I’m guessing, why apps such as Advanced Task Killer (ATK henceforth) are well received. Few realize Android is clever enough to manage itself much better than we ever will, and there’s no need to interfere. In development world, manual or forced quitting is actually <a href="http://stackoverflow.com/a/2034238/905349">frowned upon</a>, or, as Romain Guy <a href="https://groups.google.com/d/msg/android-developers/G_D3pKnGLt0/0mFuZnjxjP4J">explains:</a> </p>
+<p>With seamless state restoration, Android (and iOS) apps seem to run forever. They give no real <em>exit</em> notion. Misunderstanding this non-desktop behaviour is, I’m guessing, why apps such as Advanced Task Killer (ATK henceforth) are well received. Few realize Android is clever enough to manage itself much better than we ever will, and there’s no need to interfere. In development world, manual or forced quitting is actually <a href="http://stackoverflow.com/a/2034238/905349">frowned upon</a>, or, as Romain Guy <a href="https://groups.google.com/d/msg/android-developers/G_D3pKnGLt0/0mFuZnjxjP4J">explains:</a></p>
 
 <blockquote>
-<p>… the system handles it automatically. That&#39;s what the Activity lifecycle (especially onPause/onStop/onDestroy) is for. No matter what you do, do not put a &quot;quit&quot; or &quot;exit&quot; application button. It is useless with Android&#39;s application model.</p>
+  <p>… the system handles it automatically. That’s what the Activity lifecycle (especially onPause/onStop/onDestroy) is for. No matter what you do, do not put a “quit” or “exit” application button. It is useless with Android’s application model.</p>
 </blockquote>
 
 <p>In reality, quiting could make matters worse. Killed apps might be restarted if they are, for example, receiving system events. Same goes for some services. You esentially force Android to do more work and consume more resources, such as battery life, to achieve absolutely nothing.</p>
 
 <p>With this in mind, it’s fair to speculate ATK is redundant. To see it tick, the initial step is to observe its source. Reversing an apk is, with tools available online, a piece of cake. Given the app feel, I didn’t expect it to be obfuscated. To my surprise, it was. Browsing through, I had to admit defeat - no <code>killProcess</code> invocation anywhere, which I was expecting. At least not explicitly, that is.</p>
 
-<p>For fun (and no profit), let&#39;s try to recreate the app. </p>
+<p>For fun (and no profit), let’s try to recreate the app.</p>
 
-<p>First, we need to get a list of all activities currently running. ATK can also extract running services. We&#39;re going to ignore them, but you can try and add them yourself - it&#39;s easy.</p>
+<p>First, we need to get a list of all activities currently running. ATK can also extract running services. We’re going to ignore them, but you can try and add them yourself - it’s easy.</p>
 
 <div class="highlight"><pre><code class="language-java" data-lang="java"><span class="cm">/*
  * Returns the list of all available launcher Activities.
@@ -194,31 +194,31 @@
     <span class="k">return</span> <span class="n">available</span><span class="o">;</span>
 <span class="o">}</span></code></pre></div>
 
-<p>This is, believe it or not, the gist of ATK. The only thing missing is the ability to <em>kill</em> a selected list item. ATK does it by invoking <code>activityManager.restartPackage(packageName)</code>. Initially, <a href="http://grepcode.com/file/repository.grepcode.com/java/ext/com.google.android/android/2.0_r1/android/app/ActivityManager.java#ActivityManager.restartPackage%28java.lang.String%29">this method</a> had the system perform a force stop of everything associated with the given application package (killed processes with same uid, stopped running services, removed activities, etc). Heavily abused by task killers, it caused all sorts of issues. Android engineers eventually had enough. They&#39;ve changed its behaviour, leaving <a href="https://android.googlesource.com/platform/frameworks/base.git/+/03abb8179f0d912e6dabfc0e2b0f129d85066d17">this comment</a>: </p>
+<p>This is, believe it or not, the gist of ATK. The only thing missing is the ability to <em>kill</em> a selected list item. ATK does it by invoking <code>activityManager.restartPackage(packageName)</code>. Initially, <a href="http://grepcode.com/file/repository.grepcode.com/java/ext/com.google.android/android/2.0_r1/android/app/ActivityManager.java#ActivityManager.restartPackage%28java.lang.String%29">this method</a> had the system perform a force stop of everything associated with the given application package (killed processes with same uid, stopped running services, removed activities, etc). Heavily abused by task killers, it caused all sorts of issues. Android engineers eventually had enough. They’ve changed its behaviour, leaving <a href="https://android.googlesource.com/platform/frameworks/base.git/+/03abb8179f0d912e6dabfc0e2b0f129d85066d17">this comment</a>:</p>
 
 <blockquote>
-<p>Kill the task killers. <br/><br/> The <code>ActivityManager.restartPackage()</code> API is now deprecated, and no longer
+  <p>Kill the task killers. <br /><br /> The <code>ActivityManager.restartPackage()</code> API is now deprecated, and no longer
 allows applications to mess up the state of other applications.  This was
 being abused by task killers, causing users to think their other applications
-had bugs. <br/><br/> A new API is introduced for task killers,
+had bugs. <br /><br /> A new API is introduced for task killers,
 <code>ActivityManager.killBackgroundProcesses()</code>, which allows these applications
 to kill processes but only the same amount that the out of memory
 killer does, thus causing no permanent damage.  The old <code>restartPackage()</code>
 API is now a wrapper for calling this new API.</p>
 </blockquote>
 
-<p>From API level 8, calling <code>restartPackage</code> is therefore the same as calling <code>killBackgroundProcesses</code>. Following the source code from, let&#39;s say, <code>ActivityThread.handleLowMemory()</code> which is presumably called when memory becomes tight, we end up in the same method: <code>killPackageProcessesLocked</code>. It&#39;s safe to assume ATK provides the exact same functionality as the system. The only difference is that ATK explicitly selects a package to be killed, whereas the system pick is based on an algorithm. Since the system knows its internals, it&#39;s much better at determining when and what to do when resource management is required. </p>
+<p>From API level 8, calling <code>restartPackage</code> is therefore the same as calling <code>killBackgroundProcesses</code>. Following the source code from, let’s say, <code>ActivityThread.handleLowMemory()</code> which is presumably called when memory becomes tight, we end up in the same method: <code>killPackageProcessesLocked</code>. It’s safe to assume ATK provides the exact same functionality as the system. The only difference is that ATK explicitly selects a package to be killed, whereas the system pick is based on an algorithm. Since the system knows its internals, it’s much better at determining when and what to do when resource management is required.</p>
 
 <p>With this in mind, one could argue ATK is harmless. The real problem is us, killing apps at random, without knowing what they do behind the scenes. We should stop interfeering and our system will run just fine.</p>
 
-<p>To finish off the fake ATK, we: </p>
+<p>To finish off the fake ATK, we:</p>
 
 <ul>
-<li>show the <code>getAvailableLaunchersCurrentlyRunning()</code> list in a <code>ListView</code></li>
-<li>add a listener that, on item click, triggers the <code>killBackgroundProcesses()</code> method.</li>
+  <li>show the <code>getAvailableLaunchersCurrentlyRunning()</code> list in a <code>ListView</code></li>
+  <li>add a listener that, on item click, triggers the <code>killBackgroundProcesses()</code> method.</li>
 </ul>
 
-<p>You can view the complete implementation, with very appealing UI, on <a href="https://github.com/tslamic/AndroidExamples/tree/master/TaskKiller/TaskKiller">Github</a>. In the near future, I plan to write a post about the <em>out-of-memory killer</em>. Some of the topics I&#39;ll touch are already included in the app, so just ignore them for now.</p>
+<p>You can view the complete implementation, with very appealing UI, on <a href="https://github.com/tslamic/AndroidExamples/tree/master/TaskKiller/TaskKiller">Github</a>. In the near future, I plan to write a post about the <em>out-of-memory killer</em>. Some of the topics I’ll touch are already included in the app, so just ignore them for now.</p>
 
       <footer class="entry-meta">
         <span class="entry-tags"><a href="/tags/#android" title="Pages tagged android" class="tag"><span class="term">android</span></a><a href="/tags/#task killer" title="Pages tagged task killer" class="tag"><span class="term">task killer</span></a><a href="/tags/#memory" title="Pages tagged memory" class="tag"><span class="term">memory</span></a></span>
