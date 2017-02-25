@@ -162,7 +162,7 @@
 
 <p>The above works, but it would be nice to provide a fluid API where it is impossible to invoke <code>build()</code> before the required parameters are provided.</p>
 
-<p>Let’s describe the builder with a simple interface:</p>
+<p>Let&#39;s describe the builder with a simple interface:</p>
 
 <div class="highlight"><pre><code class="language-java" data-lang="java"><span class="kd">interface</span> <span class="nc">Builder</span> <span class="o">{</span>
   <span class="n">Builder</span> <span class="nf">servingSize</span><span class="o">(</span><span class="kt">int</span> <span class="n">size</span><span class="o">);</span>
@@ -174,7 +174,7 @@
   <span class="n">NutritionFacts</span> <span class="nf">build</span><span class="o">();</span>
 <span class="o">}</span></code></pre></div>
 
-<p>Recall the first two methods, <code>servingSize(int)</code> and <code>servings(int)</code> are required. Could we force the user to start the builder chain with them?</p>
+<p>Recall the first two methods, <code>servingSize(int)</code> and <code>servings(int)</code> are required. Could we force the user to start the builder chain with them? </p>
 
 <p>Suppose we declare two additional interfaces:</p>
 
@@ -188,7 +188,7 @@
   <span class="n">Builder</span> <span class="nf">serving</span><span class="o">(</span><span class="kt">int</span> <span class="n">size</span><span class="o">);</span>
 <span class="o">}</span></code></pre></div>
 
-<p>Starting with a <code>ServingSizeBuilder</code> instance, you’re now forced to start the chain with the two required params and are unable to invoke <code>build()</code> before:</p>
+<p>Starting with a <code>ServingSizeBuilder</code> instance, you&#39;re now forced to start the chain with the two required params and are unable to invoke <code>build()</code> before:</p>
 
 <div class="highlight"><pre><code class="language-java" data-lang="java"><span class="n">servingSizeBuilder</span><span class="o">.</span><span class="na">servingSize</span><span class="o">(</span><span class="n">someInt</span><span class="o">)</span>
     <span class="o">.</span><span class="na">serving</span><span class="o">(</span><span class="n">anotherInt</span><span class="o">)</span>

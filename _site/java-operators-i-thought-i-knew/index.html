@@ -126,11 +126,11 @@
       </div><!-- /.header-title-wrap -->
     </header>
     <div class="entry-content">
-      <p>Today, I stumbled upon <a href="http://docs.oracle.com/javase/tutorial/java/nutsandbolts/operators.html">Java Tutorial Operators</a> page.</p>
+      <p>Today, I stumbled upon <a href="http://docs.oracle.com/javase/tutorial/java/nutsandbolts/operators.html">Java Tutorial Operators</a> page. </p>
 
-<p>I glanced the list, wondering if I know what each operator does. As you might have guessed from the title, I failed. Luckily, I failed at only two operators.</p>
+<p>I glanced the list, wondering if I know what each operator does. As you might have guessed from the title, I failed. Luckily, I failed at only two operators. </p>
 
-<h3 id="the-modulo-operator-">The modulo operator %</h3>
+<h3>The modulo operator %</h3>
 
 <p>While mostly defined in the same fashion, implementations of <em>modulo</em> or <em>reminder</em> operator differ when it comes to the sign of a result. For example, a modulo operator in Python might yield a different result than a modulo operator in Java, using the exact same data. Try it out for yourself, evaluate the expression <code>-1 % 2</code> for instance.</p>
 
@@ -148,7 +148,7 @@
   <span class="k">return</span> <span class="o">(</span><span class="n">value</span> <span class="o">%</span> <span class="mi">2</span><span class="o">)</span> <span class="o">==</span> <span class="mi">1</span><span class="o">;</span>
 <span class="o">}</span></code></pre></div>
 
-<p>It works wonderful with a positive argument. But since the definition of an odd number is quite natural for any negative integer too, does <code>isOdd(-1)</code> produce a correct result?</p>
+<p>It works wonderful with a positive argument. But since the definition of an odd number is quite natural for any negative integer too, does <code>isOdd(-1)</code> produce a correct result? </p>
 
 <p>Java uses the dividend when determining the sign of a modulo operation. Therefore, if the argument we pass to <code>isOdd</code> is negative, the modulo operation yields a negative result. In our case <code>-1 % 2 == -1</code>, and <code>isOdd(-1) == false</code>. The result is not what one would expect.</p>
 
@@ -161,33 +161,33 @@
   <span class="k">return</span> <span class="o">(</span><span class="n">value</span> <span class="o">&amp;</span> <span class="mi">1</span><span class="o">)</span> <span class="o">==</span> <span class="mi">1</span><span class="o">;</span>
 <span class="o">}</span></code></pre></div>
 
-<h3 id="the-unsigned-right-shift-">The unsigned right shift <code>&gt;&gt;&gt;</code></h3>
+<h3>The unsigned right shift <code>&gt;&gt;&gt;</code></h3>
 
-<p>The second operator I was having trouble with was <code>&gt;&gt;&gt;</code>. I couldn’t tell the difference with <code>&gt;&gt;</code> operator, so I had to check the definition: <code>&gt;&gt;&gt;</code>is an <em>unsigned</em> right shift whereas <code>&gt;&gt;</code> is <em>signed</em>. Confused? Read on.</p>
+<p>The second operator I was having trouble with was <code>&gt;&gt;&gt;</code>. I couldn&#39;t tell the difference with <code>&gt;&gt;</code> operator, so I had to check the definition: <code>&gt;&gt;&gt;</code>is an <em>unsigned</em> right shift whereas <code>&gt;&gt;</code> is <em>signed</em>. Confused? Read on.</p>
 
-<center>
-<figure>
-  <img src="http://upload.wikimedia.org/wikipedia/commons/thumb/7/76/Most_significant_bit.svg/300px-Most_significant_bit.svg.png" alt="Most Significant Bit" />
+<p><center>
+<figure >
+  <img src="http://upload.wikimedia.org/wikipedia/commons/thumb/7/76/Most_significant_bit.svg/300px-Most_significant_bit.svg.png" alt="Most Significant Bit">
   <figcaption>The most significant bit is highlighted.</figcaption>
 </figure>
-</center>
+</center></p>
 
 <p><code>&gt;&gt;</code> operator uses the most-significant bit value when shifting a bit pattern, whereas <code>&gt;&gt;&gt;</code> <em>always</em> uses <code>0</code>.</p>
 
-<p>Suppose we’re operating with 4-bit two’s complement numbers. Take a binary number, e.g. <code>0001</code>. The most significant bit is <code>0</code>. Performing a shift, say <code>0001 &gt;&gt; 1</code>, the value you’ll be shifting with is <code>0</code>.</p>
+<p>Suppose we&#39;re operating with 4-bit two&#39;s complement numbers. Take a binary number, e.g. <code>0001</code>. The most significant bit is <code>0</code>. Performing a shift, say <code>0001 &gt;&gt; 1</code>, the value you&#39;ll be shifting with is <code>0</code>.</p>
 
-<p>Now consider the binary number <code>1001</code>. The most significant bit in this case is <code>1</code>, so the value you’ll be shifting with is <code>1</code>.</p>
+<p>Now consider the binary number <code>1001</code>. The most significant bit in this case is <code>1</code>, so the value you&#39;ll be shifting with is <code>1</code>.</p>
 
 <pre>
-0001 &gt;&gt; 1 == 0000
-1001 &gt;&gt; 1 == 1100
+0001 >> 1 == 0000
+1001 >> 1 == 1100
 </pre>
 
 <p>Regardless of the most significant bit value, an unsigned right shift operator <code>&gt;&gt;&gt;</code> always uses <code>0</code> as the shifting value. <code>0001</code> will be shifted with <code>0</code> as before, but so will <code>1001</code>:</p>
 
 <pre>
-0001 &gt;&gt;&gt; 1 = 0000
-1001 &gt;&gt;&gt; 1 = 0100
+0001 >>> 1 = 0000
+1001 >>> 1 = 0100
 </pre>
 
 <p>You may notice there is no unsigned left shift operator. Any nontrivial <code>&lt;&lt;</code> shift will actually move the significant bit out of the picture: <code>1001 &lt;&lt; 1 == 0010</code>. Shifting by 1 to the left will transform -7 to 2, changing signs along the way. Therefore, the <code>&lt;&lt;</code> operator itself is already <em>unsigned</em>.</p>

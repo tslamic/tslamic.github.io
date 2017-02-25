@@ -37,7 +37,7 @@ bing_verify:
 timezone:    America/New_York
 future:      true
 highlighter: rouge
-markdown:    kramdown
+markdown:    redcarpet
 sass:
   sass_dir: _sass
   style: compressed

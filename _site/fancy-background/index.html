@@ -128,28 +128,17 @@
     <div class="entry-content">
       <p>FancyBackground is a tiny Android library designed to animate images on a View instance.</p>
 
-<table>
-  <thead>
-    <tr>
-      <th style="text-align: center">Before</th>
-      <th style="text-align: center">After</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td style="text-align: center"><img src="http://i.imgur.com/7kH0FIN.png?1" alt="plain" /></td>
-      <td style="text-align: center"><img src="http://i.imgur.com/Sh4XegD.gif" alt="fancybg" /></td>
-    </tr>
-  </tbody>
-</table>
+<p>Before | After 
+:-----------:|:-----------:
+<img src="http://i.imgur.com/7kH0FIN.png?1" alt="plain"> | <img src="http://i.imgur.com/Sh4XegD.gif" alt="fancybg"></p>
 
-<p>Android runs on a variety of devices, with different screen sizes and densities. Providing alternative resources is a standard practice. Let’s assume that in our case, the design team only gave us resources of <code>xxhdpi</code> size. To make matters worse, an <code>OutOfMemoryError</code> is thrown when we try to load any image into memory on our S3 mini.</p>
+<p>Android runs on a variety of devices, with different screen sizes and densities. Providing alternative resources is a standard practice. Let’s assume that in our case, the design team only gave us resources of <code>xxhdpi</code> size. To make matters worse, an <code>OutOfMemoryError</code> is thrown when we try to load any image into memory on our S3 mini. </p>
 
 <blockquote>
-  <p>Given that you are working with limited memory, ideally you only want to load a lower resolution version in memory. The lower resolution version should match the size of the UI component that displays it. An image with a higher resolution does not provide any visible benefit, but still takes up precious memory and incurs additional performance overhead due to additional on the fly scaling.</p>
+<p>Given that you are working with limited memory, ideally you only want to load a lower resolution version in memory. The lower resolution version should match the size of the UI component that displays it. An image with a higher resolution does not provide any visible benefit, but still takes up precious memory and incurs additional performance overhead due to additional on the fly scaling.</p>
 </blockquote>
 
-<p>is what the <a href="http://developer.android.com/training/displaying-bitmaps/load-bitmap.html">docs</a> say about efficient bitmap loading. Therefore, in order to load the background images into memory successfully, we have to subsample and, most likely, scale them.</p>
+<p>is what the <a href="http://developer.android.com/training/displaying-bitmaps/load-bitmap.html">docs</a> say about efficient bitmap loading. Therefore, in order to load the background images into memory successfully, we have to subsample and, most likely, scale them. </p>
 
 <p>This real-world scenario is the motivation behind FancyBackground. FancyBackground animates through a set of resource Drawables. It ensures they are subsampled and cached, if need be, with all the heavy lifting done in the background. The usage is simple. To animate between <code>R.drawable.fst</code>, <code>R.drawable.snd</code> and <code>R.drawable.trd</code>, showing each for 2.5 seconds, simply do:</p>
 
@@ -160,69 +149,37 @@
                <span class="o">.</span><span class="na">interval</span><span class="o">(</span><span class="mi">2500</span><span class="o">)</span>
                <span class="o">.</span><span class="na">start</span><span class="o">();</span></code></pre></div>
 
-<p>The code above gives us subsampling, caching and automatic transitions for free.</p>
+<p>The code above gives us subsampling, caching and automatic transitions for free. </p>
 
-<p>There are other options available, so let’s do a quick abstract:</p>
+<p>There are other options available, so let&#39;s do a quick abstract:</p>
 
-<table>
-  <thead>
-    <tr>
-      <th style="text-align: left">Method name</th>
-      <th style="text-align: left">Description</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td style="text-align: left"><code>set</code></td>
-      <td style="text-align: left">sets the Drawable resources we wish to show/animate</td>
-    </tr>
-    <tr>
-      <td style="text-align: left"><code>inAnimation</code></td>
-      <td style="text-align: left">specifies the animation used to animate a <code>View</code> entering the screen.</td>
-    </tr>
-    <tr>
-      <td style="text-align: left"><code>outAnimation</code></td>
-      <td style="text-align: left">specifies the animation used to animate a <code>View</code> exiting the screen.</td>
-    </tr>
-    <tr>
-      <td style="text-align: left"><code>loop</code></td>
-      <td style="text-align: left">continuously loop through the Drawables or stop after the first cycle is complete.</td>
-    </tr>
-    <tr>
-      <td style="text-align: left"><code>interval</code></td>
-      <td style="text-align: left">the millisecond interval a Drawable instance will be displayed for.</td>
-    </tr>
-    <tr>
-      <td style="text-align: left"><code>scale</code></td>
-      <td style="text-align: left">determines how the Drawables should be resized or moved to match the size of the view we’re animating on.</td>
-    </tr>
-    <tr>
-      <td style="text-align: left"><code>listener</code></td>
-      <td style="text-align: left">receives the <code>FancyBackground</code> events (described below)</td>
-    </tr>
-    <tr>
-      <td style="text-align: left"><code>cache</code></td>
-      <td style="text-align: left">caches loaded bitmaps so we don’t have to do it again</td>
-    </tr>
-  </tbody>
-</table>
+<p>Method name | Description
+:-----------|:-----------
+<code>set</code> | sets the Drawable resources we wish to show/animate
+<code>inAnimation</code> | specifies the animation used to animate a <code>View</code> entering the screen.
+<code>outAnimation</code> | specifies the animation used to animate a <code>View</code> exiting the screen.
+<code>loop</code> | continuously loop through the Drawables or stop after the first cycle is complete.
+<code>interval</code> | the millisecond interval a Drawable instance will be displayed for.
+<code>scale</code> | determines how the Drawables should be resized or moved to match the size of the view we&#39;re animating on.
+<code>listener</code> | receives the <code>FancyBackground</code> events (described below)
+<code>cache</code> | caches loaded bitmaps so we don&#39;t have to do it again</p>
 
-<p><code>FancyListener</code> can receive four events:</p>
+<p><code>FancyListener</code> can receive four events: </p>
 
 <ul>
-  <li><code>onStarted</code> when the FancyBackground is started</li>
-  <li><code>onNew</code> when a new image is set</li>
-  <li><code>onLoopDone</code> if looping is set to false and the first cycle is complete</li>
-  <li><code>onStopped</code> when the FancyBackground stops.</li>
+<li><code>onStarted</code> when the FancyBackground is started </li>
+<li><code>onNew</code> when a new image is set</li>
+<li><code>onLoopDone</code> if looping is set to false and the first cycle is complete</li>
+<li><code>onStopped</code> when the FancyBackground stops.</li>
 </ul>
 
 <p><code>FancyCache</code> enables you to create your own bitmap cache. <code>FancyLruCache</code> is the default, targeting ~25% of the available heap and evicting the least recently used bitmap if over capacity. Use <code>null</code> to avoid caching.</p>
 
-<p>To try it out, make sure to add the following to your dependency list:</p>
+<p>To try it out, make sure to add the following to your dependency list: </p>
 
 <div class="highlight"><pre><code class="language-bash" data-lang="bash">compile <span class="s1">'com.github.tslamic.fancybackground:library:1.0'</span></code></pre></div>
 
-<p>For an example, visit my <a href="https://github.com/tslamic/FancyBackground">Github profile</a>.</p>
+<p>For an example, visit my <a href="https://github.com/tslamic/FancyBackground">Github profile</a>. </p>
 
       <footer class="entry-meta">
         <span class="entry-tags"><a href="/tags/#android" title="Pages tagged android" class="tag"><span class="term">android</span></a><a href="/tags/#bitmap" title="Pages tagged bitmap" class="tag"><span class="term">bitmap</span></a><a href="/tags/#memory" title="Pages tagged memory" class="tag"><span class="term">memory</span></a><a href="/tags/#cache" title="Pages tagged cache" class="tag"><span class="term">cache</span></a><a href="/tags/#subsampling" title="Pages tagged subsampling" class="tag"><span class="term">subsampling</span></a></span>

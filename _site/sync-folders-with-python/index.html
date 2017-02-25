@@ -126,20 +126,20 @@
       </div><!-- /.header-title-wrap -->
     </header>
     <div class="entry-content">
-      <p>Manually comparing and synchronizing two folders can be tedious. Add long, confusing and very similar filenames and it’s no fun at all.</p>
+      <p>Manually comparing and synchronizing two folders can be tedious. Add long, confusing and very similar filenames and it&#39;s no fun at all.</p>
 
 <figure class="center-align">
-	<img src="http://throb.pagesperso-orange.fr/prg/Xojo/SyncTwoFolders_1024.png" title="sync-folders" width="300" height="300" />
-	<figcaption>Source: throb.pagesperso-orange.fr</figcaption>
+    <img src="http://throb.pagesperso-orange.fr/prg/Xojo/SyncTwoFolders_1024.png" title="sync-folders" width="300" height="300" />
+    <figcaption>Source: throb.pagesperso-orange.fr</figcaption>
 </figure>
 
 <p>We recently faced a similar situation at work. Besides cryptic names, there was also a fair share of twisted logic governing the sync scenarios. We had to get our hands dirty, since the standard tools were useless.</p>
 
-<p>Because we don’t have to do the sync often, and the folders have always been of reasonable size, automating the process seemed an overkill. However, as our products grow, so do the folders needing sync. We recently figured spending some time to create a script would be a good future investment.</p>
+<p>Because we don&#39;t have to do the sync often, and the folders have always been of reasonable size, automating the process seemed an overkill. However, as our products grow, so do the folders needing sync. We recently figured spending some time to create a script would be a good future investment.</p>
 
 <p>This post builds upon ideas I came across writing the script, but were ultimately left out or done differently. It concludes with a simple tool capable of syncing two folders. The code was written using version 2.7.6.</p>
 
-<h3 id="backing-and-reverting">Backing and reverting</h3>
+<h3>Backing and reverting</h3>
 
 <p>Let’s assume nothing is under version control. It would be cool if our script would have a revert mechanism of sorts, in case something funky happens during sync. To keep it simple, maybe a directory snapshot is enough:</p>
 
@@ -160,7 +160,7 @@
     <span class="k">if</span> <span class="n">tag</span><span class="p">:</span>
         <span class="n">set_tag</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">archive_path</span> <span class="o">+</span> <span class="s">".zip"</span><span class="p">,</span> <span class="n">tag</span><span class="p">)</span></code></pre></div>
 
-<p>It seems dense, but it’s easy to explain. First, we create a repository folder or <code>REPO</code>, if it doesn’t exist yet. It is where the backup snapshots live. We then save the archived directory under a unique name to <code>REPO</code>. Tag is optional, but if given, we’ll be able to reference the archived file with it. The name is written into <code>backup_path</code> and saved to <code>directory</code>. Let’s call it the <code>BACKUP</code> file. It’s there to help us revert:</p>
+<p>It seems dense, but it&#39;s easy to explain. First, we create a repository folder or <code>REPO</code>, if it doesn’t exist yet. It is where the backup snapshots live. We then save the archived directory under a unique name to <code>REPO</code>. Tag is optional, but if given, we&#39;ll be able to reference the archived file with it. The name is written into <code>backup_path</code> and saved to <code>directory</code>. Let&#39;s call it the <code>BACKUP</code> file. It&#39;s there to help us revert:</p>
 
 <div class="highlight"><pre><code class="language-python" data-lang="python"><span class="k">def</span> <span class="nf">revert</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">archive_path</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
     <span class="n">ensure_dir_exists</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span>
@@ -173,7 +173,7 @@
     <span class="k">with</span> <span class="n">zipfile</span><span class="o">.</span><span class="n">ZipFile</span><span class="p">(</span><span class="n">archive_path</span><span class="p">)</span> <span class="k">as</span> <span class="n">zf</span><span class="p">:</span>
         <span class="n">zf</span><span class="o">.</span><span class="n">extractall</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span></code></pre></div>
 
-<p>In order to revert, we need to know the archived file to revert to. This is written in the <code>BACKUP</code> file which should be part of <code>directory</code>.</p>
+<p>In order to revert, we need to know the archived file to revert to. This is written in the <code>BACKUP</code> file which should be part of <code>directory</code>. </p>
 
 <p><code>get_archive_name</code> helps us extract it:</p>
 
@@ -191,11 +191,11 @@
 <p>Note that any backed state is reachable by a sequence of reverts, as long as <code>REPO</code> contains the appropriate archive:</p>
 
 <figure class="center-align">
-	<img src="http://i.imgur.com/mIISsct.png" title="backup-revert" />
-	<figcaption>Magenta arrows represent backups, green arrows reverts.</figcaption>
+    <img src="http://i.imgur.com/mIISsct.png" title="backup-revert" />
+    <figcaption>Magenta arrows represent backups, green arrows reverts.</figcaption>
 </figure>
 
-<p>We should also be able to revert using tags. Here’s one way to do it:</p>
+<p>We should also be able to revert using tags. Here&#39;s one way to do it:</p>
 
 <div class="highlight"><pre><code class="language-python" data-lang="python"><span class="n">INSERT_TAG</span> <span class="o">=</span> <span class="s">"INSERT OR REPLACE INTO tags VALUES (?,?,?)"</span>
 <span class="n">GET_TAG</span> <span class="o">=</span> <span class="s">"SELECT dir,zip FROM tags WHERE tag=?"</span>
@@ -228,9 +228,9 @@ CREATE TABLE IF NOT EXISTS tags (
     <span class="n">directory</span><span class="p">,</span> <span class="n">archive_path</span> <span class="o">=</span> <span class="n">result</span>
     <span class="n">revert</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">archive_path</span><span class="p">)</span></code></pre></div>
 
-<p>My initial thought was to serialize and de-serialize a dictionary, but performance would degrade quickly. Even with a bit of SQL, I’d argue the above is quite concise.</p>
+<p>My initial thought was to serialize and de-serialize a dictionary, but performance would degrade quickly. Even with a bit of SQL, I&#39;d argue the above is quite concise.  </p>
 
-<p>It’s also quite easy to show tag history of a directory:</p>
+<p>It&#39;s also quite easy to show tag history of a directory:</p>
 
 <div class="highlight"><pre><code class="language-python" data-lang="python"><span class="n">GET_DIR</span> <span class="o">=</span> <span class="s">"SELECT tag,zip FROM tags WHERE dir=?"</span>
 
@@ -251,16 +251,16 @@ CREATE TABLE IF NOT EXISTS tags (
 <p>There are a few things to consider when reverting:</p>
 
 <ul>
-  <li>we’re blindly extracting archives without prior inspection. It is possible that files are created outside of path, e.g. filenames starting with two dots. This could be a security hazard.</li>
-  <li>someone could backup the root directory, then try to recover it and happily wipe out the hard drive, since we don’t worry about the directory we’re clearing.</li>
-  <li>if the directory contains symbolic links, <code>shutil.rmtree(directory)</code> will throw an <code>OSError</code>.</li>
+<li>we&#39;re blindly extracting archives without prior inspection. It is possible that files are created outside of path, e.g. filenames starting with two dots. This could be a security hazard.</li>
+<li>someone could backup the root directory, then try to recover it and happily wipe out the hard drive, since we don&#39;t worry about the directory we&#39;re clearing.</li>
+<li>if the directory contains symbolic links, <code>shutil.rmtree(directory)</code> will throw an <code>OSError</code>.</li>
 </ul>
 
 <p>The issues are somewhat easily fixable and might be a good exercise to try out.</p>
 
-<h3 id="finding-and-applying-the-differences">Finding and applying the differences</h3>
+<h3>Finding and applying the differences</h3>
 
-<p>Finding the differences between two directories couldn’t be simpler:</p>
+<p>Finding the differences between two directories couldn&#39;t be simpler:</p>
 
 <div class="highlight"><pre><code class="language-python" data-lang="python"><span class="k">def</span> <span class="nf">find_diff</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">dst</span><span class="p">):</span>
     <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">dst</span><span class="p">):</span>
@@ -271,9 +271,9 @@ CREATE TABLE IF NOT EXISTS tags (
     <span class="n">ignore</span> <span class="o">=</span> <span class="p">(</span><span class="n">BACKUP</span><span class="p">,</span> <span class="n">SYNC</span><span class="p">)</span>
     <span class="k">return</span> <span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">l</span><span class="p">:</span> <span class="n">l</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ignore</span><span class="p">,</span> <span class="n">diff_list</span><span class="p">)</span></code></pre></div>
 
-<p>If <code>dst</code> does not exist, then the difference is the <code>src</code> directory content. Otherwise, there’s a handy module we can use: <code>filecmp</code>. It contains a function <code>dircmp</code> that does exactly what we need - it finds all the differences between two folders.</p>
+<p>If <code>dst</code> does not exist, then the difference is the <code>src</code> directory content. Otherwise, there&#39;s a handy module we can use: <code>filecmp</code>. It contains a function <code>dircmp</code> that does exactly what we need - it finds all the differences between two folders. </p>
 
-<p>We’re interested in files or folders only in <code>src</code>, or common files that differ. We also don’t want to copy any of the config files, so we filter them out.</p>
+<p>We&#39;re interested in files or folders only in <code>src</code>, or common files that differ. We also don&#39;t want to copy any of the config files, so we filter them out.</p>
 
 <p>This is how to apply the differences:</p>
 
@@ -293,9 +293,9 @@ CREATE TABLE IF NOT EXISTS tags (
 
 <p>The code speaks for itself. The point to note is the backup we perform before any copying is done. This enables us to revert if something goes sour.</p>
 
-<h3 id="syncing-the-same-folders-over-and-over-and-over">Syncing the same folders over and over and over…</h3>
+<h3>Syncing the same folders over and over and over...</h3>
 
-<p>Sometimes, you know beforehand the folders you need to sync. For example, you know that folder <code>A</code> will always have to be synced with folders <code>B</code> and  <code>C</code>. This is where <code>SYNC</code> file comes into play. It contains one or more source folders, each listed on a separate line.</p>
+<p>Sometimes, you know beforehand the folders you need to sync. For example, you know that folder <code>A</code> will always have to be synced with folders <code>B</code> and  <code>C</code>. This is where <code>SYNC</code> file comes into play. It contains one or more source folders, each listed on a separate line. </p>
 
 <p>In the example above, folder <code>A</code> should contain the <code>SYNC</code> file with the following content:</p>
 
@@ -319,7 +319,7 @@ CREATE TABLE IF NOT EXISTS tags (
     <span class="k">for</span> <span class="n">src</span> <span class="ow">in</span> <span class="n">src_list</span><span class="p">:</span>
         <span class="n">apply_diff</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">directory</span><span class="p">,</span> <span class="n">auto_backup</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">backup_tag</span><span class="o">=</span><span class="n">backup_tag</span><span class="p">)</span></code></pre></div>
 
-<p>As you can see, it’s as straightforward as opening the <code>SYNC</code> file, reading the sources, and then applying the differences.</p>
+<p>As you can see, it&#39;s as straightforward as opening the <code>SYNC</code> file, reading the sources, and then applying the differences. </p>
 
 <p>Of course, we should provide means to generate such file:</p>
 
@@ -331,39 +331,39 @@ CREATE TABLE IF NOT EXISTS tags (
         <span class="n">cp</span><span class="o">.</span><span class="n">writelines</span><span class="p">(</span><span class="n">absolute_paths</span><span class="p">)</span>
     <span class="k">assert</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getsize</span><span class="p">(</span><span class="n">sync_file</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span></code></pre></div>
 
-<h3 id="adding-cli">Adding CLI</h3>
+<h3>Adding CLI</h3>
 
-<p>To wrap what we’ve done in a simple utility tool, we should create a command line interface, so the user can interact with it. <code>argparse</code> module makes this simple. Before turning to code, here’s what the user should be able to do:</p>
+<p>To wrap what we&#39;ve done in a simple utility tool, we should create a command line interface, so the user can interact with it. <code>argparse</code> module makes this simple. Before turning to code, here&#39;s what the user should be able to do:</p>
 
-<h4 id="copy-different-files-from-one-directory-to-another">1. Copy different files from one directory to another</h4>
+<h4>1. Copy different files from one directory to another</h4>
 
 <p>Example usage: <code>cp -t sample_tag /source/path/dir /destination/path/dir</code></p>
 
 <p>The comand requires a <code>src</code> directory and a <code>dst</code> directory, where <code>dst</code> will be synced with <code>src</code>. Tag is optional.</p>
 
-<h4 id="revert-a-directory-or-tag">2. Revert a directory or tag</h4>
+<h4>2. Revert a directory or tag</h4>
 
 <p>Example usage: <code>rv -t sample_tag</code> or <code>rv -d /random/path/dir</code></p>
 
-<h4 id="sync-a-directory">3. Sync a directory</h4>
+<h4>3. Sync a directory</h4>
 
 <p>Example usage: <code>sync -t just_in_case /random/dir/path</code></p>
 
 <p><code>/random/dir/path</code> should contain the <code>SYNC</code> file. Tag is optional.</p>
 
-<h4 id="create-a-sync-file">4. Create a <code>SYNC</code> file</h4>
+<h4>4. Create a <code>SYNC</code> file</h4>
 
 <p>Example usage: <code>mksync dir/path/where/sync/is/created /fst/src /snd/src /trd/src</code></p>
 
 <p>Create a <code>SYNC</code> file in the first specified directory. Any directory listed afterwards is added to the source list.</p>
 
-<h4 id="show-tag-history">5. Show tag history</h4>
+<h4>5. Show tag history</h4>
 
 <p>Example usage: <code>th /random/dir/path</code></p>
 
 <p>It shows the available revert tags.</p>
 
-<p>Here’s the above in code:</p>
+<p>Here&#39;s the above in code:</p>
 
 <div class="highlight"><pre><code class="language-python" data-lang="python"><span class="k">def</span> <span class="nf">diff_parser</span><span class="p">():</span>
     <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span>
@@ -406,16 +406,16 @@ CREATE TABLE IF NOT EXISTS tags (
                 <span class="k">raise</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentError</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">"Invalid dir: </span><span class="si">%</span><span class="s">s"</span> <span class="o">%</span> <span class="n">d</span><span class="p">)</span>
         <span class="nb">setattr</span><span class="p">(</span><span class="n">namespace</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dest</span><span class="p">,</span> <span class="n">values</span><span class="p">)</span></code></pre></div>
 
-<p>It ensures that any path we provide as an argument is an existing directory we can write to.</p>
+<p>It ensures that any path we provide as an argument is an existing directory we can write to. </p>
 
-<h3 id="fin">Fin</h3>
+<h3>Fin</h3>
 
-<p>We can now sync two folders and revert if need be. The tool is very simple and only offers crude functionality, but it’s a good starting point to build upon. What always amazes me is the expressiveness of Python and what can be achieved with
-cca. 200 lines of code, half of which are paranoid asserts and param checks.</p>
+<p>We can now sync two folders and revert if need be. The tool is very simple and only offers crude functionality, but it&#39;s a good starting point to build upon. What always amazes me is the expressiveness of Python and what can be achieved with
+cca. 200 lines of code, half of which are paranoid asserts and param checks. </p>
 
-<p>I’d also like to note that although I love Python, I don’t use it enough to consider myself a <em>pythonista</em>. If you spot any piece of code that can be replaced with a more standarized idiom, please let me know!</p>
+<p>I&#39;d also like to note that although I love Python, I don&#39;t use it enough to consider myself a <em>pythonista</em>. If you spot any piece of code that can be replaced with a more standarized idiom, please let me know!</p>
 
-<p>As always, there’s a <a href="https://github.com/tslamic/cptool">GitHub repo</a> where you can find the complete script.</p>
+<p>As always, there&#39;s a <a href="https://github.com/tslamic/cptool">GitHub repo</a> where you can find the complete script.</p>
 
       <footer class="entry-meta">
         <span class="entry-tags"><a href="/tags/#python" title="Pages tagged python" class="tag"><span class="term">python</span></a><a href="/tags/#script" title="Pages tagged script" class="tag"><span class="term">script</span></a><a href="/tags/#automation" title="Pages tagged automation" class="tag"><span class="term">automation</span></a><a href="/tags/#folder-sync" title="Pages tagged folder-sync" class="tag"><span class="term">folder-sync</span></a></span>

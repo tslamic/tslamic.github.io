@@ -129,28 +129,28 @@
       <p>The Android framework provides two animation systems:</p>
 
 <ul>
-  <li>Property animation (introduced in Android 3.0)</li>
-  <li>View animation</li>
+<li>Property animation (introduced in Android 3.0)</li>
+<li>View animation</li>
 </ul>
 
 <p>While property animation system is more flexible, offers more features and generally has better performance, the view animation system takes less time to setup and requires less code to write. If it accomplishes everything you need to do, there is no need to use the property animation system.</p>
 
-<p>In this post, we’re going to focus on the basics of the latter one.</p>
+<p>In this post, we&#39;re going to focus on the basics of the latter one.</p>
 
-<p>The view animation system is used to perform <em>tweened</em> animation on views. Tween stands for “in-between” and refers to the creation of successive frames of animation between the first and the last frame.</p>
+<p>The view animation system is used to perform <em>tweened</em> animation on views. Tween stands for &quot;in-between&quot; and refers to the creation of successive frames of animation between the first and the last frame.</p>
 
 <p>It can perform a series of simple transformations on a <code>View</code> object, changing:</p>
 
 <ul>
-  <li>position</li>
-  <li>size</li>
-  <li>rotation</li>
-  <li>transparency</li>
+<li>position</li>
+<li>size</li>
+<li>rotation</li>
+<li>transparency</li>
 </ul>
 
 <p>The system lives in the <code>android.view.animation</code> package, with <code>Animation</code>, <code>AnimationSet</code> and <code>Interpolator</code> being the juicy parts.</p>
 
-<p><code>Animation</code> class is responsible for a single animation. If our animation should change e.g. position <em>and</em> transparency, we’d have to use the <code>AnimationSet</code> class, since it represents a group of animations that should be played together.</p>
+<p><code>Animation</code> class is responsible for a single animation. If our animation should change e.g. position <em>and</em> transparency, we&#39;d have to use the <code>AnimationSet</code> class, since it represents a group of animations that should be played together.</p>
 
 <p><code>Interpolator</code> defines the rate of change of an animation. We can specify, for example, how fast something is going to fade out or if the animation should be accelerating, decelerating, etc.</p>
 
@@ -167,20 +167,20 @@
 <span class="n">fadeOut</span><span class="o">.</span><span class="na">setInterpolator</span><span class="o">(</span><span class="k">new</span> <span class="n">AccelerateInterpolator</span><span class="o">());</span>
 <span class="n">fadeOut</span><span class="o">.</span><span class="na">setDuration</span><span class="o">(</span><span class="mi">1000</span><span class="o">);</span></code></pre></div>
 
-<p>Remember the simple transformations we’re able to do: position, size, rotation and transparency? Android provides an implementation for each one, respectively:</p>
+<p>Remember the simple transformations we&#39;re able to do: position, size, rotation and transparency? Android provides an implementation for each one, respectively:</p>
 
 <ul>
-  <li><code>TranslateAnimation</code></li>
-  <li><code>ScaleAnimation</code></li>
-  <li><code>RotateAnimation</code></li>
-  <li><code>AlphaAnimation</code></li>
+<li><code>TranslateAnimation</code></li>
+<li><code>ScaleAnimation</code></li>
+<li><code>RotateAnimation</code></li>
+<li><code>AlphaAnimation</code></li>
 </ul>
 
-<p>In our example, we’re using <code>AlphaAnimation</code> which is used for transparency transformations. The arguments, <code>1</code> and <code>0</code>, simply mean we wish the opacity to go from 100% to 0% - we want the view to fade out.</p>
+<p>In our example, we&#39;re using <code>AlphaAnimation</code> which is used for transparency transformations. The arguments, <code>1</code> and <code>0</code>, simply mean we wish the opacity to go from 100% to 0% - we want the view to fade out.</p>
 
-<p>The second line of our example sets the <code>Interpolator</code>. Again, to make things easier for us, the package includes several subclasses specifying various speed curves. We’ve randomly chosen <code>AccelerateInterpolator</code>, which tells a transformation to start slow, then speed up. By default, every Animation uses a <code>LinearInterpolator</code>. Lastly, we set the millisecond duration for our animation to run.</p>
+<p>The second line of our example sets the <code>Interpolator</code>. Again, to make things easier for us, the package includes several subclasses specifying various speed curves. We&#39;ve randomly chosen <code>AccelerateInterpolator</code>, which tells a transformation to start slow, then speed up. By default, every Animation uses a <code>LinearInterpolator</code>. Lastly, we set the millisecond duration for our animation to run.</p>
 
-<p>Animations can be defined by either code or XML. Android designates a special folder where XML files should live: <code>res/anim</code>. Let’s create a file called <code>res/anim/fade_out.xml</code>:</p>
+<p>Animations can be defined by either code or XML. Android designates a special folder where XML files should live: <code>res/anim</code>. Let&#39;s create a file called <code>res/anim/fade_out.xml</code>:</p>
 
 <div class="highlight"><pre><code class="language-xml" data-lang="xml"><span class="cp">&lt;?xml version="1.0" encoding="utf-8"?&gt;</span>
 <span class="nt">&lt;alpha</span> <span class="na">xmlns:android=</span><span class="s">"http://schemas.android.com/apk/res/android"</span>
@@ -255,7 +255,7 @@
 
 <span class="n">view</span><span class="o">.</span><span class="na">startAnimation</span><span class="o">(</span><span class="n">fadeOut</span><span class="o">);</span></code></pre></div>
 
-<p>If you wish to spice things up by browsing through some actual code, I’ve created a simple app showing random View animations. You can find it <a href="https://github.com/tslamic/AndroidExamples/tree/master/SimpleAnimationsExample">here</a>.</p>
+<p>If you wish to spice things up by browsing through some actual code, I&#39;ve created a simple app showing random View animations. You can find it <a href="https://github.com/tslamic/AndroidExamples/tree/master/SimpleAnimationsExample">here</a>.</p>
 
       <footer class="entry-meta">
         <span class="entry-tags"><a href="/tags/#android" title="Pages tagged android" class="tag"><span class="term">android</span></a><a href="/tags/#animation" title="Pages tagged animation" class="tag"><span class="term">animation</span></a><a href="/tags/#view" title="Pages tagged view" class="tag"><span class="term">view</span></a><a href="/tags/#interpolator" title="Pages tagged interpolator" class="tag"><span class="term">interpolator</span></a></span>

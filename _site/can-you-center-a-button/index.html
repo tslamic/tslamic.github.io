@@ -128,14 +128,14 @@
     <div class="entry-content">
       <p>Carloss Sessa of <a href="http://www.amazon.com/50-Android-Hacks-Carlos-Sessa/dp/1617290564">50 Android Hacks</a> starts off with an interesting problem: how to center a button that is 50% of its parent width?</p>
 
-<center>
+<p><center>
   <figure>
-    <img src="http://i.imgur.com/DW6JWEo.png" />
+    <img src="http://i.imgur.com/DW6JWEo.png"/>
     <figcaption>Pretty cool Android phone, huh?</figcaption>
   </figure>
-</center>
+</center></p>
 
-<p>It’s easy to center a generic button. Using <code>FrameLayout</code>, one could simply set the appropriate layout gravity:</p>
+<p>It&#39;s easy to center a generic button. Using <code>FrameLayout</code>, one could simply set the appropriate layout gravity:</p>
 
 <div class="highlight"><pre><code class="language-xml" data-lang="xml"><span class="cp">&lt;?xml version="1.0" encoding="utf-8"?&gt;</span>
 <span class="nt">&lt;FrameLayout</span> <span class="na">xmlns:android=</span><span class="s">"default_schema"</span>
@@ -149,16 +149,16 @@
 
 <span class="nt">&lt;/FrameLayout&gt;</span></code></pre></div>
 
-<p>But how to set the button width to 50% of its parent? I decided to create a custom <code>Button</code>.</p>
+<p>But how to set the button width to 50% of its parent? I decided to create a custom <code>Button</code>. </p>
 
-<p>When creating custom views, you usually want to override some <a href="http://developer.android.com/reference/android/view/View.html">standard methods</a> the framework uses. There are two I could consider in this case:</p>
+<p>When creating custom views, you usually want to override some <a href="http://developer.android.com/reference/android/view/View.html">standard methods</a> the framework uses. There are two I could consider in this case: </p>
 
 <ul>
-  <li><code>onMeasure</code> determines the size requirements for this view and all of its children</li>
-  <li><code>onLayout</code> assigns a size and position to all of its children.</li>
+<li><code>onMeasure</code> determines the size requirements for this view and all of its children</li>
+<li><code>onLayout</code> assigns a size and position to all of its children.</li>
 </ul>
 
-<p>Because the parent layout already provides the position I’m after, <code>onMeasure</code> will suffice.</p>
+<p>Because the parent layout already provides the position I&#39;m after, <code>onMeasure</code> will suffice.</p>
 
 <div class="highlight"><pre><code class="language-java" data-lang="java"><span class="kd">public</span> <span class="kd">class</span> <span class="nc">CenteredButton</span> <span class="kd">extends</span> <span class="n">Button</span> <span class="o">{</span>
 
@@ -190,26 +190,26 @@
 
 <span class="nt">&lt;/FrameLayout&gt;</span></code></pre></div>
 
-<p>It works! However, there’s a slight hiccup - the text is not centered. Applying <code>android:gravity="center"</code> doesn’t work:</p>
+<p>It works! However, there&#39;s a slight hiccup - the text is not centered. Applying <code>android:gravity=&quot;center&quot;</code> doesn&#39;t work:</p>
 
-<center>
+<p><center>
   <figure>
-    <img src="http://i.imgur.com/4huD0rH.png" />
-    <figcaption>"Button" text is not centered.</figcaption>
+    <img src="http://i.imgur.com/4huD0rH.png"/>
+    <figcaption>&quot;Button&quot; text is not centered.</figcaption>
   </figure>
-</center>
+</center> </p>
 
-<p>Darn <code>super.onMeasure</code>! A closer look at the <a href="http://grepcode.com/file/repository.grepcode.com/java/ext/com.google.android/android/4.4.2_r1/android/widget/Button.java/">source code</a> reveals a simple text like “Button” is drawn with the help of a <code>BoringLayout</code>. The layout is also responsible for positioning the text based on the available height, width and gravity.</p>
+<p>Darn <code>super.onMeasure</code>! A closer look at the <a href="http://grepcode.com/file/repository.grepcode.com/java/ext/com.google.android/android/4.4.2_r1/android/widget/Button.java/">source code</a> reveals a simple text like &quot;Button&quot; is drawn with the help of a <code>BoringLayout</code>. The layout is also responsible for positioning the text based on the available height, width and gravity. </p>
 
 <p>Since I only change the width after <code>super.onMeasure</code>, it has no effect to the initially calculated dimensions and position.</p>
 
-<p>Is there a way to halve the width before <code>super.onMeasure</code>? Enter <a href="http://developer.android.com/reference/android/view/View.MeasureSpec.html">MeasureSpec</a>. Scary documentation hides its simple nature: the three modes, <code>AT_MOST</code>, <code>UNSPECIFIED</code> and <code>EXACTLY</code>, are a rough translation of the familiar <code>wrap_content</code>, <code>match_parent</code> and a specific size, e.g. <code>200dp</code>.</p>
+<p>Is there a way to halve the width before <code>super.onMeasure</code>? Enter <a href="http://developer.android.com/reference/android/view/View.MeasureSpec.html">MeasureSpec</a>. Scary documentation hides its simple nature: the three modes, <code>AT_MOST</code>, <code>UNSPECIFIED</code> and <code>EXACTLY</code>, are a rough translation of the familiar <code>wrap_content</code>, <code>match_parent</code> and a specific size, e.g. <code>200dp</code>. </p>
 
-<p>Two encoded values of the <code>onMeasure</code> method, <code>widthMeasureSpec</code> and <code>heightMeasureSpec</code> present the <code>MeasureSpec</code> values from its parent View. This is handy, we can easily extract the parent width from it:</p>
+<p>Two encoded values of the <code>onMeasure</code> method, <code>widthMeasureSpec</code> and <code>heightMeasureSpec</code> present the <code>MeasureSpec</code> values from its parent View. This is handy, we can easily extract the parent width from it: </p>
 
 <div class="highlight"><pre><code class="language-java" data-lang="java"><span class="kd">final</span> <span class="kt">int</span> <span class="n">parentWidth</span> <span class="o">=</span> <span class="n">MeasureSpec</span><span class="o">.</span><span class="na">getSize</span><span class="o">(</span><span class="n">widthMeasureSpec</span><span class="o">);</span></code></pre></div>
 
-<p>If we could modify the <code>widthMeasureSpec</code> to be half its parent width, and pass it to the <code>super.onMeasure</code>, our work would be done. Fortunately, that’s easy:</p>
+<p>If we could modify the <code>widthMeasureSpec</code> to be half its parent width, and pass it to the <code>super.onMeasure</code>, our work would be done. Fortunately, that&#39;s easy:</p>
 
 <div class="highlight"><pre><code class="language-java" data-lang="java"><span class="nd">@Override</span>
 <span class="kd">protected</span> <span class="kt">void</span> <span class="nf">onMeasure</span><span class="o">(</span><span class="kt">int</span> <span class="n">wMeasureSpec</span><span class="o">,</span> <span class="kt">int</span> <span class="n">hMeasureSpec</span><span class="o">)</span> <span class="o">{</span>
@@ -221,7 +221,7 @@
   <span class="kd">super</span><span class="o">.</span><span class="na">onMeasure</span><span class="o">(</span><span class="n">newMeasureSpec</span><span class="o">,</span> <span class="n">hMeasureSpec</span><span class="o">);</span>
 <span class="o">}</span></code></pre></div>
 
-<p>Mission accomplished!</p>
+<p>Mission accomplished! </p>
 
 <p>Of course, Carlos did things a bit differently. To see his solution, go and buy his book.</p>
 

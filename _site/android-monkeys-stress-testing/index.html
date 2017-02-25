@@ -126,30 +126,30 @@
       </div><!-- /.header-title-wrap -->
     </header>
     <div class="entry-content">
-      <p>As end users, we’re terrible.</p>
+      <p>As end users, we’re terrible. </p>
 
-<p>We’ll microwave a fork, pull doors with a big red sign saying push and sue a company for serving us a hot cup of coffee. We’ll grab a supposedly waterproof phone and toss it in a full tub. Then we’ll go online and laugh at the schmuck trying to drill through a wall he’s standing on.</p>
+<p>We’ll microwave a fork, pull doors with a big red sign saying push and sue a company for serving us a hot cup of coffee. We’ll grab a supposedly waterproof phone and toss it in a full tub. Then we’ll go online and laugh at the schmuck trying to drill through a wall he’s standing on. </p>
 
-<center>
+<p><center>
   <figure>
-    <img src="http://i.imgur.com/X17puIB.gif" />
+    <img src="http://i.imgur.com/X17puIB.gif"/>
     <figcaption>Can you imagine designing a product that can handle such superusers? </figcaption>
   </figure>
-</center>
+</center></p>
 
-<p>Creating software with good user experience is hard. Relying on intuition is naive, but expecting a product to be used in a predictable (or, y’know, logical) manner is just wrong.</p>
+<p>Creating software with good user experience is hard. Relying on intuition is naive, but expecting a product to be used in a predictable (or, y’know, logical) manner is just wrong. </p>
 
 <p><em>Stress testing</em> puts great emphasis on availability and error handling, under a load few consider normal. It indicates just how robust our product really is.</p>
 
-<p>Android - or, more precisely, its debug bridge -  has a very handy tool called <em>the monkey</em>. It’s purpose is to stress-test your app by generating pseudo-random user events in a repeatable manner. It’s as if a monkey was ordered to test your app. It’ll tap, swipe, click and drag no matter what’s on the screen.</p>
+<p>Android - or, more precisely, its debug bridge -  has a very handy tool called <em>the monkey</em>. It’s purpose is to stress-test your app by generating pseudo-random user events in a repeatable manner. It’s as if a monkey was ordered to test your app. It’ll tap, swipe, click and drag no matter what’s on the screen. </p>
 
 <p>A typical command to start the monkey is:</p>
 
 <div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="gp">$ </span>adb shell monkey -p your.package.name 5000</code></pre></div>
 
-<p>where <code>-p</code> denotes your package name. <code>5000</code> is the amount of events generated.</p>
+<p>where <code>-p</code> denotes your package name. <code>5000</code> is the amount of events generated. </p>
 
-<p>Another useful option is the seed parameter. If you re-run the monkey with the same seed value, it will generate the exact same sequence of events. Just add the <code>-s &lt;number&gt;</code> option to your command:</p>
+<p>Another useful option is the seed parameter. If you re-run the monkey with the same seed value, it will generate the exact same sequence of events. Just add the <code>-s &lt;number&gt;</code> option to your command: </p>
 
 <div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="gp">$ </span>adb shell monkey -p your.package.name -s 12345 5000</code></pre></div>
 
@@ -159,34 +159,34 @@
 
 <pre>
 List of devices attached 
-192.168.56.102:5555		device
-0749e0c421157449		device
-017961c7d19f9615		device
+192.168.56.102:5555     device
+0749e0c421157449        device
+017961c7d19f9615        device
 </pre>
 
 <p>Executing any adb shell command results in <code>error: more than one device and emulator</code>. You need to explicitly tell the adb which device or emulator one to use, by using <code>-s &lt;serialNumber&gt;</code> option:</p>
 
 <div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="gp">$ </span>adb -s 192.168.56.102:5555 shell monkey -p your.package.name -s 12345 5000</code></pre></div>
 
-<p>This will run the monkey on a device or emulator with a serial number <code>192.168.56.102:5555</code>. To run the monkey on all attached emulators and devices, you have to execute a separate command for each one.</p>
+<p>This will run the monkey on a device or emulator with a serial number <code>192.168.56.102:5555</code>. To run the monkey on all attached emulators and devices, you have to execute a separate command for each one. </p>
 
-<p>Numerous other options are <a href="http://developer.android.com/tools/help/monkey.html">available</a> to fine-tune the monkey. Perhaps <code>--hprof</code> is an option worth mentioning. If set, it dumps the heap immediately before and after running. This can be quite useful for memory profiling.</p>
+<p>Numerous other options are <a href="http://developer.android.com/tools/help/monkey.html">available</a> to fine-tune the monkey. Perhaps <code>--hprof</code> is an option worth mentioning. If set, it dumps the heap immediately before and after running. This can be quite useful for memory profiling. </p>
 
 <p>However, according to this <a href="http://stackoverflow.com/a/8433740/905349">old post</a>, the <code>--hprof</code> option seems to be ignored. Moreover, the dumps are put in <code>data/misc</code> folder. It may be impossible to extract them.</p>
 
-<p>To tackle the two problems, running the monkey on multiple devices and making heap dumps, I’ve created Dumpey, a collection of (currently) three UNIX scripts:</p>
+<p>To tackle the two problems, running the monkey on multiple devices and making heap dumps, I&#39;ve created Dumpey, a collection of (currently) three UNIX scripts:</p>
 
 <ul>
-  <li><code>monkey</code> capable of running the monkey on all attached devices/emulators</li>
-  <li><code>memdmp</code> capable of extracting and converting heap dumps from a device/emulator to a local drive</li>
-  <li><code>dumpey</code> capable of extracting and converting heap dumps before and after running the monkey, on all attached devices/emulators</li>
+<li><code>monkey</code> capable of running the monkey on all attached devices/emulators</li>
+<li><code>memdmp</code> capable of extracting and converting heap dumps from a device/emulator to a local drive</li>
+<li><code>dumpey</code> capable of extracting and converting heap dumps before and after running the monkey, on all attached devices/emulators</li>
 </ul>
 
 <p>Using Dumpey is easy. For example</p>
 
 <div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="gp">$ </span>./monkey -p your.package.name -s 12345 -e 5000</code></pre></div>
 
-<p>runs the monkey on all attached devices with a seed number <code>12345</code>, generating <code>5000</code> random events.</p>
+<p>runs the monkey on all attached devices with a seed number <code>12345</code>, generating <code>5000</code> random events. </p>
 
 <p>To avoid using DDMS to do a heap dump, use <code>memdmp</code>:</p>
 
@@ -198,14 +198,14 @@ List of devices attached
 
 <div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="gp">$ </span>./dumpey -p your.package.name -bad heapdumps/</code></pre></div>
 
-<p>This extracts converted memory heap dumps, runs the monkey, and extracts converted memory heap dumps again. It does this on all attached devices or emulators. If, for example, you only have one device attached, <code>SH48HWM03500</code>, then running <code>dumpey</code> with the above command will generate two files in <code>heapdumps</code> folder:</p>
+<p>This extracts converted memory heap dumps, runs the monkey, and extracts converted memory heap dumps again. It does this on all attached devices or emulators. If, for example, you only have one device attached, <code>SH48HWM03500</code>, then running <code>dumpey</code> with the above command will generate two files in <code>heapdumps</code> folder: </p>
 
 <ul>
-  <li><code>SH48HWM03500-before.hprof</code></li>
-  <li><code>SH48HWM03500-after.hprof</code></li>
+<li><code>SH48HWM03500-before.hprof</code></li>
+<li><code>SH48HWM03500-after.hprof</code></li>
 </ul>
 
-<p>As the names suggest, they are converted memory heap dumps from a specific device done before and after running the monkey. Again, all you have to do is open them in MAT.</p>
+<p>As the names suggest, they are converted memory heap dumps from a specific device done before and after running the monkey. Again, all you have to do is open them in MAT. </p>
 
 <p>To read more about Dumpey, visit the <a href="https://github.com/tslamic/Dumpey">Github repo</a>. Happy stress testing!</p>
 
