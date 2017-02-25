@@ -8,8 +8,8 @@ tags: [android, bitmap, memory, cache, subsampling]
 FancyBackground is a tiny Android library designed to animate images on a View instance.
 
 | Before | After |
-|:------:|:-----:|
-|![plain](http://i.imgur.com/7kH0FIN.png?1) | ![fancybg](http://i.imgur.com/Sh4XegD.gif)|
+| :----: | :---: |
+| ![plain](http://i.imgur.com/7kH0FIN.png?1) | ![fancybg](http://i.imgur.com/Sh4XegD.gif) |
 
 Android runs on a variety of devices, with different screen sizes and densities. Providing alternative resources is a standard practice. Let’s assume that in our case, the design team only gave us resources of `xxhdpi` size. To make matters worse, an `OutOfMemoryError` is thrown when we try to load any image into memory on our S3 mini. 
 
@@ -33,15 +33,15 @@ The code above gives us subsampling, caching and automatic transitions for free.
 There are other options available, so let's do a quick abstract:
 
 | Method name | Description |
-|:------------|:-----------:|
-|`set` | sets the Drawable resources we wish to show/animate |
-|`inAnimation` | specifies the animation used to animate a `View` entering the screen. |
-|`outAnimation` | specifies the animation used to animate a `View` exiting the screen. |
-|`loop` | continuously loop through the Drawables or stop after the first cycle is complete. |
-|`interval` | the millisecond interval a Drawable instance will be displayed for. |
-|`scale` | determines how the Drawables should be resized or moved to match the size of the view we're animating on. |
-|`listener` | receives the `FancyBackground` events (described below) |
-|`cache` | caches loaded bitmaps so we don't have to do it again |
+| :---------- | :---------- |
+| `set` | sets the Drawable resources we wish to show/animate |
+| `inAnimation` | specifies the animation used to animate a `View` entering the screen. |
+| `outAnimation` | specifies the animation used to animate a `View` exiting the screen. |
+| `loop` | continuously loop through the Drawables or stop after the first cycle is complete. |
+| `interval` | the millisecond interval a Drawable instance will be displayed for. |
+| `scale` | determines how the Drawables should be resized or moved to match the size of the view we're animating on. |
+| `listener` | receives the `FancyBackground` events (described below) |
+| `cache` | caches loaded bitmaps so we don't have to do it again |
 
 `FancyListener` can receive four events: 
 
