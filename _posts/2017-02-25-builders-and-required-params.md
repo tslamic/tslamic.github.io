@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Builders and required params"
+title: "Builders and Required Params"
 description: "How to handle builders with required parameters"
 tags: [Android, Java, Builder, Design Patterns]
 ---
