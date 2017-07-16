@@ -1,8 +1,9 @@
 ---
 layout: post
-title: View Animations On Android
-description: "A short but sweet intro to view animations on Android."
-tags: [android, animation, view, interpolator]
+title: "View Animations On Android"
+subtitle: "Short but sweet intro to view animations on Android."
+author: "Tadej"
+comments: true
 ---
 
 The Android framework provides two animation systems:
@@ -14,7 +15,7 @@ While property animation system is more flexible, offers more features and gener
 
 In this post, we're going to focus on the basics of the latter one.
 
-The view animation system is used to perform _tweened_ animation on views. Tween stands for "in-between" and refers to the creation of successive frames of animation between the first and the last frame.
+The view animation system is used to perform _tweened_ animation on views. Tween stands for _in-between_ and refers to the creation of successive frames of animation between the first and the last frame.
 
 It can perform a series of simple transformations on a `View` object, changing:
 
@@ -29,15 +30,14 @@ The system lives in the `android.view.animation` package, with `Animation`, `Ani
 
 `Interpolator` defines the rate of change of an animation. We can specify, for example, how fast something is going to fade out or if the animation should be accelerating, decelerating, etc.
 
-<figure class="center-align">
-    <a href="http://cogitolearning.co.uk/?p=1078" target="_blank">
-      <img src="http://i.imgur.com/xVlimsR.png" />
-    </a>
+
+<figure class="center">
+    <img src="http://i.imgur.com/xVlimsR.png" />
     <figcaption>Rate of change for some interpolators.</figcaption>
 </figure>
 
 Constructing an `Animation` is simple:
- 
+
 {% highlight java %}
 Animation fadeOut = new AlphaAnimation(1, 0);
 fadeOut.setInterpolator(new AccelerateInterpolator());
@@ -58,22 +58,21 @@ The second line of our example sets the `Interpolator`. Again, to make things ea
 Animations can be defined by either code or XML. Android designates a special folder where XML files should live: `res/anim`. Let's create a file called `res/anim/fade_out.xml`:
 
 {% highlight xml %}
-<?xml version="1.0" encoding="utf-8"?>
 <alpha xmlns:android="http://schemas.android.com/apk/res/android"
-    android:interpolator="@interpolator/accelerate_quad" 
+    android:interpolator="@interpolator/accelerate_quad"
     android:fromAlpha="1.0"
     android:toAlpha="0.0"
     android:duration="1000"/>
 {% endhighlight %}
 
-To use it, `AnimationUtils class provides a method that constructs the Animation:
+To use it, `AnimationUtils` class provides a method that constructs the `Animation`:
 
 {% highlight java %}
-Context ctx = getContext();
-Animation fade = AnimationUtils.loadAnimation(ctx, R.anim.fade_out);
+Animation fade =
+  AnimationUtils.loadAnimation(context, R.anim.fade_out);
 {% endhighlight %}
 
-Suppose we wish to - besides fading out - shrink our view. Recall that in order to execute two or more animations at the same time, we have to use `AnimationSet`. This is as simple as creating an `Animation` and adding it to the `AnimationSet`:
+Suppose we wish - besides fading out - to shrink our view. Recall that in order to execute two or more animations at the same time, we have to use `AnimationSet`. This is as simple as creating an `Animation` and adding it to the `AnimationSet`:
 
 {% highlight java %}
 // suppose fade is defined as in the code example above
@@ -98,7 +97,6 @@ shrink.setStartOffset(1000);
 Converting everything to XML yields:
 
 {% highlight xml %}
-<?xml version="1.0" encoding="utf-8"?>
 <set xmlns:android="http://schemas.android.com/apk/res/android">
   <alpha
     android:fromAlpha="1.0"

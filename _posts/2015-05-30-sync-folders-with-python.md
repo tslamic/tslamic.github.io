@@ -1,17 +1,12 @@
 ---
 layout: post
 title: "Sync folders with Python"
-description: "Manually comparing and synchronizing two folders can be tedious. Add long, confusing and very similar filenames and it's no fun at all. Here's how to automate the process with Python."
-tags: [python, script, automation, folder-sync]
+subtitle: "Manually comparing and synchronizing two folders can be tedious. Add long, confusing and very similar filenames and it's no fun at all. Here's how to automate the process with Python."
+author: "Tadej"
+comments: true
 ---
 
 Manually comparing and synchronizing two folders can be tedious. Add long, confusing and very similar filenames and it's no fun at all.
-
-<figure class="center-align">
-	<img src="http://throb.pagesperso-orange.fr/prg/Xojo/SyncTwoFolders_1024.png" title="sync-folders" width="300" height="300" />
-	<figcaption>Source: throb.pagesperso-orange.fr</figcaption>
-</figure>
-
 
 We recently faced a similar situation at work. Besides cryptic names, there was also a fair share of twisted logic governing the sync scenarios. We had to get our hands dirty, since the standard tools were useless.
 
@@ -22,7 +17,7 @@ This post builds upon ideas I came across writing the script, but were ultimatel
 ### Backing and reverting
 
 Let’s assume nothing is under version control. It would be cool if our script would have a revert mechanism of sorts, in case something funky happens during sync. To keep it simple, maybe a directory snapshot is enough:
- 
+
 {% highlight python %}
 def backup(directory, tag=None):
     ensure_dir_exists(directory)
@@ -57,7 +52,7 @@ def revert(directory, archive_path=None):
         zf.extractall(directory)
 {% endhighlight %}
 
-In order to revert, we need to know the archived file to revert to. This is written in the `BACKUP` file which should be part of `directory`. 
+In order to revert, we need to know the archived file to revert to. This is written in the `BACKUP` file which should be part of `directory`.
 
 `get_archive_name` helps us extract it:
 
@@ -161,7 +156,7 @@ def find_diff(src, dst):
     return filter(lambda l: l not in ignore, diff_list)
 {% endhighlight %}
 
-If `dst` does not exist, then the difference is the `src` directory content. Otherwise, there's a handy module we can use: `filecmp`. It contains a function `dircmp` that does exactly what we need - it finds all the differences between two folders. 
+If `dst` does not exist, then the difference is the `src` directory content. Otherwise, there's a handy module we can use: `filecmp`. It contains a function `dircmp` that does exactly what we need - it finds all the differences between two folders.
 
 We're interested in files or folders only in `src`, or common files that differ. We also don't want to copy any of the config files, so we filter them out.
 
@@ -187,7 +182,7 @@ The code speaks for itself. The point to note is the backup we perform before an
 
 ### Syncing the same folders over and over and over...
 
-Sometimes, you know beforehand the folders you need to sync. For example, you know that folder `A` will always have to be synced with folders `B` and  `C`. This is where `SYNC` file comes into play. It contains one or more source folders, each listed on a separate line. 
+Sometimes, you know beforehand the folders you need to sync. For example, you know that folder `A` will always have to be synced with folders `B` and  `C`. This is where `SYNC` file comes into play. It contains one or more source folders, each listed on a separate line.
 
 In the example above, folder `A` should contain the `SYNC` file with the following content:
 
@@ -215,7 +210,7 @@ def sync(directory, backup_tag=None):
         apply_diff(src, directory, auto_backup=False, backup_tag=backup_tag)
 {% endhighlight %}
 
-As you can see, it's as straightforward as opening the `SYNC` file, reading the sources, and then applying the differences. 
+As you can see, it's as straightforward as opening the `SYNC` file, reading the sources, and then applying the differences.
 
 Of course, we should provide means to generate such file:
 
@@ -239,7 +234,7 @@ Example usage: `cp -t sample_tag /source/path/dir /destination/path/dir`
 
 The comand requires a `src` directory and a `dst` directory, where `dst` will be synced with `src`. Tag is optional.
 
-#### 2. Revert a directory or tag 
+#### 2. Revert a directory or tag
 
 Example usage: `rv -t sample_tag` or `rv -d /random/path/dir`
 
@@ -308,12 +303,12 @@ class ValidDirAction(argparse.Action):
         setattr(namespace, self.dest, values)
 {% endhighlight %}
 
-It ensures that any path we provide as an argument is an existing directory we can write to. 
+It ensures that any path we provide as an argument is an existing directory we can write to.
 
 ### Fin
 
 We can now sync two folders and revert if need be. The tool is very simple and only offers crude functionality, but it's a good starting point to build upon. What always amazes me is the expressiveness of Python and what can be achieved with
-cca. 200 lines of code, half of which are paranoid asserts and param checks. 
+cca. 200 lines of code, half of which are paranoid asserts and param checks.
 
 I'd also like to note that although I love Python, I don't use it enough to consider myself a _pythonista_. If you spot any piece of code that can be replaced with a more standarized idiom, please let me know!
 

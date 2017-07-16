@@ -1,8 +1,9 @@
 ---
 layout: post
 title: "Builders and Required Params"
-description: "How to handle builders with required parameters"
-tags: [Android, Java, Builder, Design Patterns]
+subtitle: "How to handle builders with required parameters."
+author: "Tadej"
+comments: true
 ---
 Ever since Effective Java 2 came out, the builder pattern became a defacto standard for instantiating objects with multiple parameters.
 
@@ -60,13 +61,13 @@ interface Builder {
 }
 {% endhighlight %}
 
-Recall the first two methods, `servingSize(int)` and `servings(int)` are required. Could we force the user to start the builder chain with them? 
+Recall the first two methods, `servingSize(int)` and `servings(int)` are required. Could we force the user to start the builder chain with them?
 
 Suppose we declare two additional interfaces:
 
 {% highlight java %}
 // Represents the first required param. Note the return type.
-interface ServingSizeBuilder { 
+interface ServingSizeBuilder {
   ServingBuilder servingSize(int size);
 }
 
@@ -88,7 +89,7 @@ We should remove the two required setters methods from the `Builder` interface, 
 
 {% highlight java %}
 interface Builder {
-  interface ServingSizeBuilder { 
+  interface ServingSizeBuilder {
     ServingBuilder servingSize(int size);
   }
   interface ServingBuilder {
@@ -115,7 +116,7 @@ class NutritionFactsBuilder implements Builder,
   private int carbohydrate = 0;
   private int sodium = 0;
 
-  // To start the builder chain with required parameters, 
+  // To start the builder chain with required parameters,
   // we need to provide the following static factory method
   // returning ServingSizeBuilder.
   public static ServingSizeBuilder builder() {

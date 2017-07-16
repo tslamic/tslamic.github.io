@@ -1,17 +1,16 @@
 ---
 layout: post
 title: Leaving London
-description: "Packing my bags, leaving London behind. Next destination: Dublin. Here's why."
-tags: [London, Dublin, travel]
-image:
-  feature: london.jpg
+subtitle: "Packing my bags, leaving London behind. Next destination: Dublin. Here's why."
+author: "Tadej"
+comments: true
 ---
 
 About a year ago, I bought a one way ticket to London.
 
 I had a job waiting for me and all I had to do was to show up. Until then, I was sure the place I was living in is a slow-paced, boring and futureless town that will never become a city. I wanted to get out.
 
-After buying the ticket, reality kicked in. I became sentimental and hesitant. I'm leaving my family. I'm leaving my friends. The place I grow up in, the forests, mountains and fresh air.  Mom's dishes and nagging. Soccer after work and drinks in my favourite bar. The smell of freshly cut grass. The sun. Half an hour drive either to the snowy slopes or good enough beach. 
+After buying the ticket, reality kicked in. I became sentimental and hesitant. I'm leaving my family. I'm leaving my friends. The place I grow up in, the forests, mountains and fresh air.  Mom's dishes and nagging. Soccer after work and drinks in my favourite bar. The smell of freshly cut grass. The sun. Half an hour drive either to the snowy slopes or good enough beach.
 
 It sure isn't the most opportunistic and ambitious little town. But it's _home_.
 

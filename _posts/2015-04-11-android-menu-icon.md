@@ -1,11 +1,12 @@
 ---
 layout: post
 title: "Android menu icon, delightfully"
-description: "Starting a redesign of my app, a contemporary menu to back-arrow icon - like the one introduced in Material design, would come handy. I thought recreating it from scratch would be a great how-to exercise. Here's my recipe."
-tags: [android, ui, drawable]
+subtitle: "A contemporary menu to back-arrow icon how-to."
+author: "Tadej"
+comments: true
 ---
 
-There's probably not a single Android developer in the wild that hasn't heard about Material design yet. 
+There's probably not a single Android developer in the wild that hasn't heard about Material design yet.
 
 One of my favorite elements are subtle icon transitions, like the ones presented in [delightful details][1].
 
@@ -15,15 +16,15 @@ One of my favorite elements are subtle icon transitions, like the ones presented
 </video>
 </div>
 
-Starting a redesign of my app, a menu to back-arrow icon - like the one in the top left corner - would come handy. I thought recreating it from scratch would be a great how-to exercise. 
+Starting a redesign of my app, a menu to back-arrow icon - like the one in the top left corner - would come handy. I thought recreating it from scratch would be a great how-to exercise.
 
 > TL;DR Here's the [GitHub repo](https://github.com/tslamic/DelightfulMenuDrawable).
 
-<a name="sec_1"/> 
+<a name="sec_1"/>
 
 ### A bird's eye view
 
-Menu to back-arrow icon is a simple drawable with transition animation. Both _states_ consist of three sole lines. The easiest way to define the transition is to mark the points of interest: 
+Menu to back-arrow icon is a simple drawable with transition animation. Both _states_ consist of three sole lines. The easiest way to define the transition is to mark the points of interest:
 
 <figure class="center-align">
 	<img src="http://i.imgur.com/VezpDYs.png" title="mapping" />
@@ -62,9 +63,9 @@ Rememeber the variable names, as they will be used throughout this post.
 
 ### Progress
 
-To get a smooth transition from e.g. A to S, we have to know the inbetween point at each animation frame. But first, we have to decide how to track animation progress. 
+To get a smooth transition from e.g. A to S, we have to know the inbetween point at each animation frame. But first, we have to decide how to track animation progress.
 
-Assuming we'll use property animation, it's on us to provide a property and set of values we want to animate between. 
+Assuming we'll use property animation, it's on us to provide a property and set of values we want to animate between.
 
 Let _progress_ denote an arbitrary float value between 0.0 and 1.0, inclusive. This will be our property. We'll start the animation by executing
 
@@ -74,11 +75,11 @@ o.setDuration(animationDuration)
 o.start();
 {% endhighlight %}
 
-If progress is 0, we show the menu icon. Else if progress is 1, we show the back-arrow icon. 
+If progress is 0, we show the menu icon. Else if progress is 1, we show the back-arrow icon.
 
 Progressing from 0 to 1 transforms a home icon to a back-arrow. Conversely, 1 to 0 goes from a back-arrow to home.
 
-<a name="sec_4"/> 
+<a name="sec_4"/>
 
 ### Math
 
@@ -89,9 +90,9 @@ Remember, the points we refer to are all defined in the <a href="#sec_1">upper s
 	<figcaption>Pic 1</figcaption>
 </figure>
 
-P is the point at progress $0 < q < 1$, moving between A and S. We want to know $dx$ and $dy$. 
+P is the point at progress $0 < q < 1$, moving between A and S. We want to know $dx$ and $dy$.
 
-Let's find coordinates of S first, assuming A is the origin. 
+Let's find coordinates of S first, assuming A is the origin.
 Clearly its $x$ coordinate is $m$. To determine $n$, a bigger picture helps:
 
 <figure class="center-align">
@@ -113,7 +114,7 @@ h &= m\sqrt 2\\
 \end{align}
 $$
 
-Since $h$ is of the same length as the diagonal of a square with an edge $m$, we deduct $z=m$, thus $n = (m-g)$ and $S=(m, (m-g))$. 
+Since $h$ is of the same length as the diagonal of a square with an edge $m$, we deduct $z=m$, thus $n = (m-g)$ and $S=(m, (m-g))$.
 
 Observe that in pic 1, at progress $p=0$, we must be at A. When $p=1$, we must be at S. It's clear that at progress $q$
 
@@ -143,9 +144,9 @@ Note that C-D line (or T-U) is a mirror line. As such, reflecting the $y$ coordi
 
 ### Draw
 
-As mentioned, both drawable states have only three simple lines. `Canvas` has a convenient method `drawLine`, which is all we need. 
+As mentioned, both drawable states have only three simple lines. `Canvas` has a convenient method `drawLine`, which is all we need.
 
-To be able to draw, we need to calculate `dx`,  `dy` and `dv` and know points A, B, C, D, E, F. 
+To be able to draw, we need to calculate `dx`,  `dy` and `dv` and know points A, B, C, D, E, F.
 
 First three change when progress changes, but others just need bounds. We can compute them in a helper method, which is only invoked when the bounds are set.
 
@@ -173,7 +174,7 @@ private void measure() {
 }
 {% endhighlight %}
 
-In the code above, `mHalfLineLength` denotes $m$, `mLineGap` denotes $g$ and `strokeWidth` is $w$. Other instance variables fully determine the points: 
+In the code above, `mHalfLineLength` denotes $m$, `mLineGap` denotes $g$ and `strokeWidth` is $w$. Other instance variables fully determine the points:
 
 - A(`mStartX`, `mTopY`)
 - B(`mEndX`, `mTopY`)
@@ -197,7 +198,7 @@ public void draw(Canvas canvas) {
 }
 {% endhighlight %}
 
-Note that we apply the transformations computed in the <a href="#sec_4">math section</a>. 
+Note that we apply the transformations computed in the <a href="#sec_4">math section</a>.
 
 ### Demo
 
@@ -217,9 +218,9 @@ Because I'm nice, I've wrapped everything we've done so far in a widget for you 
 
 If progress is 1, the above widget reveals the pointy end of the arrow is not really pointy.
 
-When drawing on a `Canvas` instance, Android uses [Skia](https://code.google.com/p/skia/), a 2D graphics library, to do the actual drawing. `Canvas.drawLine` invokes a native method `SkCanvas::drawLine`, which invokes `SkCanvas::onDrawPoints`. Because our `mPaint` instance is not complex (it has no path effects, for example), `SkPaint::doComputeFastBounds` is called. 
+When drawing on a `Canvas` instance, Android uses [Skia](https://code.google.com/p/skia/), a 2D graphics library, to do the actual drawing. `Canvas.drawLine` invokes a native method `SkCanvas::drawLine`, which invokes `SkCanvas::onDrawPoints`. Because our `mPaint` instance is not complex (it has no path effects, for example), `SkPaint::doComputeFastBounds` is called.
 
-We care because in this case, if the `mPaint` stroke width is $w$, the rendered point has a radius of $w/2$. 
+We care because in this case, if the `mPaint` stroke width is $w$, the rendered point has a radius of $w/2$.
 
 Here's a zoomed in look at U, where B and F meet and progress is 1:
 
@@ -229,7 +230,7 @@ Here's a zoomed in look at U, where B and F meet and progress is 1:
 	Line A-B (S-U) is colored purple. Line E-F (V-U) is colored green. Red square is the issue we're trying to resolve. </figcaption>
 </figure>
 
-If we offset B and F by $(zx, -zy), (zx, zy)$ respectively, we cover the red square. 
+If we offset B and F by $(zx, -zy), (zx, zy)$ respectively, we cover the red square.
 
 Because of the above analysis, we know $r=\frac{w}{2}$. Both lines come at a 45 degree angle, hence $k = 45\deg$ too. We can use trigonometric ratios again:
 

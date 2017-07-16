@@ -1,13 +1,14 @@
 ---
 layout: post
-title: Java Operators I Thought I Knew
-description: "I thought I know all the operators used in Java. Turns's out I was wrong..."
-tags: [java, modulo, bitshift]
+title: "Java Operators I Thought I Knew"
+subtitle: "I thought I knew them all. I was wrong."
+author: "Tadej"
+comments: true
 ---
 
-Today, I stumbled upon [Java Tutorial Operators](http://docs.oracle.com/javase/tutorial/java/nutsandbolts/operators.html) page. 
+Today, I stumbled upon [Java Tutorial Operators](http://docs.oracle.com/javase/tutorial/java/nutsandbolts/operators.html) page.
 
-I glanced the list, wondering if I know what each operator does. As you might have guessed from the title, I failed. Luckily, I failed at only two operators. 
+I glanced the list, wondering if I know what each operator does. As you might have guessed from the title, I failed. Luckily, I failed at only two operators.
 
 ### The modulo operator %
 
@@ -21,32 +22,26 @@ It boils down to the decision language designers made when defining the operator
 Missing this fact could lead to some fun late night debugging sessions. Consider the following example:
 
 {% highlight java %}
-/*
- * Returns true if value is odd, false otherwise.
- */
-static boolean isOdd(final int value) {
-  return (value % 2) == 1;
+boolean isOdd(int value) {
+  return (value % 2) == 1; // true if odd, false otherwise
 }
 {% endhighlight %}
 
-It works wonderful with a positive argument. But since the definition of an odd number is quite natural for any negative integer too, does `isOdd(-1)` produce a correct result? 
+It works wonderful with a positive argument. But since the definition of an odd number is quite natural for any negative integer too, does `isOdd(-1)` produce a correct result?
 
 Java uses the dividend when determining the sign of a modulo operation. Therefore, if the argument we pass to `isOdd` is negative, the modulo operation yields a negative result. In our case `-1 % 2 == -1`, and `isOdd(-1) == false`. The result is not what one would expect.
 
 A quick fix could apply absolute value to a dividend. A better solution, albeit a bit cryptic, would be to just check the last bit of a number and avoid the modulo operator altogether:
 
 {% highlight java %}
-/*
- * Returns true if value is odd, false otherwise.
- */
-static boolean isOdd(final int value) {
-  return (value & 1) == 1;
+boolean isOdd(int value) {
+  return (value & 1) == 1; // true if odd, false otherwise
 }
 {% endhighlight %}
 
 ### The unsigned right shift `>>>`
 
-The second operator I was having trouble with was `>>>`. I couldn't tell the difference with `>>` operator, so I had to check the definition: `>>>`is an _unsigned_ right shift whereas `>>` is _signed_. Confused? Read on.
+The second operator I was having trouble with was `>>>`. I couldn't tell the difference with `>>` operator, so I had to check the definition: `>>>` is an _unsigned_ right shift whereas `>>` is _signed_. Confused? Read on.
 
 <center>
 <figure >

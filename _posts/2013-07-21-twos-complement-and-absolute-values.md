@@ -1,8 +1,9 @@
 ---
-layout:   post
-title:    Two's Complement And Absolute Values
-description: "A gentle introduction to two's complement and a quirky property that comes with it."
-tags: [java, two's complement, bitshift]
+layout: post
+title: "Two's Complement And Absolute Values"
+subtitle: "Two's Complement and a quirky property that comes with it."
+author: "Tadej"
+comments: true
 ---
 
 <script type="text/javascript"
@@ -13,7 +14,7 @@ If I ask you what the result of `Math.abs(-10)` is, would you guess it's `10`? H
 
 ### How it all starts
 
-A bit can hold only one of two values, say `0` and `1`. An 8-bit value, for example, is 
+A bit can hold only one of two values, say `0` and `1`. An 8-bit value, for example, is
 a combination of 8 bits _glued together_:
 <pre>
 001: [0] [0] [0] [0] [0] [0] [0] [0]
@@ -72,7 +73,7 @@ Through time, people had come up with clever ways of storing integers, so that c
 For an arbitrary n-bit binary number, to get its opposite representation, first invert the number, then add 1.
 </blockquote>
 
-This simple algorithm forms Two's Complement, the most commonly used signed number representation system in use today. 
+This simple algorithm forms Two's Complement, the most commonly used signed number representation system in use today.
 
 Let's do an example: find the opposite value of the binary number `00001010`:
 <pre>
@@ -96,26 +97,26 @@ The result is a 9-bit number in an 8-bit number system. This is called an _overf
 
 ### Sign
 
-In Two's Complement, the most significant bit represents the sign. `0` means the number will be positive, `1` negative. This means that with _n_ bits, you can only use _(n-1)_ bits to represent the number, as one bit is reserved to denote the sign. 
+In Two's Complement, the most significant bit represents the sign. `0` means the number will be positive, `1` negative. This means that with _n_ bits, you can only use _(n-1)_ bits to represent the number, as one bit is reserved to denote the sign.
 
-You may think of, e.g., `01001010` as a compound value consisting of `0` (sign) and `1001010` (actual binary number). 
+You may think of, e.g., `01001010` as a compound value consisting of `0` (sign) and `1001010` (actual binary number).
 
 ### But I can't think in binary
 
-Converting a binary value `01001010` to decimal is simple. Ignoring the most significant bit, we get 
+Converting a binary value `01001010` to decimal is simple. Ignoring the most significant bit, we get
 
 $$ 0 \times 2^{0} + 1 \times 2^{1} + 0 \times 2^{2} + 1 \times 2^{3} + 1 \times 2^{6} = 138 $$
 
-What about `10001010`? 
+What about `10001010`?
 
-This is a negative value, since the most significant bit is `1`. To get the actual value, we can apply Two's Complement algorithm, ignoring the first bit: 
+This is a negative value, since the most significant bit is `1`. To get the actual value, we can apply Two's Complement algorithm, ignoring the first bit:
 
 <pre>
-inverted(0001010) =  1110101
+inverted(0001010) = 1110101
     add1(1110101) = 1110110
 </pre>
 
-Then, 
+Then,
 
 $$ 0 \times 2^{0} + 1 \times 2^{1} + 1 \times 2^{3} + 0 \times 2^{4} + 1 \times 2^{5} + 1 \times 2^{6} + 1 \times 2^{7} = 118 $$
 
@@ -163,21 +164,21 @@ Let's first look at 3-bit two's complement binary numbers and its decimal values
     <td>101</td>
     <td>-3</td>
   </tr>
-  
+
   <tr>
     <td>110</td>
     <td>-2</td>
   </tr>
-  
+
   <tr>
     <td>111</td>
     <td>-1</td>
   </tr>
-  
+
 </table>
 </center>
 
-Since one bit represents the sign, there are only two bits available for binary numbers. The upper bound seems to be 3 \\ = (2^{2} - 1\\). The lower bound is -4 \\ = (-2^{2}\\)
+Since one bit represents the sign, there are only two bits available for binary numbers. The upper bound seems to be \\(3 = (2^{2} - 1) \\). The lower bound is \\( -4 = -2^{2} \\)
 
 Let's do the same thing for 4-bit numbers:
 
@@ -212,12 +213,12 @@ Let's do the same thing for 4-bit numbers:
     <td>0100</td>
     <td>4</td>
   </tr>
-  
+
   <tr>
     <td>0101</td>
     <td>5</td>
   </tr>
-  
+
   <tr>
     <td>0110</td>
     <td>6</td>
@@ -252,12 +253,12 @@ Let's do the same thing for 4-bit numbers:
     <td>1100</td>
     <td>-4</td>
   </tr>
-  
+
   <tr>
     <td>1101</td>
     <td>-3</td>
   </tr>
-  
+
   <tr>
     <td>1110</td>
     <td>-2</td>
@@ -267,11 +268,11 @@ Let's do the same thing for 4-bit numbers:
     <td>1111</td>
     <td>-1</td>
   </tr>
-  
+
 </table>
 </center>
 
-Again, one bit represents the sign, so there are three bits available for binary numbers. The upper bound seems to be 7 \\ = (2 ^ {3} - 1\\). The lower bound is -8 \\ = (-2^{3}\\)
+Again, one bit represents the sign, so there are three bits available for binary numbers. The upper bound seems to be \\( 7 = 2 ^ {3} - 1 \\). The lower bound is \\( -8 = -2^{3} \\)
 
 Notice the bounds pattern for number of bits:
 
@@ -282,19 +283,19 @@ Notice the bounds pattern for number of bits:
     <th>Lower bound</th>
     <th>Upper bound</th>
   </tr>
-  
+
   <tr>
     <td>3</td>
     <td>-4</td>
     <td>3</td>
   </tr>
-  
+
   <tr>
     <td>4</td>
     <td>-8</td>
     <td>7</td>
   </tr>
-  
+
   <tr>
     <td>5</td>
     <td>-16</td>
@@ -309,10 +310,10 @@ Notice the bounds pattern for number of bits:
 
  <tr>
     <td>n</td>
-    <td>\(-2^{n - 1}\)</td>
-    <td>\(2^{n - 1} - 1\)</td>
+    <td>\( -2^{n - 1} \)</td>
+    <td>\( 2^{n - 1} - 1 \)</td>
   </tr>
-  
+
 </table>
 </center>
 
@@ -332,7 +333,7 @@ inverted(1000) = 0111
     add1(0111) = 1000
 </pre>
 
-Applying inductive reasoning, this holds for any _n-bit_ number. But what exactly are this values? 
+Applying inductive reasoning, this holds for any _n-bit_ number. But what exactly are this values?
 
 <center>
 <table style="width:500px; text-align:center">
@@ -341,25 +342,25 @@ Applying inductive reasoning, this holds for any _n-bit_ number. But what exactl
     <th>Bit value</th>
     <th>Decimal value</th>
   </tr>
-  
+
   <tr>
     <td>3</td>
     <td>100</td>
     <td>-4</td>
   </tr>
-  
+
   <tr>
     <td>4</td>
     <td>1000</td>
     <td>-8</td>
   </tr>
-  
+
   <tr>
     <td>5</td>
     <td>10000</td>
     <td>-16</td>
   </tr>
-  
+
    <tr>
     <td>...</td>
     <td>...</td>
@@ -369,13 +370,13 @@ Applying inductive reasoning, this holds for any _n-bit_ number. But what exactl
   <tr>
    <td>n</td>
    <td></td>
-   <td>\(-2^{n - 1}\)</td> 
+   <td>\(-2^{n - 1}\)</td>
   </tr>
-  
+
 </table>
 </center>
 
 
-The values are lower bounds. We've shown that in Two's Complement, the opposite value of a lower bound is still the lower bound. 
+The values are lower bounds. We've shown that in Two's Complement, the opposite value of a lower bound is still the lower bound.
 
-This is relevant because `-2147483648 == Integer.MIN_VALUE`, a lower bound for `int` type in Java. Hence, `Math.abs(-2147483648) == -2147483648`.
+This is relevant because `-2147483648 == Integer.MIN_VALUE`, a lower bound for `int` type in Java. And as such, `Math.abs(-2147483648) == -2147483648`.

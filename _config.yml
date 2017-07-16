@@ -1,52 +1,26 @@
-title:            Tadej's Blog
-description:      Code, Life and Coffee.
+author: Tadej
+title: Tadej's Blog
+description: "Tadej's Blog - Code, Coffee, Life"
+copyright_name: tadej.me
+
+baseurl: ""
+url: ""
+
+header-img: img/index.jpg
+
+twitter_username:
+github_username:  tslamic
+stackoverflow_username: 905349
+linkedin_username: tadejslamic
+email_recaptcha_url: http://www.google.com/recaptcha/mailhide/d?k=0111lMTscu6dV5C-xqKQJIdw==&c=yuobLsnDzPlkgvE7eDLirgKBMG2TBTHfslypuNTrofQ=
+
 disqus_shortname: tslamic
-reading_time:     true
-words_per_minute: 200
-# Your site's domain goes here (eg: //mmistakes.github.io, http://mademistakes.com, etc)
-# When testing locally leave blank or use http://localhost:4000
-url:
+google_tracking_id: UA-44812127-1
 
-# Owner/author information
-owner:
-  name:           Tadej Slamic
-  avatar:         selfie.jpg
-  bio:            "I'm a code monkey from Slovenia, living in London. I love code, coffee and traveling."
-  email:          
-  # Social networking links used in footer. Update and remove as you like.
-  twitter:        
-  facebook:       
-  github:         tslamic
-  stackexchange:  http://stackoverflow.com/users/905349/curtisloew
-  linkedin:       tadejslamic
-  instagram:      
-  flickr:         
-  tumblr:         
-  google_plus:
-
-# Background image to be tiled on all pages
-background: 
-
-# Analytics and webmaster tools stuff goes here
-google_analytics: UA-44812127-1
-google_verify:      
-# https://ssl.bing.com/webmaster/configure/verify/ownership Option 2 content= goes here
-bing_verify:         
-
-# http://en.wikipedia.org/wiki/List_of_tz_database_time_zones
-timezone:    America/New_York
-future:      true
+markdown: kramdown
 highlighter: rouge
-markdown:    kramdown
-sass:
-  sass_dir: _sass
-  style: compressed
+permalink: /:title/
+paginate: 10
+exclude: ["less","node_modules","Gruntfile.js","package.json","README.md"]
 
-# https://github.com/mojombo/jekyll/wiki/Permalinks
-permalink:   /:categories/:title/
-
-# Amount of post to show on home page
-paginate: 12
-
-include: [".htaccess"]
-exclude: ["lib", "config.rb", "Capfile", "config", "Gemfile", "Gemfile.lock", "README.md", "LICENSE", "log", "Rakefile", "Rakefile.rb", "tmp", "less", "*.sublime-project", "*.sublime-workspace", "test", "spec", "Gruntfile.js", "package.json", "node_modules"]
+plugins: [jekyll-paginate, jekyll-feed]
