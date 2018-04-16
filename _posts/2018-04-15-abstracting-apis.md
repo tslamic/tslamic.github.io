@@ -1,7 +1,11 @@
 ---
 layout: post
 title: "Abstracting APIs"
+<<<<<<< HEAD
 subtitle: "How I like to abstract my"
+=======
+subtitle: "How I like to abstract my APIs."
+>>>>>>> 5fefc2571c71728ac67e10934007a130e15adea9
 author: "Tadej"
 comments: true
 ---
