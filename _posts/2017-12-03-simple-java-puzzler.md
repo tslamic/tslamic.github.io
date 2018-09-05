@@ -28,13 +28,13 @@ Using `Integer` instead of an `int`, each variable points to an object. `==` che
 
 Wrong.
 
-The reasoning above is not wrong, but misses the most important piece of this puzzle. When Java encounters code like `Integer a = 100;` [the compiler converts it](https://docs.oracle.com/javase/tutorial/java/data/autoboxing.html) into `Integer a = Integer.valueOf(100);` and since we all know what `Integer.valueOf` does, we never bother to read the docs. 
+The reasoning above is not wrong but misses the most important piece of this puzzle. When Java encounters code like `Integer a = 100;` [the compiler converts it](https://docs.oracle.com/javase/tutorial/java/data/autoboxing.html) into `Integer a = Integer.valueOf(100);` and since we all know what `Integer.valueOf` does, we never bother to read the docs.
 
 Here's the [SE7 Javadoc](https://docs.oracle.com/javase/7/docs/api/java/lang/Integer.html#valueOf(int)):
 
 > Returns an Integer instance representing the specified int value. If a new Integer instance is not required, this method should generally be used in preference to the constructor Integer(int), as this method is likely to yield significantly better space and time performance by caching frequently requested values. This method will always cache values in the range -128 to 127, inclusive, and may cache other values outside of this range.
 
-Last sentence spills the beans. `Integer.valueOf` will always cache values in the interval `[-128,127]`. Here's the implementation:
+The last sentence spills the beans. `Integer.valueOf` will always cache values in the interval `[-128,127]`. Here's the implementation:
 
 ```java
 public static Integer valueOf(int i) {

@@ -5,9 +5,6 @@ subtitle: "How I like to abstract my APIs."
 author: "Tadej"
 comments: true
 ---
-
-# Abstracting APIs
-
 Assume you're developing an [XKCD](https://xkcd.com/) comic browser on Android. The [API](https://xkcd.com/json.html) offers two endpoints:
 
 -  [`info.0.json`](http://xkcd.com/info.0.json), which retrieves the JSON describing the current comic,
@@ -36,7 +33,7 @@ interface XkcdApi {
 }
 ```
 
-Is this a good idea? One could argue the implementation details have creeped into an abstraction, defeating its purpose. If you choose to ignore annotations though, it's no different than the original. But suppose we want to add another method: 
+Is this a good idea? One could argue the implementation details have crept into an abstraction, defeating its purpose. If you choose to ignore annotations though, it's no different from the original. But suppose we want to add another method:
 
 ```java
 Single<Comic> getComic(String searchQuery); 
@@ -44,7 +41,7 @@ Single<Comic> getComic(String searchQuery);
 
 and this method needs to access an endpoint with a different base URL than others. 
 
-If our interface contains Retrofit annotations, we're in trouble. We cannot simply add the new method, unless we want to do [extra work](https://github.com/square/retrofit/issues/1404#issuecomment-207408548). We could provide a separate interface, e.g. `XkcdApi` and `XkcdSearchApi`, but we then have two separate instances handling API requests, which might not be ideal.
+If our interface contains Retrofit annotations, we're in trouble. We cannot simply add the new method unless we want to do [extra work](https://github.com/square/retrofit/issues/1404#issuecomment-207408548). We could provide a separate interface, e.g. `XkcdApi` and `XkcdSearchApi`, but we then have two separate instances handling API requests, which might not be ideal.
 
 A neater approach could be to revert back to a plain interface, with required API calls all in the same place:
 
@@ -77,7 +74,7 @@ interface RetrofitSearchApi {
 }
 ```
 
-Although the two Retrofit interfaces look uncomfortably similar to the original one, they shouldn't be treated as such - they're implementation detail, as we cannot build a Retrofit instances without them. 
+Although the two Retrofit interfaces look uncomfortably similar to the original one, they shouldn't be treated as such - they're an implementation detail, as we cannot build Retrofit instances without them.
 
 Creating a facade couldn't be simpler:
 

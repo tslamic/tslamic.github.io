@@ -1,17 +1,34 @@
 <!DOCTYPE html>
 <html lang="en">
-{% include head.html %}
-<body>
-    {% include nav.html %}
 
-    {{ content }}
+  {% include head.html %}
 
-    {% include footer.html %}
+  <body>
+    <nav class="nav">
+      <div class="nav-container">
+        <a href="{{ site.baseurl }}/">
+          <h2 class="nav-title">{{ site.title }}</h2>
+        </a>
+        <ul>
+          <li><a href="{{ '/about' | prepend: site.baseurl }}">About</a></li>
+          <li><a href="{{ '/projects' | prepend: site.baseurl }}">Projects</a></li>
+          <li><a href="https://github.com/tslamic" target="_blank"><i class="fab fa-github"></i></a></li>
+          <li><a href="https://stackoverflow.com/users/905349" target="_blank"><i class="fab fa-stack-overflow"></i></a></li>
+          <li><a href="https://www.linkedin.com/in/tadejslamic/" target="_blank"><i class="fab fa-linkedin"></i></a></li>
+        </ul>
+      </div>
+    </nav>
 
-    {% if page.comments %}
-        {% include disqus.html %}
-    {% endif %}
+    <main>
+      {{ content }}
+    </main>
 
-    {% include ga.html %}
-</body>
+    <footer>
+      <span>
+          The blog posts (excluding any images) are licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.
+          Views and opinions expressed are my own and not of my employer. Made with Jekyll using the <a href="https://github.com/chesterhow/tale/">Tale</a> theme.
+      </span>
+    </footer>
+
+  </body>
 </html>

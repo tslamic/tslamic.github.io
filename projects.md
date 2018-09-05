@@ -1,17 +1,13 @@
 ---
-layout: page
+layout: post
 title: "Projects"
-description: Some stuff I've done.
-header-img: "img/projects.jpg"
+author: "Tadej"
+permalink: /projects/
 ---
-
 {% for project in site.data.projects %}
-<div class="post-preview">
-  <a href="{{ project.url }}">
-    <h2 class="post-title">{{ project.title }}</h2>
-    <h3 class="post-subtitle">{{ project.description }}</h3>
-  </a>
-  <p class="post-meta">{{ project.category }}</p>
+<div>
+  <a href="{{ project.url }}"><b>{{ project.title }}</b></a>
+  <span>{{ project.description }}</span>
 </div>
 <hr>
 {% endfor %}

@@ -1,26 +1,28 @@
-author: Tadej
-title: Tadej's Blog
-description: "Tadej's Blog - Code, Coffee, Life"
-copyright_name: tadej.me
+# Site settings
+title:          Tadej's Blog
+description:    "Code, Coffee, Life"
+url:            "http://www.tadej.me"
 
-baseurl: ""
-url: ""
+# Author
+author:
+  name:         Tadej Slamic
+  url:          http://www.tadej.me
+  email:        tadej.slamic@gmail.com
 
-header-img: img/index.jpg
+# Build settings
+markdown:       kramdown
 
-twitter_username:
-github_username:  tslamic
-stackoverflow_username: 905349
-linkedin_username: tadejslamic
-email_recaptcha_url: http://www.google.com/recaptcha/mailhide/d?k=0111lMTscu6dV5C-xqKQJIdw==&c=yuobLsnDzPlkgvE7eDLirgKBMG2TBTHfslypuNTrofQ=
+# Assets
+sass:
+  sass_dir:     _sass
+  style:        compressed
 
-disqus_shortname: tslamic
-google_tracking_id: UA-44812127-1
+# Gems
+plugins:
+  - jekyll-feed
+  - jekyll-paginate
+  - jemoji
 
-markdown: kramdown
-highlighter: rouge
-permalink: /:title/
-paginate: 10
-exclude: ["less","node_modules","Gruntfile.js","package.json","README.md"]
-
-gems: [jekyll-paginate, jekyll-feed]
+# Permalinks
+permalink:      /:title
+paginate:       5

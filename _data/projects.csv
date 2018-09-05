@@ -1,6 +1,9 @@
 title,category,description,url
+LUAS API,Android,A Kotlin wrapper for LUAS timetables API (trams in Dublin).,https://github.com/tslamic/luas-api
+Versioning,Android,A Gradle plugin that helps with your app versioning.,https://github.com/tslamic/versioning
 Premiumer,Android,Remove ads with a single in-app purchase.,https://github.com/tslamic/premiumer
 AndroidDeviceNames,Android,Transforms device model names into something users can understand.,https://github.com/tslamic/AndroidDeviceNames
-FancyBackground,Android,Animate a set of resource drawables on a view.,https://github.com/tslamic/FancyBackground
+FancyBackground,Android,Animate a set of resource drawables on a View.,https://github.com/tslamic/FancyBackground
 Dumpey,Python,Android Debug Bridge utility tool.,https://github.com/tslamic/Dumpey
-Google Play,Android,Some of the apps I've published.,https://play.google.com/store/apps/developer?id=tslamic
+Google Play,Android,Some apps I've published.,https://play.google.com/store/apps/developer?id=tslamic
+Cptool,Python,Sync folders using Python.,https://github.com/tslamic/cptool
