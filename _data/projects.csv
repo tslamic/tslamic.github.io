@@ -1,5 +1,5 @@
 title,category,description,url
-Learn Kotlin/Native,Kotlin,A set of tutorials to get your feet wet with Kotlin/Native,http://www.learnkotlinnative.com
+Learn Kotlin/Native,Kotlin,A set of tutorials to get your feet wet with Kotlin/Native.,http://www.learnkotlinnative.com
 Versioning,Android,A Gradle plugin that helps with your app versioning.,https://github.com/tslamic/versioning
 LUAS API,Android,A Kotlin wrapper for LUAS timetables API (trams in Dublin).,https://github.com/tslamic/luas-api
 Premiumer,Android,Remove ads with a single in-app purchase.,https://github.com/tslamic/premiumer
