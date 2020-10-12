@@ -1,5 +1,5 @@
 title,category,description,url
-Coffee Shop Finder,gRPC,Showcases the use of gRPC with a server and two consumer apps., Android and iOS.,https://github.com/tslamic/coffee-finder
+Coffee Shop Finder,gRPC,Showcases the use of gRPC with a server and two consumer apps.,https://github.com/tslamic/coffee-finder
 Learn Kotlin/Native,Kotlin,A set of tutorials to get your feet wet with Kotlin/Native.,https://tslamic.github.io/learn-kotlin-native/
 Kotlin/Native Example,Kotlin,A sample app created during my Mobile Era Meetup talk.,https://github.com/tslamic/kotlin-native-multiplatform-example
 Jokster,DI,A gentle introduction to dependency injection & Dagger2.,https://github.com/tslamic/jokster
